@@ -1,5 +1,8 @@
 # When NOT to use DSL First
 
+> **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.  
+> **License**: Apache 2.0 — see [LICENSE](../LICENSE)
+
 DSL-First is not a silver bullet. It has a high initial investment and learning curve.
 
 ## ❌ Poor Fits

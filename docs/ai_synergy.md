@@ -1,5 +1,8 @@
 # DSL First and AI: The Perfect Synergy
 
+> **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.  
+> **License**: Apache 2.0 — see [LICENSE](../LICENSE)
+
 The most exciting aspect of DSL-First is how perfectly it pairs with LLMs. 
 
 ## The Problem with LLMs and Code

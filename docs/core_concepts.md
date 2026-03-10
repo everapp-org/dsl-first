@@ -1,5 +1,8 @@
 # Core Concepts of DSL First
 
+> **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.  
+> **License**: Apache 2.0 — see [LICENSE](../LICENSE)
+
 ## The DSL-First Process
 
 When practicing DSL-First, your workflows shift from writing boilerplate to designing languages. The typical process looks like this:

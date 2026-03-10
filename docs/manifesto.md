@@ -1,5 +1,8 @@
 # The DSL First Manifesto
 
+> **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.  
+> **License**: Apache 2.0 — see [LICENSE](../LICENSE)
+
 ## The Problem
 
 In traditional software development, the specification, the code, the tests, and the documentation are all separate artifacts. Over time, they *will* drift apart. It's inevitable.

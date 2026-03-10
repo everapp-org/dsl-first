@@ -1,5 +1,8 @@
 # Kernel DSL Specification (v1.1)
 
+> **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.  
+> **License**: Apache 2.0 — see [LICENSE](../LICENSE)
+
 **Version:** 1.1
 **Purpose:** A reusable **modeling language** for describing domain structure, lifecycle behavior, service surfaces, and architecture constraints across projects (e.g., Frames, Dynamic UI, Notes).
 
