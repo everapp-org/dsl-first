@@ -6,7 +6,7 @@
 
 **Welcome to the home of DSL-First Development.**
 
-A methodology where a **Domain-Specific Language (DSL)** serves as the *single source of truth*. Your AI coding assistant authors the DSL from your specification or legacy code; from that one model it deterministically generates type-safe code, exhaustive tests, and documentation — so they can never drift apart.
+**Spec in, app out.** Hand your AI coding assistant a specification (or a legacy repo) and get back a working application — code, tests, and docs that agree. The trick: the assistant writes only a small model (a **DSL**), and a *deterministic generator* expands it into the full codebase. You **spend cheap CPU cycles instead of expensive LLM tokens** — so you get correct code faster and cheaper, with no drift between code, tests, and docs. **You don't need to know how it works to use it** — [the one-pager](DSL_FIRST.md) is enough.
 
 > When one model DRIVES the code, tests, and docs, drift between them becomes impossible.
 
