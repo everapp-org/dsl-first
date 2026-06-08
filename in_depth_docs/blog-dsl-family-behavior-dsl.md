@@ -77,18 +77,18 @@ This is the rule that keeps a DSL family from becoming DSL sprawl. Two grammars 
 
 ## What changed in this release
 
-- **[`specification/BEHAVIOR_DSL.md`](../specification/BEHAVIOR_DSL.md)** — Behavior DSL v1.0: full spec with EBNF grammar, metamodel, M2T transformations, well-formedness rules, a general pipeline example, and crew strategies as one application.
+- **[`dsl_first_methodology/BEHAVIOR_DSL.md`](../dsl_first_methodology/BEHAVIOR_DSL.md)** — Behavior DSL v1.0: full spec with EBNF grammar, metamodel, M2T transformations, well-formedness rules, a general pipeline example, and crew strategies as one application.
 
-- **[`docs/case-study-provider-integration.md`](case-study-provider-integration.md)** — moved out of `specification/` and reframed as a case study: why provider integration is a Kernel DSL domain, not a grammar — and how to model it with the three-layer discipline.
+- **[`in_depth_docs/case-study-provider-integration.md`](case-study-provider-integration.md)** — moved out of `specification/` and reframed as a case study: why provider integration is a Kernel DSL domain, not a grammar — and how to model it with the three-layer discipline.
 
-- **[`DSL_FIRST_DEVELOPMENT_GUIDE.md`](../DSL_FIRST_DEVELOPMENT_GUIDE.md) §2.4** — "DSL Families: Multiple DSLs, One Toolchain": the architecture, the decision criterion, and the new-grammar-vs-new-domain table.
+- **[`DSL_FIRST_METHODOLOGY_GUIDE.md`](../dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) §2.4** — "DSL Families: Multiple DSLs, One Toolchain": the architecture, the decision criterion, and the new-grammar-vs-new-domain table.
 
 ---
 
 ## Try it
 
-Copy `specification/BEHAVIOR_DSL.md` into your project alongside `KERNEL_DSL.md` when you need to model how procedures run. The grammar is small enough to implement in an afternoon with ANTLR or a PEG parser.
+Copy `dsl_first_methodology/BEHAVIOR_DSL.md` into your project alongside `KERNEL_DSL.md` when you need to model how procedures run. The grammar is small enough to implement in an afternoon with ANTLR or a PEG parser.
 
-Read `docs/case-study-provider-integration.md` before you reach for a new grammar on your next integration concern — it might just be a domain.
+Read `in_depth_docs/case-study-provider-integration.md` before you reach for a new grammar on your next integration concern — it might just be a domain.
 
 Both are Apache 2.0. Drop them in, hand them to your AI assistant, and let it build the grammar and generators from the spec.

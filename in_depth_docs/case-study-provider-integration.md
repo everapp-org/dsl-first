@@ -3,8 +3,8 @@
 > **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.  
 > **License**: Apache 2.0 — see [LICENSE](../LICENSE)
 
-**Type:** Case study — a worked example of the *"when do I add a grammar?"* decision (see Development Guide §2.4)  
-**Uses:** [Kernel DSL v1.1](../specification/KERNEL_DSL.md) — **no new grammar**
+**Type:** Case study — a worked example of the *"when do I add a grammar?"* decision (see Methodology Guide §2.4)  
+**Uses:** [Kernel DSL v1.1](../dsl_first_methodology/KERNEL_DSL.md) — **no new grammar**
 
 ---
 
@@ -15,7 +15,7 @@ with capabilities and costs, HTTP protocol bindings, retry rules, and a runtime
 model-selection policy. It had its own vocabulary (`provider`, `protocolBinding`,
 `selectionPolicy`), its own change cadence, and warranted its own file. The instinct was
 to declare it a **third grammar** in the DSL family, alongside the Kernel DSL and the
-[Behavior DSL](../specification/BEHAVIOR_DSL.md).
+[Behavior DSL](../dsl_first_methodology/BEHAVIOR_DSL.md).
 
 That instinct was wrong, and catching it is the lesson of this case study.
 
@@ -31,7 +31,7 @@ mini-language** — no `execution { foreach ... }`, no imperative shape. Contras
 the Behavior DSL, which earns its own grammar precisely *because* its execution script has
 constructs (assignment, parallel iteration) with no Kernel DSL analog.
 
-> **The decision rule** (Development Guide §2.4): a new grammar is justified only when the
+> **The decision rule** (Methodology Guide §2.4): a new grammar is justified only when the
 > concern has concepts that **cannot be expressed naturally in an existing grammar** — not
 > merely because the concern is different, has its own vocabulary, or deserves its own file.
 > Provider integration fails that test. It is a **Kernel DSL domain**, full stop.

@@ -177,9 +177,9 @@ Each DSL is a modeling language for *one concern*. Both share the same toolchain
 
 | Concern | Artifact | New grammar? | Why |
 |---------|----------|-------------|-----|
-| **Domain structure & lifecycle** | [KERNEL_DSL.md](specification/KERNEL_DSL.md) | Yes — core grammar | The foundational metamodel: `Domain / Model / State / Transition` |
-| **Behavior / procedure shape** | [BEHAVIOR_DSL.md](specification/BEHAVIOR_DSL.md) | **Yes — distinct grammar** | Its `execution { }` block is a mini imperative language — assignment, `foreach`, `parallelForEach` — with no analog in the Kernel DSL's declarative world |
-| **Provider integration** | [case study](docs/case-study-provider-integration.md) | **No — Kernel DSL domain** | `provider`, `protocolBinding`, `selectionPolicy` are all entities with fields; they map directly onto `model / fields`. Value is the three-layer discipline, not new syntax |
+| **Domain structure & lifecycle** | [KERNEL_DSL.md](KERNEL_DSL.md) | Yes — core grammar | The foundational metamodel: `Domain / Model / State / Transition` |
+| **Behavior / procedure shape** | [BEHAVIOR_DSL.md](BEHAVIOR_DSL.md) | **Yes — distinct grammar** | Its `execution { }` block is a mini imperative language — assignment, `foreach`, `parallelForEach` — with no analog in the Kernel DSL's declarative world |
+| **Provider integration** | [case study](../in_depth_docs/case-study-provider-integration.md) | **No — Kernel DSL domain** | `provider`, `protocolBinding`, `selectionPolicy` are all entities with fields; they map directly onto `model / fields`. Value is the three-layer discipline, not new syntax |
 
 The Behavior DSL earns a separate metamodel because the *shape of a procedure* —
 ordered steps, parallel iteration, error and concurrency policy — cannot be expressed
@@ -1079,9 +1079,9 @@ public class Order extends GeneratedEntityBase<OrderState> { ... }
 **DSL Files:**
 | DSL | Purpose | Generated Artifacts | Spec |
 |-----|---------|---------------------|------|
-| `jcrew.dsl` | Domain models (Agent, Crew, Task, Tool) | Model classes, states, events, tests | [Kernel DSL](specification/KERNEL_DSL.md) |
-| `jcrew-behaviors.dsl` | Crew strategy behaviors (Sequential, Hierarchical, Parallel) | Executor classes, participant validators, policy objects | [Behavior DSL](specification/BEHAVIOR_DSL.md) |
-| `jcrew-providers.dsl` | LLM provider catalog, protocol bindings, selection policy | Provider profiles, HTTP config, model selector, registry | [case study](docs/case-study-provider-integration.md) (Kernel DSL domain) |
+| `jcrew.dsl` | Domain models (Agent, Crew, Task, Tool) | Model classes, states, events, tests | [Kernel DSL](KERNEL_DSL.md) |
+| `jcrew-behaviors.dsl` | Crew strategy behaviors (Sequential, Hierarchical, Parallel) | Executor classes, participant validators, policy objects | [Behavior DSL](BEHAVIOR_DSL.md) |
+| `jcrew-providers.dsl` | LLM provider catalog, protocol bindings, selection policy | Provider profiles, HTTP config, model selector, registry | [case study](../in_depth_docs/case-study-provider-integration.md) (Kernel DSL domain) |
 | `jcrew-mcp.dsl` | MCP tool definitions | Tool schemas, server configs, JSON schemas | (project-specific) |
 | `jcrew-config.dsl` | Configuration schemas | Config POJOs, validators, JSON Schema | (project-specific) |
 
@@ -1090,7 +1090,7 @@ public class Order extends GeneratedEntityBase<OrderState> { ... }
 The full reference implementation — ANTLR grammar (`KernelDSL.g4`), semantic model
 (records), extractor (parse tree → semantic model), generators (semantic model →
 JavaPoet source), and the generated executor classes — lives in
-[`examples/java-antlr-minimal`](examples/java-antlr-minimal). Rather than reproduce
+[`examples/java-antlr-minimal`](../examples/java-antlr-minimal). Rather than reproduce
 ~300 lines of Java here, the pipeline is five stages:
 
 1. **Grammar** (`*.g4`) defines the concrete syntax; ANTLR produces the parser.

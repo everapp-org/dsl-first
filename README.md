@@ -1,12 +1,12 @@
 # DSL-First Methodology
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Java](https://img.shields.io/badge/Reference_Implementation-Java%20%2B%20ANTLR-orange.svg)](guides/quick_start_java.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
+[![Java](https://img.shields.io/badge/Reference_Implementation-Java%20%2B%20ANTLR-orange.svg)](quick_start_guides/quick_start_java.md)
 
 **Welcome to the home of DSL-First Development.**
 
-**Spec in, app out.** Hand your AI coding assistant a specification (or a legacy repo) and get back a working application — code, tests, and docs that agree. The trick: the assistant writes only a small model (a **DSL**), and a *deterministic generator* expands it into the full codebase. You **spend cheap CPU cycles instead of expensive LLM tokens** — so you get correct code faster and cheaper, with no drift between code, tests, and docs. **You don't need to know how it works to use it** — [the one-pager](DSL_FIRST.md) is enough.
+**Spec in, app out.** Hand your AI coding assistant a specification (or a legacy repo) and get back a working application — code, tests, and docs that agree. The trick: the assistant writes only a small model (a **DSL**), and a *deterministic generator* expands it into the full codebase. You **spend cheap CPU cycles instead of expensive LLM tokens** — so you get correct code faster and cheaper, with no drift between code, tests, and docs. **You don't need to know how it works to use it.**
 
 > When one model DRIVES the code, tests, and docs, drift between them becomes impossible.
 
@@ -14,11 +14,26 @@
 >
 > [![Star History Chart](https://api.star-history.com/svg?repos=everapp-org/dsl-first&type=Date)](https://star-history.com/#everapp-org/dsl-first&Date)
 
+## Table of Contents
+
+- [Who is this for?](#who-is-this-for)
+- [The problem it solves](#the-problem-it-solves)
+- [How it works](#how-it-works)
+- [Getting started](#getting-started)
+- [Project structure](#project-structure)
+- [Documentation navigation](#documentation-navigation)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Who Is This For?
 
 This methodology is designed for **developers using AI coding assistants** (Cursor, GitHub Copilot, Windsurf, Claude Code, etc.).
 
-The core insight: AI assistants are dramatically more effective when they work from a **structured model** than from natural-language requirements alone. In DSL-First, the assistant turns your specification — or your existing/legacy repo — into a DSL: a small, readable model that becomes the single source of truth, and then deterministically generates the code, tests, and documentation from it. **You provide intent and review the results; the assistant authors and maintains the DSL.** You read it when you need to dig in, and edit it directly only when you want surgical control.
+The core insight: AI assistants are dramatically more effective when they work from a **structured model** than from natural-language requirements alone. In the DSL-First methodology, the AI coding assistant turns your specification — or your existing/legacy repo — into small, readable models written in our domain-specific languages. These models become the single source of truth, and the assistant then deterministically generates the code, tests, and documentation from them.
+
+**You provide intent and review the results; the assistant authors and maintains the DSL.** You read it when you need to dig in, and edit it directly only when you want surgical control.
+
+**Any host language.** Your app can be in Java, TypeScript, Python, Go, C#, or Clojure. Each is handled a little differently under the hood — a text grammar and code generator in some, plain data and a schema in others — but that's the assistant's concern while applying the methodology, not yours.
 
 ## The Problem It Solves
 
@@ -43,23 +58,21 @@ In traditional development, the spec, the code, the tests, and the documentation
 
 ## Getting Started
 
-**New to DSL-First? Read [DSL_FIRST.md](DSL_FIRST.md) — the entire methodology on one page.** Everything else in this repo is depth you reach for later, not a prerequisite.
+No long reading list. Three files are all you need to drop into your project; your AI coding assistant does the rest.
 
-There is no long reading list before you begin. Two files are all you need to drop into your project and then let your AI coding assistant do the heavy lifting.
-
-### Step 1 — Copy these two files into your project
+### Step 1 — Copy these three files into your project
 
 | File | Purpose |
 |------|---------|
-| [`specification/KERNEL_DSL.md`](specification/KERNEL_DSL.md) | Domain structure, state machines, services — the core modeling language |
-| [`specification/BEHAVIOR_DSL.md`](specification/BEHAVIOR_DSL.md) | How procedures unfold — ordered/parallel steps over a runtime API (copy when you need to model behavior) |
-| [`DSL_FIRST_DEVELOPMENT_GUIDE.md`](DSL_FIRST_DEVELOPMENT_GUIDE.md) | The practitioner's guide — how to apply the methodology, including DSL families |
+| [`dsl_first_methodology/KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md) | Domain structure, state machines, services — the core modeling language |
+| [`dsl_first_methodology/BEHAVIOR_DSL.md`](dsl_first_methodology/BEHAVIOR_DSL.md) | How procedures unfold — ordered/parallel steps over a runtime API (copy when you need to model behavior) |
+| [`dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md`](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) | The practitioner's guide — how to apply the methodology, including DSL families |
 
 > The Kernel DSL alone is enough to start. Add the Behavior DSL only when you actually need to model *how things happen*, not just *what they are*.
 
 ### Step 2 — Prompt your AI coding assistant
 
-Open both files in your AI assistant's context and use a prompt like:
+Open these files in your AI assistant's context and use a prompt like:
 
 ```
 I want to apply the DSL-First methodology to this project.
@@ -77,39 +90,34 @@ Both modes work. Step-by-step gives you more control over the domain model; YOLO
 ## Project Structure
 
 ```
-dsl-first-methodology/
-├── DSL_FIRST_DEVELOPMENT_GUIDE.md  # Practitioner's guide — copy this to your project
-├── docs/                           # Theory, concepts, tradeoffs, AI synergy
-│   └── case-study-provider-integration.md  # When a concern is just a domain, not a grammar
-├── specification/
-│   ├── KERNEL_DSL.md               # Domain structure + lifecycle — copy to your project
-│   └── BEHAVIOR_DSL.md             # How procedures unfold — copy when you need behavior modeling
-├── guides/                         # Language-specific quick-start guides
+dsl-first/
+├── README.md
+├── dsl_first_methodology/          # THE METHODOLOGY — copy these into your project
+│   ├── KERNEL_DSL.md               #   domain structure + lifecycle (what things are)
+│   ├── BEHAVIOR_DSL.md             #   how procedures unfold (how things happen)
+│   └── DSL_FIRST_METHODOLOGY_GUIDE.md  #   the practitioner's guide
+├── quick_start_guides/             # Language-specific quick-starts (Java + ANTLR today)
+├── in_depth_docs/                  # For the curious: theory, concepts, case studies
 └── examples/
     └── java-antlr-minimal/         # Reference implementation (Java + ANTLR + JavaPoet)
 ```
 
 ## Documentation Navigation
 
-### Start Here
-* [**DSL_FIRST.md**](DSL_FIRST.md) — the whole methodology in one page. Read this first.
+### The Methodology (`dsl_first_methodology/`)
+* [Kernel DSL Specification v1.1](dsl_first_methodology/KERNEL_DSL.md) — Domain structure, state machines, services. The core modeling language: *what things are*.
+* [Behavior DSL Specification v1.0](dsl_first_methodology/BEHAVIOR_DSL.md) — How procedures unfold as ordered/parallel steps over a runtime API: *how things happen*. A separate grammar, because its execution script has no Kernel DSL analog.
+* [DSL-First Methodology Guide](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The practitioner's guide: how to apply the methodology, including DSL families.
 
-### Theory & Concepts
-* [The Manifesto](docs/manifesto.md) - Why we need DSL First.
-* [Core Concepts](docs/core_concepts.md) - How the generator pipeline works.
-* [AI Synergy](docs/ai_synergy.md) - Why LLMs work better with DSLs than Code.
-* [Tradeoffs](docs/tradeoffs.md) - When you should (and shouldn't) use this.
-* [The Comprehensive Guide](docs/comprehensive_guide.md) - A massively detailed practitioner's guide to building and integrating your methodology pipeline.
+### Quick-Start Guides (`quick_start_guides/`)
+* [Java quick start (ANTLR + JavaPoet)](quick_start_guides/quick_start_java.md)
 
-### The Formal Languages
-* [Kernel DSL Specification v1.1](specification/KERNEL_DSL.md) — Domain structure, state machines, services. The core modeling language: *what things are*.
-* [Behavior DSL Specification v1.0](specification/BEHAVIOR_DSL.md) — How procedures unfold as ordered/parallel steps over a runtime API: *how things happen*. A separate grammar, because its execution script has no Kernel DSL analog.
-
-### Case Studies
-* [Provider Integration Is a Domain, Not a Grammar](docs/case-study-provider-integration.md) — A worked example of the "when do I add a grammar?" decision. We were tempted to make provider integration a third language; here's why it's only a Kernel DSL domain — and how to model it well anyway.
-
-### Implementation Guides
-* [Java quick start (ANTLR + JavaPoet)](guides/quick_start_java.md)
+### In-Depth Docs (`in_depth_docs/`) — for those peeking into internals
+* [The Manifesto](in_depth_docs/manifesto.md) — Why we need DSL-First.
+* [Core Concepts](in_depth_docs/core_concepts.md) — How the generator pipeline works.
+* [AI Synergy](in_depth_docs/ai_synergy.md) — Why LLMs work better with DSLs than code.
+* [Tradeoffs](in_depth_docs/tradeoffs.md) — When you should (and shouldn't) use this.
+* [Case study: Provider Integration Is a Domain, Not a Grammar](in_depth_docs/case-study-provider-integration.md) — A worked example of the "when do I add a grammar?" decision.
 
 ### Examples
 * `java-antlr-minimal` - A reference architecture for a Java DSL generator.
