@@ -198,7 +198,7 @@ STRING          = ESCAPED_STRING
 
 This DSL becomes executable through **meta-programs** (generators). The following are the recommended Model-to-Text (M2T) generation mappings.
 
-### 5.1 Model → Java/Code (M2T)
+### 5.1 Model → Code (M2T)
 - Generate a State `enum`.
 - Generate the Model class with fields as attributes.
 - Generate transition methods corresponding to triggers handling guard assertions, state updates, and adding events.

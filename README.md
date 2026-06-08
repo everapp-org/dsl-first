@@ -42,6 +42,8 @@ In traditional development, the spec, the code, the tests, and the documentation
 
 ## Getting Started
 
+**New to DSL-First? Read [DSL_FIRST.md](DSL_FIRST.md) — the entire methodology on one page.** Everything else in this repo is depth you reach for later, not a prerequisite.
+
 There is no long reading list before you begin. Two files are all you need to drop into your project and then let your AI coding assistant do the heavy lifting.
 
 ### Step 1 — Copy these two files into your project
@@ -87,6 +89,9 @@ dsl-first-methodology/
 ```
 
 ## Documentation Navigation
+
+### Start Here
+* [**DSL_FIRST.md**](DSL_FIRST.md) — the whole methodology in one page. Read this first.
 
 ### Theory & Concepts
 * [The Manifesto](docs/manifesto.md) - Why we need DSL First.
