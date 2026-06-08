@@ -153,44 +153,40 @@ When a domain has **distinct modeling concerns** that don't fit a single metamod
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        DSL FAMILY                                   │
 │                                                                     │
-│   kernel.dsl          processes.dsl          providers.dsl          │
-│   (structure +        (orchestration         (platform              │
-│    lifecycle)          strategies)            integration)          │
-│       │                    │                       │                │
-│       ▼                    ▼                       ▼                │
-│  KERNEL DSL           PROCESS DSL           PROVIDERS DSL           │
-│  metamodel (M2)       metamodel (M2)        metamodel (M2)          │
-│       │                    │                       │                │
-│       └────────────────────┴───────────────────────┘                │
-│                            │                                        │
+│   kernel.dsl                      behaviors.dsl                     │
+│   (what things are:               (how things happen:               │
+│    structure + lifecycle)          ordered/parallel steps)          │
+│       │                                │                            │
+│       ▼                                ▼                            │
+│  KERNEL DSL                       BEHAVIOR DSL                       │
+│  metamodel (M2)                   metamodel (M2)                     │
+│       │                                │                            │
+│       └────────────────┬───────────────┘                            │
+│                        │                                            │
 │              Shared build infrastructure                            │
 │         (parser generator, semantic model, M2T pipeline)           │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-Each DSL is a modeling language for *one concern*. All three share the same toolchain and compile in the same build step.
+Each DSL is a modeling language for *one concern*. Both share the same toolchain and compile in the same build step. A concern that maps onto the Kernel DSL's `model / fields` constructs is **not** a new family member — it is a *domain* written in the Kernel DSL (see the provider-integration case study).
 
-#### The DSL family in jCrew
+#### Two grammars, one domain pattern
 
-| DSL | Spec | New metamodel? | Models | Generates |
-|-----|------|---------------|--------|-----------|
-| **Kernel DSL** | [KERNEL_DSL.md](specification/KERNEL_DSL.md) | Yes — core | Domain structure, state machines, services | Model classes, state enums, event records, transition methods, test scaffolds |
-| **Process Strategy DSL** | [PROCESS_DSL.md](specification/PROCESS_DSL.md) | Yes — distinct | Workflow execution strategies (ordering, delegation, error handling, concurrency) | Executor classes (`SequentialProcess`, `HierarchicalProcess`, …) |
-| **Provider integration** | [PROVIDERS_DSL.md](specification/PROVIDERS_DSL.md) | No — Kernel DSL domain | Three-layer provider model: capability catalog, protocol binding, selection policy | Profile constants, HTTP config, retry config, model selector, registry |
+| Concern | Artifact | New grammar? | Why |
+|---------|----------|-------------|-----|
+| **Domain structure & lifecycle** | [KERNEL_DSL.md](specification/KERNEL_DSL.md) | Yes — core grammar | The foundational metamodel: `Domain / Model / State / Transition` |
+| **Behavior / procedure shape** | [BEHAVIOR_DSL.md](specification/BEHAVIOR_DSL.md) | **Yes — distinct grammar** | Its `execution { }` block is a mini imperative language — assignment, `foreach`, `parallelForEach` — with no analog in the Kernel DSL's declarative world |
+| **Provider integration** | [case study](docs/case-study-provider-integration.md) | **No — Kernel DSL domain** | `provider`, `protocolBinding`, `selectionPolicy` are all entities with fields; they map directly onto `model / fields`. Value is the three-layer discipline, not new syntax |
 
-The Process DSL earns a separate metamodel because its `execution { }` block is a
-mini imperative language — assignments, `foreach`, `parallelForEach` — with no
-analog in Kernel DSL's declarative `fields / states / transitions` world.
-
-Provider integration uses the **same Kernel DSL grammar** applied to a `providers`
-domain. The pattern guide ([PROVIDERS_DSL.md](specification/PROVIDERS_DSL.md)) is
-valuable for the *three-layer discipline* it prescribes (capability / binding / policy),
-not because it introduces new syntax.
+The Behavior DSL earns a separate metamodel because the *shape of a procedure* —
+ordered steps, parallel iteration, error and concurrency policy — cannot be expressed
+naturally in `fields / states / transitions`. Provider integration can, so it doesn't.
 
 **Architects' framing:** a DSL family member is justified when the new concern has
 concepts that cannot be expressed naturally in an existing grammar — not merely because
-the concern is different. Separate files for separate concerns; separate grammars only
-when the metamodel genuinely differs.
+the concern is different, has its own vocabulary, or deserves its own file. Separate
+files for separate concerns; separate **grammars** only when the metamodel genuinely
+differs. The provider-integration case study walks through this exact judgement call.
 
 #### When to introduce a new DSL
 
@@ -1079,8 +1075,8 @@ public class Order extends GeneratedEntityBase<OrderState> { ... }
 | DSL | Purpose | Generated Artifacts | Spec |
 |-----|---------|---------------------|------|
 | `jcrew.dsl` | Domain models (Agent, Crew, Task, Tool) | Model classes, states, events, tests | [Kernel DSL](specification/KERNEL_DSL.md) |
-| `jcrew-processes.dsl` | Execution strategy variants (Sequential, Hierarchical, Parallel) | Executor classes, role validators, policy objects | [Process DSL](specification/PROCESS_DSL.md) |
-| `jcrew-providers.dsl` | LLM provider catalog, protocol bindings, selection policy | Provider profiles, HTTP config, model selector, registry | [Providers DSL](specification/PROVIDERS_DSL.md) |
+| `jcrew-behaviors.dsl` | Crew strategy behaviors (Sequential, Hierarchical, Parallel) | Executor classes, participant validators, policy objects | [Behavior DSL](specification/BEHAVIOR_DSL.md) |
+| `jcrew-providers.dsl` | LLM provider catalog, protocol bindings, selection policy | Provider profiles, HTTP config, model selector, registry | [case study](docs/case-study-provider-integration.md) (Kernel DSL domain) |
 | `jcrew-mcp.dsl` | MCP tool definitions | Tool schemas, server configs, JSON schemas | (project-specific) |
 | `jcrew-config.dsl` | Configuration schemas | Config POJOs, validators, JSON Schema | (project-specific) |
 
@@ -1369,33 +1365,36 @@ jcrew/
 ├── jcrew-dsl/                          # DSL module
 │   └── src/main/
 │       ├── antlr4/.../dsl/
-│       │   ├── KernelDSL.g4            # Core domain grammar
-│       │   ├── ProviderDSL.g4          # Provider definitions
+│       │   ├── KernelDSL.g4            # Core domain grammar (also parses the providers domain)
+│       │   ├── BehaviorDSL.g4          # Second grammar: execution scripts
 │       │   ├── McpDSL.g4               # MCP tool definitions
 │       │   └── ConfigDSL.g4            # Configuration schemas
 │       └── resources/
-│           ├── jcrew.dsl               # Domain models
-│           ├── jcrew-providers.dsl     # Provider definitions
+│           ├── jcrew.dsl               # Domain models                (KernelDSL.g4)
+│           ├── jcrew-behaviors.dsl     # Crew strategy behaviors      (BehaviorDSL.g4)
+│           ├── jcrew-providers.dsl     # Provider domain — no new .g4  (KernelDSL.g4)
 │           ├── jcrew-mcp.dsl           # MCP definitions
 │           └── jcrew-config.dsl        # Config schemas
 │
 ├── jcrew-codegen/                      # Generator module
 │   └── src/main/java/.../codegen/
 │       ├── model/                      # Semantic models
-│       │   ├── DomainModel.java
-│       │   ├── ProviderModel.java
+│       │   ├── DomainModel.java         # shared by jcrew.dsl + jcrew-providers.dsl
+│       │   ├── BehaviorModel.java
 │       │   ├── McpModel.java
 │       │   └── ConfigModel.java
 │       ├── extractor/                  # DSL → Semantic model
 │       │   ├── DomainModelExtractor.java
-│       │   ├── ProviderModelExtractor.java
+│       │   ├── BehaviorModelExtractor.java
+│       │   ├── ProviderDomainExtractor.java   # reads the providers domain (DomainModel)
 │       │   ├── McpModelExtractor.java
 │       │   └── ConfigModelExtractor.java
 │       ├── generator/                  # Semantic model → Code
 │       │   ├── ModelClassGenerator.java
 │       │   ├── StateEnumGenerator.java
 │       │   ├── EventClassGenerator.java
-│       │   ├── ProviderProfileGenerator.java
+│       │   ├── BehaviorExecutorGenerator.java
+│       │   ├── ProviderProfileGenerator.java  # domain-specific generator, Kernel grammar
 │       │   ├── McpSchemaGenerator.java
 │       │   └── ConfigClassGenerator.java
 │       └── DslCodeGenerator.java       # Orchestrator

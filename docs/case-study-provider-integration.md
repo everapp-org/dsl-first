@@ -1,23 +1,46 @@
-# Provider Integration: A Kernel DSL Domain Pattern (v1.0)
+# Case Study: Provider Integration Is a Domain, Not a Grammar
 
 > **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.  
 > **License**: Apache 2.0 — see [LICENSE](../LICENSE)
 
-**Version:** 1.0  
-**Type:** Domain pattern guide (uses [Kernel DSL v1.1](KERNEL_DSL.md) — no new grammar)  
-**Purpose:** Show how to model **platform integration surfaces** as a Kernel DSL domain, with an opinionated three-layer structure that keeps capability intent, protocol binding, and selection policy separate.
+**Type:** Case study — a worked example of the *"when do I add a grammar?"* decision (see Development Guide §2.4)  
+**Uses:** [Kernel DSL v1.1](../specification/KERNEL_DSL.md) — **no new grammar**
 
 ---
 
-## 1. This Is a Kernel DSL Domain
+## 1. The Temptation — and Why We Resisted It
 
-Provider integration — binding an application to external APIs, LLM services, or data
-platforms — has the same structure as any domain: named entities with fields, optional
-lifecycle, configuration blocks. The Kernel DSL handles it without a new grammar.
+While building jCrew we needed to model LLM provider integration: a catalog of models
+with capabilities and costs, HTTP protocol bindings, retry rules, and a runtime
+model-selection policy. It had its own vocabulary (`provider`, `protocolBinding`,
+`selectionPolicy`), its own change cadence, and warranted its own file. The instinct was
+to declare it a **third grammar** in the DSL family, alongside the Kernel DSL and the
+[Behavior DSL](../specification/BEHAVIOR_DSL.md).
 
-The value of this pattern guide is not a new metamodel. It is the **three-layer modeling
-discipline** that prevents a common failure mode: collapsing capabilities, wire-protocol
-details, and operational policy into a single configuration blob.
+That instinct was wrong, and catching it is the lesson of this case study.
+
+Walk through what provider integration actually *declares*:
+
+- `provider OpenAI { ... }` — an entity with fields
+- `model gpt-4o { capabilities: [...] costPer1kInputTokens: 0.005 }` — a nested entity with fields
+- `protocolBinding { baseUrl: "..." authScheme: BEARER_TOKEN }` — a configuration block of fields
+- `selectionPolicy { strategy: COST_OPTIMIZED fallback: gpt-4o-mini }` — another block of fields
+
+Every construct maps to a Kernel DSL `model` with `fields`. There is **no embedded
+mini-language** — no `execution { foreach ... }`, no imperative shape. Contrast this with
+the Behavior DSL, which earns its own grammar precisely *because* its execution script has
+constructs (assignment, parallel iteration) with no Kernel DSL analog.
+
+> **The decision rule** (Development Guide §2.4): a new grammar is justified only when the
+> concern has concepts that **cannot be expressed naturally in an existing grammar** — not
+> merely because the concern is different, has its own vocabulary, or deserves its own file.
+> Provider integration fails that test. It is a **Kernel DSL domain**, full stop.
+
+So why keep this document at all? Because recognizing "this is just a domain" is only half
+the win. The other half is modeling that domain *well*. The genuinely reusable artifact
+here is not a grammar — it is the **three-layer modeling discipline** below, which prevents
+the common failure mode of collapsing capabilities, wire-protocol details, and operational
+policy into a single configuration blob.
 
 ---
 
