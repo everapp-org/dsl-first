@@ -15,6 +15,7 @@
 
 1. [Introduction](#1-introduction)
 2. [Core Concepts](#2-core-concepts)
+   - 2.4 [DSL Families: Multiple DSLs, One Toolchain](#24-dsl-families-multiple-dsls-one-toolchain)
 3. [The Methodology](#3-the-methodology)
 4. [DSL Design Patterns](#4-dsl-design-patterns)
 5. [Generator Architecture](#5-generator-architecture)
@@ -141,6 +142,73 @@ DSL-First Development complements Domain-Driven Design:
 | **Domain Event** | DSL `emits` clause in transitions |
 | **Repository** | Generated from DSL aggregate definitions |
 | **Specification** | DSL validation rules |
+
+### 2.4 DSL Families: Multiple DSLs, One Toolchain
+
+When a domain has **distinct modeling concerns** that don't fit a single metamodel cleanly, DSL-First naturally extends into a **DSL family** — a set of small, complementary languages that share a build toolchain but have independent metamodels.
+
+#### The language-family architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        DSL FAMILY                                   │
+│                                                                     │
+│   kernel.dsl          processes.dsl          providers.dsl          │
+│   (structure +        (orchestration         (platform              │
+│    lifecycle)          strategies)            integration)          │
+│       │                    │                       │                │
+│       ▼                    ▼                       ▼                │
+│  KERNEL DSL           PROCESS DSL           PROVIDERS DSL           │
+│  metamodel (M2)       metamodel (M2)        metamodel (M2)          │
+│       │                    │                       │                │
+│       └────────────────────┴───────────────────────┘                │
+│                            │                                        │
+│              Shared build infrastructure                            │
+│         (parser generator, semantic model, M2T pipeline)           │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Each DSL is a modeling language for *one concern*. All three share the same toolchain and compile in the same build step.
+
+#### The DSL family in jCrew
+
+| DSL | Spec | New metamodel? | Models | Generates |
+|-----|------|---------------|--------|-----------|
+| **Kernel DSL** | [KERNEL_DSL.md](specification/KERNEL_DSL.md) | Yes — core | Domain structure, state machines, services | Model classes, state enums, event records, transition methods, test scaffolds |
+| **Process Strategy DSL** | [PROCESS_DSL.md](specification/PROCESS_DSL.md) | Yes — distinct | Workflow execution strategies (ordering, delegation, error handling, concurrency) | Executor classes (`SequentialProcess`, `HierarchicalProcess`, …) |
+| **Provider integration** | [PROVIDERS_DSL.md](specification/PROVIDERS_DSL.md) | No — Kernel DSL domain | Three-layer provider model: capability catalog, protocol binding, selection policy | Profile constants, HTTP config, retry config, model selector, registry |
+
+The Process DSL earns a separate metamodel because its `execution { }` block is a
+mini imperative language — assignments, `foreach`, `parallelForEach` — with no
+analog in Kernel DSL's declarative `fields / states / transitions` world.
+
+Provider integration uses the **same Kernel DSL grammar** applied to a `providers`
+domain. The pattern guide ([PROVIDERS_DSL.md](specification/PROVIDERS_DSL.md)) is
+valuable for the *three-layer discipline* it prescribes (capability / binding / policy),
+not because it introduces new syntax.
+
+**Architects' framing:** a DSL family member is justified when the new concern has
+concepts that cannot be expressed naturally in an existing grammar — not merely because
+the concern is different. Separate files for separate concerns; separate grammars only
+when the metamodel genuinely differs.
+
+#### When to introduce a new DSL
+
+Add a DSL when you see a **repeated configuration or modeling pattern** that:
+
+- Has its own distinct concepts (not expressible cleanly in existing DSLs without syntactic contortion)
+- Generates a distinct category of artifacts
+- Benefits from a dedicated grammar — i.e., domain experts can read and write it without programming
+
+One DSL file per concern is a reasonable starting heuristic. Resist merging concerns into one grammar just to minimize file count.
+
+#### Shared infrastructure
+
+A DSL family shares:
+- **Parser generator** — one ANTLR project (or equivalent) with multiple grammar files
+- **Semantic model** — each grammar has its own semantic model classes; they may cross-reference by name
+- **Build orchestration** — a single entry point (e.g., `DslCodeGenerator.main`) that runs all grammars and all generators
+- **Output directory conventions** — all generated artifacts go to the same `generated/` root
 
 ---
 
@@ -1008,12 +1076,13 @@ public class Order extends GeneratedEntityBase<OrderState> { ... }
 **jCrew** is a multi-agent orchestration framework using DSL-First Development.
 
 **DSL Files:**
-| DSL | Purpose | Generated Artifacts |
-|-----|---------|---------------------|
-| `jcrew.dsl` | Domain models (Agent, Crew, Task, Tool) | Model classes, states, events, tests |
-| `jcrew-providers.dsl` | LLM provider definitions | Provider profiles, registry, enums |
-| `jcrew-mcp.dsl` | MCP tool definitions | Tool schemas, server configs, JSON schemas |
-| `jcrew-config.dsl` | Configuration schemas | Config POJOs, validators, JSON Schema |
+| DSL | Purpose | Generated Artifacts | Spec |
+|-----|---------|---------------------|------|
+| `jcrew.dsl` | Domain models (Agent, Crew, Task, Tool) | Model classes, states, events, tests | [Kernel DSL](specification/KERNEL_DSL.md) |
+| `jcrew-processes.dsl` | Execution strategy variants (Sequential, Hierarchical, Parallel) | Executor classes, role validators, policy objects | [Process DSL](specification/PROCESS_DSL.md) |
+| `jcrew-providers.dsl` | LLM provider catalog, protocol bindings, selection policy | Provider profiles, HTTP config, model selector, registry | [Providers DSL](specification/PROVIDERS_DSL.md) |
+| `jcrew-mcp.dsl` | MCP tool definitions | Tool schemas, server configs, JSON schemas | (project-specific) |
+| `jcrew-config.dsl` | Configuration schemas | Config POJOs, validators, JSON Schema | (project-specific) |
 
 ### 11.2 Grammar Example (ANTLR)
 

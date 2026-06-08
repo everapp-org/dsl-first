@@ -48,8 +48,10 @@ There is no long reading list before you begin. Two files are all you need to dr
 
 | File | Purpose |
 |------|---------|
-| [`specification/KERNEL_DSL.md`](specification/KERNEL_DSL.md) | The domain-agnostic modeling language — defines the DSL syntax your AI will write |
-| [`DSL_FIRST_DEVELOPMENT_GUIDE.md`](DSL_FIRST_DEVELOPMENT_GUIDE.md) | The practitioner's guide — tells your AI assistant how to apply the methodology |
+| [`specification/KERNEL_DSL.md`](specification/KERNEL_DSL.md) | Domain structure, state machines, services — the core modeling language |
+| [`specification/PROCESS_DSL.md`](specification/PROCESS_DSL.md) | Workflow execution strategies — orchestration, delegation, error handling (copy when needed) |
+| [`specification/PROVIDERS_DSL.md`](specification/PROVIDERS_DSL.md) | Provider integration pattern — three-layer Kernel DSL domain for external API bindings (reference, not a new grammar) |
+| [`DSL_FIRST_DEVELOPMENT_GUIDE.md`](DSL_FIRST_DEVELOPMENT_GUIDE.md) | The practitioner's guide — how to apply the methodology, including DSL families |
 
 ### Step 2 — Prompt your AI coding assistant
 
@@ -75,7 +77,9 @@ dsl-first-methodology/
 ├── DSL_FIRST_DEVELOPMENT_GUIDE.md  # Practitioner's guide — copy this to your project
 ├── docs/                           # Theory, concepts, tradeoffs, AI synergy
 ├── specification/
-│   └── KERNEL_DSL.md               # Modeling language spec — copy this to your project
+│   ├── KERNEL_DSL.md               # Domain structure + lifecycle — copy to your project
+│   ├── PROCESS_DSL.md              # Orchestration grammar — copy when you need process modeling
+│   └── PROVIDERS_DSL.md            # Provider integration pattern — Kernel DSL domain guide
 ├── guides/                         # Language-specific quick-start guides
 └── examples/
     └── java-antlr-minimal/         # Reference implementation (Java + ANTLR + JavaPoet)
@@ -90,8 +94,12 @@ dsl-first-methodology/
 * [Tradeoffs](docs/tradeoffs.md) - When you should (and shouldn't) use this.
 * [The Comprehensive Guide](docs/comprehensive_guide.md) - A massively detailed practitioner's guide to building and integrating your methodology pipeline.
 
-### The Formal Language
-* [Kernel DSL Specification v1.1](specification/KERNEL_DSL.md) - The domain-agnostic modeling language specification and EBNF grammar used as the backbone of the methodology.
+### The Formal Languages
+* [Kernel DSL Specification v1.1](specification/KERNEL_DSL.md) — Domain structure, state machines, services. The core modeling language.
+* [Process Strategy DSL Specification v1.0](specification/PROCESS_DSL.md) — Workflow execution strategies (Sequential, Hierarchical, Parallel). A separate grammar for orchestration modeling.
+
+### Domain Patterns (Kernel DSL applied to a specific concern)
+* [Provider Integration Pattern v1.0](specification/PROVIDERS_DSL.md) — How to model platform integration (capability catalog, protocol binding, selection policy) as a Kernel DSL domain. No new grammar needed.
 
 ### Implementation Guides
 * [Java quick start (ANTLR + JavaPoet)](guides/quick_start_java.md)
