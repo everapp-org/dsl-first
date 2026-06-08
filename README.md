@@ -6,9 +6,9 @@
 
 **Welcome to the home of DSL-First Development.**
 
-A methodology where a **Domain-Specific Language (DSL)** serves as the *single source of truth*. Unlike traditional spec-driven or code-first approaches, the DSL is executable — once crafted, it drives a grammar and a code generator that deterministically produce type-safe code and exhaustive tests.
+A methodology where a **Domain-Specific Language (DSL)** serves as the *single source of truth*. Your AI coding assistant authors the DSL from your specification or legacy code; from that one model it deterministically generates type-safe code, exhaustive tests, and documentation — so they can never drift apart.
 
-> When your specification (DSL) DRIVES your code generator, specification drift becomes impossible.
+> When one model DRIVES the code, tests, and docs, drift between them becomes impossible.
 
 > ⭐ **If you find this methodology useful, please star this repo** — it helps others discover it!
 >
@@ -16,9 +16,9 @@ A methodology where a **Domain-Specific Language (DSL)** serves as the *single s
 
 ## Who Is This For?
 
-This methodology is designed for **developers using AI coding assistants** (Cursor, GitHub Copilot, Windsurf, Claude, etc.).
+This methodology is designed for **developers using AI coding assistants** (Cursor, GitHub Copilot, Windsurf, Claude Code, etc.).
 
-The core insight: AI assistants are dramatically more effective when given a **structured DSL** to work from rather than vague natural-language requirements. Instead of prompting your AI to "write some code", you define your domain in a DSL — and your AI assistant builds the grammar, the code generator, and then generates all the boilerplate deterministically from that single source of truth.
+The core insight: AI assistants are dramatically more effective when they work from a **structured model** than from natural-language requirements alone. In DSL-First, the assistant turns your specification — or your existing/legacy repo — into a DSL: a small, readable model that becomes the single source of truth, and then deterministically generates the code, tests, and documentation from it. **You provide intent and review the results; the assistant authors and maintains the DSL.** You read it when you need to dig in, and edit it directly only when you want surgical control.
 
 ## The Problem It Solves
 
@@ -27,17 +27,18 @@ In traditional development, the spec, the code, the tests, and the documentation
 ## How It Works
 
 ```
-  Your DSL file
-       │
-       ▼
-  ANTLR Grammar  ──►  Parser / AST
-                            │
-                            ▼
-                     Code Generator
-                      ┌─────┴──────┐
-                      ▼            ▼
-               Type-safe code   Exhaustive tests
-               (Java, TS, Go…)  (100% transition coverage)
+  You provide:  a spec, or a legacy repo
+        │
+        ▼
+  AI assistant  ──authors──►  DSL  (single source of truth)
+        │                      │
+        │                      ▼   derived deterministically
+        │             ┌────────┼─────────┐
+        │             ▼        ▼          ▼
+        │         app code   tests       docs
+        │             │        │          │
+        └─────────────┴────────┴──────────┘
+            you observe, and prompt for changes
 ```
 
 ## Getting Started

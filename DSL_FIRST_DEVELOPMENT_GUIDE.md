@@ -43,8 +43,11 @@ This inverts the traditional approach where code is written first and documentat
 
 ```
 Traditional:  Requirements → Code → Documentation → Drift
-DSL-First:    Requirements → DSL → Generated Code + Documentation (always in sync)
+DSL-First:    Spec / legacy → DSL (SSOT) → Generated code + tests + docs (always in sync)
+              you provide      AI authors   AI derives; you observe
 ```
+
+**Who writes the DSL.** In an AI-assisted workflow — the primary setting for this methodology — the **AI coding assistant authors and maintains the DSL**. You provide the intent (a written specification, or an existing/legacy repo to model) and review the outputs: the running app, the test results, the generated documentation. The DSL is the single source of truth you *read* when something needs deeper investigation, and *edit directly* only when you want surgical control. By default you drive changes in natural language and the assistant updates the DSL for you. You are the consumer of the SSOT; the assistant is its author.
 
 ### 1.2 When to Use DSL-First
 
@@ -211,6 +214,8 @@ A DSL family shares:
 ## 3. The Methodology
 
 ### 3.1 The DSL-First Workflow
+
+The phases below are the work of *building and operating the DSL pipeline* — in an AI-assisted setting, the **assistant** does this, from the spec or legacy repo you give it. You read the outputs and steer in natural language. (This particular pipeline is the **grammar-hosted** binding; a data/homoiconic host like Clojure collapses Phases 2–4 into a schema plus interpretation — same phases, less machinery.)
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
