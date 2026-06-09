@@ -94,4 +94,14 @@ The real output lands in `target/` (git-ignored). The committed copies in
 [`generated-preview/`](generated-preview/) are there purely so the output is readable
 on GitHub without building.
 
+If you change `domain.dsl`, the grammar, or the generator, refresh those copies in the
+same commit so they don't drift:
+
+```bash
+./verify-generated-preview.sh            # diff committed snapshot vs fresh output
+./verify-generated-preview.sh --update   # regenerate and refresh generated-preview/
+```
+
+See [`generated-preview/README.md`](generated-preview/README.md) for the full workflow.
+
 (In a real project the generator runs automatically in the `generate-sources` build phase — see §8 of the [Methodology Guide](../../dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md).)
