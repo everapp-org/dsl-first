@@ -19,7 +19,7 @@
    - 2.5 [Two Bindings: Grammar-Hosted and Data-Hosted](#25-two-bindings-grammar-hosted-and-data-hosted)
 3. [The Methodology](#3-the-methodology)
 4. [DSL Design Patterns](#4-dsl-design-patterns)
-5. [Generator Architecture](#5-generator-architecture)
+5. [Deriving Artifacts](#5-deriving-artifacts)
 6. [Implementation Workflow](#6-implementation-workflow)
 7. [Testing Strategy](#7-testing-strategy)
 8. [Build Integration](#8-build-integration)
@@ -95,43 +95,42 @@ DSL-First:    Spec / legacy → DSL (SSOT) → Generated code + tests + docs (al
 
 ### 2.2 Architecture Layers
 
+DSL-First has the same shape in both bindings (§2.5): a model flows through **validation** into **derivation** into **artifacts**. Only the middle differs — a parser + generator in the grammar-hosted binding, a schema + interpreter in the data-hosted one. Both pipelines are peers; pick the one your host language makes natural.
+
+**Grammar-hosted pipeline** (Java, C#, Go — text DSL):
+
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         DSL FILES                               │
-│  (domain.dsl, providers.dsl, config.dsl)                       │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      GRAMMAR LAYER                              │
-│  Parser Generator (ANTLR, PEG.js, TreeSitter)                  │
-│  Output: Parser + Lexer                                         │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    EXTRACTION LAYER                             │
-│  Visitor/Extractor classes                                      │
-│  Output: Semantic Model (in-memory domain representation)       │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    GENERATION LAYER                             │
-│  Multiple generators per semantic model                         │
-│  Output: Source code, schemas, documentation                    │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    GENERATED ARTIFACTS                          │
-│  - Source files (Java, TypeScript, Python, etc.)               │
-│  - Test files                                                   │
-│  - JSON/YAML schemas                                            │
-│  - Documentation (Markdown, HTML)                               │
-│  - Diagrams (PlantUML, Mermaid)                                │
-└─────────────────────────────────────────────────────────────────┘
+  DSL FILES (domain.dsl)
+        │  parse
+        ▼
+  GRAMMAR LAYER     — parser generator (ANTLR, PEG.js, Tree-sitter) → parser + lexer
+        │  extract
+        ▼
+  EXTRACTION LAYER  — visitor / extractor → semantic model (in-memory)
+        │  generate
+        ▼
+  GENERATION LAYER  — generators over the semantic model → source text
+        │
+        ▼
+  ARTIFACTS         — source files, tests, JSON/YAML schemas, docs, diagrams
 ```
+
+**Data-hosted pipeline** (Clojure, Lisp — the DSL *is* data):
+
+```
+  DSL DATA (domain.edn)
+        │  read  (edn/read-string — there is no parser)
+        ▼
+  SCHEMA LAYER      — malli / clojure.spec validates the data
+        │  interpret  (or macro-expand)
+        ▼
+  DERIVATION LAYER  — functions walk the data → runtime registries & behaviour
+        │                                        (or a macro emits code)
+        ▼
+  ARTIFACTS         — live state machines & registries, optional emitted code, docs, schemas
+```
+
+Both end in the same place: artifacts derived from one authoritative model. §5–§8 detail the grammar-hosted column; §5.3.4 and the [Clojure quick-start](../quick_start_guides/quick_start_clojure.md) give the data-hosted equivalents.
 
 ### 2.3 DDD Alignment
 
@@ -204,17 +203,19 @@ One DSL file per concern is a reasonable starting heuristic. Resist merging conc
 
 #### Shared infrastructure
 
-A DSL family shares:
+A DSL family shares one toolchain. In a **grammar-hosted** binding that is:
 - **Parser generator** — one ANTLR project (or equivalent) with multiple grammar files
 - **Semantic model** — each grammar has its own semantic model classes; they may cross-reference by name
 - **Build orchestration** — a single entry point (e.g., `DslCodeGenerator.main`) that runs all grammars and all generators
-- **Output directory conventions** — all generated artifacts go to the same `generated/` root
+- **Output directory conventions** — all generated artifacts share one `generated/` root
+
+In a **data-hosted** binding the shared toolchain is one **schema registry + loader**: a single malli/spec registry validating every model file, and one `load!` that reads, validates, and assembles them all — same idea, no parsers. (This is how ikc3's `gi` runtime carries eight EDN DSLs on one schema + loader.)
 
 ### 2.5 Two Bindings: Grammar-Hosted and Data-Hosted
 
 DSL-First is paradigm-agnostic. The metamodel — `Domain / Level / Model / State / Transition` — is the same everywhere; only the **carrier** of the DSL and the **mechanism** of derivation change with the host language. There are two bindings.
 
-**Grammar-hosted** (Java, C#, Go, and most non-Lisp languages). The DSL is a text file with a concrete syntax defined by a grammar (ANTLR `.g4`, a PEG, …). A parser turns it into an AST / semantic model, and a generator emits source text (JavaPoet, etc.). Most of this guide describes this binding. → Quick start: [Java + ANTLR](../quick_start_guides/quick_start_java.md).
+**Grammar-hosted** (Java, C#, Go, and most non-Lisp languages). The DSL is a text file with a concrete syntax defined by a grammar (ANTLR `.g4`, a PEG, …). A parser turns it into an AST / semantic model, and a generator emits source text (JavaPoet, etc.). → Quick start: [Java + ANTLR](../quick_start_guides/quick_start_java.md).
 
 **Data-hosted** (Clojure, Lisp, and other homoiconic languages). The DSL *is data* (EDN, maps). There is no grammar and no parser: you read the data, validate it against a **schema** (malli, `clojure.spec`), then derive by **interpreting** the data at runtime or **macro-expanding** it at compile time. No text-generation step. → Quick start: [Clojure (data, not grammar)](../quick_start_guides/quick_start_clojure.md).
 
@@ -225,7 +226,7 @@ DSL-First is paradigm-agnostic. The metamodel — `Domain / Level / Model / Stat
 | Parse step | lexer + parser → AST | none (`read-string`) |
 | Derivation | generator → source text | interpret, or macro-expand |
 
-The choice is dictated by your host language, not by taste. **The model, the single-source-of-truth discipline, and everything in §3–§9 apply to both** — only "how the generator works" differs. Where this guide shows ANTLR + JavaPoet, a data-hosted project substitutes a schema and an interpreter; the §2.4 "shared toolchain" is then a shared *schema + loader* rather than a shared ANTLR project.
+The choice is dictated by your host language, not by taste. **The model, the single-source-of-truth discipline, and the whole methodology apply to both** — only "how derivation works" differs. The rest of this guide is written for both bindings: where a section is necessarily concrete it shows the grammar-hosted form *and* its data-hosted counterpart (e.g. §2.2 pipelines, §5.3.4, §8.4), so neither is the default.
 
 ---
 
@@ -545,9 +546,13 @@ The generator creates a stub; developers implement the `@custom` actions.
 
 ---
 
-## 5. Generator Architecture
+## 5. Deriving Artifacts
 
-### 5.1 Generator Types
+*Deriving* turns the model into artifacts. In a **grammar-hosted** binding the deriver is a code **generator** (§5.1–§5.3.3); in a **data-hosted** binding it is an **interpreter** or a **macro** (§5.3.4). Both produce the same categories of artifact from the same model — files on disk in one case, runtime values (and optionally emitted code) in the other.
+
+### 5.1 Artifact Types
+
+These categories are binding-independent. The *Example* column shows grammar-hosted output (generated files); a data-hosted deriver produces the same category as a runtime value — e.g. a state-machine *function* rather than an `AgentState.java` *file*.
 
 | Type | Input | Output | Example |
 |------|-------|--------|---------|
@@ -634,9 +639,29 @@ MethodSpec method = MethodSpec.methodBuilder("validate")
     .build();
 ```
 
-### 5.4 Generator Testing
+#### 5.3.4 Interpretation and Macros (Data-Hosted)
 
-**Test generators, not generated code.**
+In a homoiconic host there is no template or builder step. You **interpret** the model — ordinary functions walk the validated data and return runtime values — or, when you want emitted code, a **macro** expands the model at compile time.
+
+```clojure
+;; Interpret: build a state machine straight from the model data
+(defn transition-fn [model]
+  (let [table (into {} (for [[from to _ ev] (:transitions model)] [[from ev] to]))]
+    (fn [state event] (get table [state event] state))))
+
+;; Or emit code: a macro turns the model into a typed record at compile time
+(defmacro defentity [m]
+  `(defrecord ~(symbol (name (:name m))) ~(mapv (comp symbol name) (keys (:fields m)))))
+```
+
+**Pros:** no parser, no template language, no build step — the model is read at runtime; macros add compile-time code only where you want it.  
+**Cons:** lives inside the host language — not handed to non-programmers as a standalone tool.
+
+Full walk-through: the [Clojure quick-start](../quick_start_guides/quick_start_clojure.md).
+
+### 5.4 Generator / Interpreter Testing
+
+**Test the deriver, not what it derives.** Whether the deriver is a generator, an interpreter, or a macro, the rule is the same: assert that it turns a known model into the right output.
 
 ```java
 @Test
@@ -655,9 +680,20 @@ void shouldGenerateFieldWithCorrectType() {
 }
 ```
 
+Data-hosted, the interpreter is just a function, so the test is just a function call:
+
+```clojure
+(deftest transition-fn-derives-state-machine
+  (let [step (transition-fn {:transitions [[:draft :published :on :publish]]})]
+    (is (= :published (step :draft :publish)))
+    (is (= :draft     (step :draft :unknown)))))   ; no transition => unchanged
+```
+
 ---
 
 ## 6. Implementation Workflow
+
+The workflows below are shown grammar-hosted (edit a `.dsl`, regenerate, let the compiler flag callers). Data-hosted is the same loop with less ceremony: edit the `.edn`, re-validate, and re-derive live at the REPL — no regenerate step, and your tests (not a compiler) flag what the change broke.
 
 ### 6.1 Adding a New Domain Concept
 
@@ -780,6 +816,8 @@ orchestrator.addGenerator(new OpenApiGenerator(config));
  └─────────────────────────────────────┘
 ```
 
+The bottom two layers are grammar-hosted. In a data-hosted binding they collapse into **schema-validation tests** (assert the schema accepts valid models and rejects malformed ones) and **load tests** (assert `load!` assembles the expected registries) — there is no parser or parse tree to test.
+
 ### 7.2 What to Generate vs. Write
 
 | Test Type | Generate? | Rationale |
@@ -832,11 +870,15 @@ void testAssignTaskInvalidState() {
 }
 ```
 
+The data-hosted equivalent generates the same transition cases, but as `deftest` forms exercising the interpreter rather than a compiled class (see the `transition-fn` test in §5.4). Same coverage, derived from the same `:transitions` data.
+
 ---
 
 ## 8. Build Integration
 
-### 8.1 Build Phase Placement
+How derivation hooks into your build depends on the binding. **Grammar-hosted** projects add a *generate-sources* step that runs the generator before compilation (§8.1–§8.3). **Data-hosted** projects often add *nothing*: the model is read and interpreted at startup, so there is no generation phase to wire in at all (§8.4).
+
+### 8.1 Build Phase Placement (Grammar-Hosted)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -908,7 +950,24 @@ void testAssignTaskInvalidState() {
 }
 ```
 
-### 8.4 Incremental Generation
+### 8.4 Data-Hosted: Often No Generation Step
+
+In a data-hosted binding the model is data your program reads at startup, so the typical pipeline has **no build-time code generation** — there is nothing to add to the build:
+
+```clojure
+;; deps.edn — the model files are just resources on the classpath
+{:paths ["src" "resources"]                ; resources/ holds the .edn models
+ :deps  {metosin/malli {:mvn/version "0.16.0"}}}
+```
+
+```clojure
+;; at startup: read -> validate -> derive (see the Clojure quick-start)
+(def system (load! ["notes.edn" "providers.edn"]))
+```
+
+The only case that touches the build is **macro**-based derivation (§5.3.4): macros expand at compile time, which the normal Clojure compiler already handles — still no extra plugin or generate-sources phase.
+
+### 8.5 Incremental Generation
 
 **Problem**: Regenerating everything on every build is slow.
 
@@ -1190,37 +1249,38 @@ jcrew/
 
 **Before Starting:**
 - [ ] Identify core domain concepts
-- [ ] List repetitive patterns suitable for generation
-- [ ] Choose parser technology (ANTLR, PEG, TreeSitter)
-- [ ] Choose code generation approach (templates vs builders)
-- [ ] Define output directory structure
+- [ ] List repetitive patterns suitable for derivation
+- [ ] Pick your binding — **grammar-hosted** (text DSL + parser) or **data-hosted** (data + schema); usually dictated by host language
+- [ ] Choose tooling — parser (ANTLR/PEG) + generator (templates/builders), *or* schema (malli/spec) + interpreter/macros
+- [ ] Decide where derived artifacts live
 
 **For Each DSL:**
-- [ ] Design grammar (start simple, evolve)
-- [ ] Define semantic model classes
-- [ ] Implement extractor/visitor
-- [ ] Implement generators
-- [ ] Write generator tests
-- [ ] Wire into build system
-- [ ] Document DSL syntax
+- [ ] Define the metamodel — a grammar (grammar-hosted) or a schema (data-hosted)
+- [ ] Define the semantic model — AST classes, or just the data shape
+- [ ] Implement the front end — extractor/visitor, or `read` + validate
+- [ ] Implement the deriver — generators, or interpreter/macros
+- [ ] Test the deriver
+- [ ] Wire into the build (grammar-hosted) or load at startup (data-hosted)
+- [ ] Document the DSL
 
 **Ongoing:**
-- [ ] DSL is single source of truth
-- [ ] Generated code is never manually edited
-- [ ] All changes flow through DSL
-- [ ] Version DSL for breaking changes
+- [ ] The DSL is the single source of truth
+- [ ] Derived artifacts are never manually edited
+- [ ] All changes flow through the DSL
+- [ ] Version the DSL for breaking changes
 
 ### 12.2 Technology Options
 
-| Language | Parser | Code Builder |
-|----------|--------|--------------|
-| Java | ANTLR 4, JavaCC | JavaPoet, Roaster |
-| Kotlin | ANTLR 4 | KotlinPoet |
-| TypeScript | PEG.js, Chevrotain | ts-morph, TypeScript AST |
-| Python | ANTLR 4, PLY, Lark | Jinja2, ast module |
-| Go | ANTLR 4, Participle | jennifer, text/template |
-| Rust | pest, nom | quote, proc-macro |
-| C# | ANTLR 4, Parlot | Roslyn, T4 |
+| Language | Carrier + validation | Derivation |
+|----------|----------------------|------------|
+| Java | text DSL · ANTLR 4, JavaCC | JavaPoet, Roaster |
+| Kotlin | text DSL · ANTLR 4 | KotlinPoet |
+| TypeScript | text DSL · PEG.js, Chevrotain — or typed object literals · Zod | ts-morph, TS AST |
+| Python | text DSL · ANTLR 4, Lark | Jinja2, `ast` |
+| Go | text DSL · ANTLR 4, Participle | jennifer, text/template |
+| Rust | text DSL · pest, nom | `quote`, proc-macros |
+| C# | text DSL · ANTLR 4, Parlot | Roslyn, T4 |
+| **Clojure / Lisp** | **EDN data · malli, clojure.spec (no parser)** | **interpretation, or macros** |
 
 ### 12.3 Common Patterns Summary
 
@@ -1235,17 +1295,21 @@ jcrew/
 
 ### 12.4 Glossary
 
-| Term | Definition |
-|------|------------|
-| **AST** | Abstract Syntax Tree - structured representation of parsed code |
-| **Emitter** | Component that outputs generated artifacts |
-| **Extractor** | Component that builds semantic model from parse tree |
-| **Grammar** | Formal specification of DSL syntax rules |
-| **Meta-program** | Program that operates on other programs |
-| **Parse Tree** | Concrete syntax tree from parser |
-| **Semantic Model** | In-memory representation of DSL domain concepts |
-| **Single Source of Truth** | One authoritative definition for derived artifacts |
-| **Visitor Pattern** | Design pattern for traversing tree structures |
+| Term | Definition | Binding |
+|------|------------|---------|
+| **AST** | Abstract Syntax Tree — structured representation of parsed text | grammar-hosted |
+| **Extractor** | Component that builds the semantic model from a parse tree | grammar-hosted |
+| **Grammar** | Formal specification of a text DSL's syntax (e.g. `.g4`) | grammar-hosted |
+| **Parse Tree** | Concrete syntax tree produced by a parser | grammar-hosted |
+| **EDN** | Extensible Data Notation — Clojure's data literal; the carrier of a data-hosted DSL | data-hosted |
+| **Schema** | Data-shape spec that validates a data-hosted model (malli, clojure.spec) — the data-hosted analogue of a grammar | data-hosted |
+| **Interpreter** | A function that derives behaviour by walking the model data at runtime | data-hosted |
+| **Macro** | A compile-time function that expands model data into code — data-hosted code generation | data-hosted |
+| **Deriver / Generator** | Component that turns a model into artifacts (a generator, interpreter, or macro) | both |
+| **Metamodel (M2)** | The concepts a model is built from — expressed as a grammar or a schema | both |
+| **Semantic Model** | In-memory representation of the DSL's domain concepts | both |
+| **Meta-program** | A program that operates on other programs | both |
+| **Single Source of Truth** | One authoritative definition from which all artifacts are derived | both |
 
 ---
 
@@ -1269,7 +1333,9 @@ jcrew/
 
 ## Appendix B: Template Starter
 
-Use this template to start a new DSL-First project:
+Pick the layout for your binding.
+
+**Grammar-hosted** (text DSL → parser → generated code):
 
 ```
 my-project/
@@ -1290,6 +1356,22 @@ my-project/
 │   ├── generated/           # Generated code goes here
 │   └── runtime/             # Manual runtime code
 └── build.gradle / pom.xml
+```
+
+**Data-hosted** (EDN model → schema → interpret at startup — no codegen tree):
+
+```
+my-project/
+├── resources/
+│   └── definitions/
+│       └── domain.edn       # the DSL — just data
+├── src/
+│   └── myproject/
+│       ├── dsl/
+│       │   ├── schema.clj    # malli/spec schema (the "grammar")
+│       │   └── load.clj      # read → validate → assemble registries
+│       └── runtime.clj       # functions that interpret the model
+└── deps.edn
 ```
 
 ---
