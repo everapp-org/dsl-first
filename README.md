@@ -70,22 +70,52 @@ No long reading list. Three files are all you need to drop into your project; yo
 
 > You don't choose between these or wire anything up — make all three available and the assistant applies whichever your domain needs.
 
-### Step 2 — Prompt your AI coding assistant
+### Step 2 — (Optional) Brainstorm the domain into a PRD
 
-Open these files in your AI assistant's context and use a prompt like:
+This is a **discovery preprocess — it runs *before* any DSL exists**, not part of authoring. Reach for it when you don't yet have a crisp spec; skip it when you do.
+
+The assistant interviews you one question at a time (each with its recommended answer), sharpens vague or overloaded terms into canonical names, probes edge cases with concrete scenarios, and reconciles your answers against any legacy code. It then writes the result up as a **PRD** — glossary, entities and their lifecycles, rules, open questions — for you to review and approve. That approved PRD is the input Step 3 authors the DSL from.
 
 ```
-I want to apply the DSL-First methodology to this project.
-You have the Kernel DSL specification and the practitioner's guide in context.
-Start by analysing the domain and producing an initial DSL for [your domain].
+Before writing any DSL, interview me about this domain to produce a PRD. Ask one
+question at a time, each with your recommended answer. Sharpen my terminology into
+canonical names, probe edge cases with concrete scenarios ("what if an Agent is
+assigned a task while already WORKING?"), and challenge anything in my answers that
+the legacy code contradicts. When the domain is clear, write it up as a PRD —
+glossary, entities and lifecycles, rules, open questions — and wait for my approval.
 ```
 
-### Step 3 — Choose your pace
+> The PRD states *intent* — your human-facing "spec in". Once Step 3 authors the DSL, **the DSL is the source of truth for what the app actually does**; the PRD is your record of original intent, not a second place to edit behavior. Change behavior DSL-first (prompt → DSL → regenerate); when intent itself changes, refresh the PRD — or regenerate it from the DSL as a derived doc — so the two never silently disagree.
 
-- **Step-by-step** — ask the AI to show you each DSL file before generating code from it. Review, refine, then proceed.
-- **YOLO** — ask the AI to go end-to-end: produce the DSL, the grammar, the code generator, and the generated code in one go. Fix issues afterwards.
+### Step 3 — Author the DSL, then derive
 
-Both modes work. Step-by-step gives you more control over the domain model; YOLO gets you to running code faster.
+Now point the assistant at the methodology and let it author the DSL (single source of truth) and generate the code, tests, and docs from it:
+
+```
+I want to apply the DSL-First methodology to this project. You have all three
+methodology files in context — the Kernel DSL and Behavior DSL specs and the
+practitioner's guide. Author the DSL from the approved PRD (or, if I skipped the
+brainstorm, from the spec or legacy repo I point you at), using whichever DSL the
+domain needs.
+```
+
+One knob: **how much of its work you check**, from most oversight to least. Append one to the prompt above.
+
+**Step-by-step** — review each DSL file before any code is derived.
+
+```
+Produce an initial DSL for [your domain]. Show me each DSL file and wait for my
+review before generating any code, tests, or docs.
+```
+
+**YOLO** — end-to-end in one pass; fix issues afterwards.
+
+```
+Go end-to-end for [your domain]: produce the DSL, the grammar, the generator,
+and the generated code in one pass. I'll review the result.
+```
+
+(A Step 2 brainstorm flows straight into either.)
 
 ## Project Structure
 
