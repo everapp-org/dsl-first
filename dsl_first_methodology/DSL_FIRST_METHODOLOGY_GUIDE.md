@@ -16,6 +16,7 @@
 1. [Introduction](#1-introduction)
 2. [Core Concepts](#2-core-concepts)
    - 2.4 [DSL Families: Multiple DSLs, One Toolchain](#24-dsl-families-multiple-dsls-one-toolchain)
+   - 2.5 [Two Bindings: Grammar-Hosted and Data-Hosted](#25-two-bindings-grammar-hosted-and-data-hosted)
 3. [The Methodology](#3-the-methodology)
 4. [DSL Design Patterns](#4-dsl-design-patterns)
 5. [Generator Architecture](#5-generator-architecture)
@@ -208,6 +209,23 @@ A DSL family shares:
 - **Semantic model** — each grammar has its own semantic model classes; they may cross-reference by name
 - **Build orchestration** — a single entry point (e.g., `DslCodeGenerator.main`) that runs all grammars and all generators
 - **Output directory conventions** — all generated artifacts go to the same `generated/` root
+
+### 2.5 Two Bindings: Grammar-Hosted and Data-Hosted
+
+DSL-First is paradigm-agnostic. The metamodel — `Domain / Level / Model / State / Transition` — is the same everywhere; only the **carrier** of the DSL and the **mechanism** of derivation change with the host language. There are two bindings.
+
+**Grammar-hosted** (Java, C#, Go, and most non-Lisp languages). The DSL is a text file with a concrete syntax defined by a grammar (ANTLR `.g4`, a PEG, …). A parser turns it into an AST / semantic model, and a generator emits source text (JavaPoet, etc.). Most of this guide describes this binding. → Quick start: [Java + ANTLR](../quick_start_guides/quick_start_java.md).
+
+**Data-hosted** (Clojure, Lisp, and other homoiconic languages). The DSL *is data* (EDN, maps). There is no grammar and no parser: you read the data, validate it against a **schema** (malli, `clojure.spec`), then derive by **interpreting** the data at runtime or **macro-expanding** it at compile time. No text-generation step. → Quick start: [Clojure (data, not grammar)](../quick_start_guides/quick_start_clojure.md).
+
+| | Grammar-hosted | Data-hosted |
+|---|---|---|
+| Carrier | text file | data literal (EDN) |
+| "Grammar" | parser grammar (`.g4`) | schema (malli / spec) |
+| Parse step | lexer + parser → AST | none (`read-string`) |
+| Derivation | generator → source text | interpret, or macro-expand |
+
+The choice is dictated by your host language, not by taste. **The model, the single-source-of-truth discipline, and everything in §3–§9 apply to both** — only "how the generator works" differs. Where this guide shows ANTLR + JavaPoet, a data-hosted project substitutes a schema and an interpreter; the §2.4 "shared toolchain" is then a shared *schema + loader* rather than a shared ANTLR project.
 
 ---
 
@@ -1103,9 +1121,8 @@ JavaPoet source), and the generated executor classes — lives in
 
 > This is the **grammar-hosted** binding of DSL-First. In a data/homoiconic host
 > (Clojure, Lisp) stages 1–3 collapse: the DSL *is* data, validated by a schema, and the
-> "generator" is interpretation or a macro — same metamodel, no parser. A dedicated
-> Clojure quick-start is planned; the pattern there is EDN data + a malli/spec schema,
-> validated and interpreted directly.
+> "generator" is interpretation or a macro — same metamodel, no parser. See §2.5 and the
+> [Clojure quick-start](../quick_start_guides/quick_start_clojure.md).
 
 ### 11.7 Project Structure
 

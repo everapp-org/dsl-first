@@ -96,7 +96,7 @@ dsl-first/
 │   ├── KERNEL_DSL.md               #   domain structure + lifecycle (what things are)
 │   ├── BEHAVIOR_DSL.md             #   how procedures unfold (how things happen)
 │   └── DSL_FIRST_METHODOLOGY_GUIDE.md  #   the practitioner's guide
-├── quick_start_guides/             # Language-specific quick-starts (Java + ANTLR today)
+├── quick_start_guides/             # Per-paradigm quick-starts (grammar-hosted: Java · data-hosted: Clojure)
 ├── in_depth_docs/                  # For the curious: theory, concepts, case studies
 └── examples/
     └── java-antlr-minimal/         # Reference implementation (Java + ANTLR + JavaPoet)
@@ -110,7 +110,10 @@ dsl-first/
 * [DSL-First Methodology Guide](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The practitioner's guide: how to apply the methodology, including DSL families.
 
 ### Quick-Start Guides (`quick_start_guides/`)
-* [Java quick start (ANTLR + JavaPoet)](quick_start_guides/quick_start_java.md)
+
+Two bindings of the same methodology — pick the one that matches your host language:
+* [Java quick start (ANTLR + JavaPoet)](quick_start_guides/quick_start_java.md) — **grammar-hosted**: text DSL → parser → generated source.
+* [Clojure quick start (data, not grammar)](quick_start_guides/quick_start_clojure.md) — **data-hosted**: EDN model → malli schema → interpret or macro. No grammar, no parser.
 
 ### In-Depth Docs (`in_depth_docs/`) — for those peeking into internals
 * [The Manifesto](in_depth_docs/manifesto.md) — Why we need DSL-First.

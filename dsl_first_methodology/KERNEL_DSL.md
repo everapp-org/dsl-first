@@ -8,14 +8,12 @@
 
 ## 1. Overview
 
-Kernel DSL is a small, domain-agnostic **language engineering artifact**:
-- a **concrete syntax** (text DSL),
-- a defined **metamodel (M2)** (Domain, Model, State, Transition, …),
-- and recommended **transformations** that map models to code/tests/docs.
+Kernel DSL is a small, domain-agnostic **metamodel (M2)** — Domain, Level, Model, State, Transition, … — together with recommended **transformations** that map models to code/tests/docs. The metamodel is the portable part; it can be carried in more than one **concrete syntax**:
+- a **text grammar** (`.dsl` files parsed by ANTLR, lark, a PEG, …) — the *grammar-hosted* binding, and the syntax §4 specifies;
+- a **data literal** (EDN / maps validated by a schema) — the *data-hosted* binding used in homoiconic languages like Clojure.
 
 It is designed to be:
-- human-readable in `.dsl` files and code-reviewable,
-- easy to parse (small grammar, suitable for tools like ANTLR or lark),
+- human-readable and code-reviewable in whichever concrete syntax you choose,
 - domain-independent,
 - suitable as an **authoritative model (M1)** from which **derived artifacts** are generated.
 
@@ -192,11 +190,25 @@ STRING          = ESCAPED_STRING
 
 *Notes: `TYPE` and `condition_expr` are intentionally permissive and domain-agnostic. You decide how to interpret types and conditions in your generators.*
 
+### 4.1 The data-hosted concrete syntax
+
+§4 specifies the **grammar-hosted** concrete syntax. In a **data-hosted** binding (Clojure, Lisp) the same metamodel is carried as a data literal and validated by a *schema* instead of a grammar — there is no parser. The `Note` model from §3.3 becomes:
+
+```clojure
+{:domain :notes
+ :levels {:domain {:models
+   {:note {:fields {:id :NoteId :title :String :state :NoteState}
+           :states #{:draft :published}
+           :transitions [[:draft :published :on :publish :emits [:note-published]]]}}}}}
+```
+
+Both syntaxes express the identical M2. See the [Clojure quick-start](../quick_start_guides/quick_start_clojure.md) and §2.5 of the [Methodology Guide](DSL_FIRST_METHODOLOGY_GUIDE.md).
+
 ---
 
 ## 5. Semantics (Pragmatic): Transformations
 
-This DSL becomes executable through **meta-programs** (generators). The following are the recommended Model-to-Text (M2T) generation mappings.
+This DSL becomes executable through **meta-programs** (generators) in grammar-hosted bindings, or by **interpreting / macro-expanding the data** in data-hosted bindings. The following are the recommended Model-to-artifact mappings.
 
 ### 5.1 Model → Code (M2T)
 - Generate a State `enum`.
