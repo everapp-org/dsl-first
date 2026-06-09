@@ -303,13 +303,13 @@ The workflow opens with **Phase 0, an intake gate**: before any modeling, the as
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│  PHASE 6: ITERATION                                              │
-│  ──────────────────                                              │
-│  • Write DSL definitions for domain                              │
-│  • Generate artifacts                                            │
-│  • Write manual runtime code that uses generated code            │
-│  • Evolve DSL and generators as domain understanding deepens     │
-│  • Output: Working system                                        │
+│  PHASE 6: ITERATION — THE STEADY STATE                           │
+│  ─────────────────────────────────────                           │
+│  • You steer in natural language; assistant edits the DSL        │
+│  • Re-derive — code, tests, docs stay in lockstep                │
+│  • Assistant hand-writes only infra/glue, never derived code     │
+│  • DSL & generators evolve as understanding deepens              │
+│  • Output: a working system; the DSL stays the SSOT              │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -722,6 +722,8 @@ Data-hosted, the interpreter is just a function, so the test is just a function 
 ---
 
 ## 6. Implementation Workflow
+
+These are the **assistant's** operations, not yours. You ask in natural language — "add a Payment entity with a refund flow" — and the assistant performs the steps below; they are written out so you can follow what happens under the hood and reach in directly when you want surgical control. ("Write integration code" and the like mean the *assistant* writes it, from your intent.)
 
 The workflows below are shown grammar-hosted (edit a `.dsl`, regenerate, let the compiler flag callers). Data-hosted is the same loop with less ceremony: edit the `.edn`, re-validate, and re-derive live at the REPL — no regenerate step, and your tests (not a compiler) flag what the change broke.
 
