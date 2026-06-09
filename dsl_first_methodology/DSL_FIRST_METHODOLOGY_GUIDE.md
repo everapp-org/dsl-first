@@ -1,6 +1,6 @@
 # DSL-First Development — Methodology Guide
 
-> **A methodology for building maintainable software by capturing the domain in a small language and deriving the code, tests, and docs from it.**
+> **A methodology for building maintainable software: the domain is captured in a model, written using the small, domain-specific languages this methodology provides, and the code, tests, and documentation are all derived from that model.**
 
 **Version**: 1.0  
 **Who reads this document**: the **AI coding assistant** — this guide is the specification it follows to apply DSL-First. You can read it too, but you don't have to.  
@@ -37,7 +37,7 @@
 
 ### 1.1 What is DSL-First Development?
 
-**DSL-First Development** has one core move: capture the domain in a small, purpose-built language, and *derive* everything else from what is written in it.
+**DSL-First Development** has one core move: the domain is captured in a **model**, expressed using one or more of the small, domain-specific languages this methodology provides (the Kernel DSL and the Behavior DSL). Everything else — the code, the tests, the documentation — is then *derived* from that model.
 
 - **The language** is a *domain-specific language (DSL)* — a small notation tailored to one domain (a state machine, a provider catalog, a workflow), not a general-purpose programming language.
 - **The model** is what's written in that language: the actual DSL files. The model is the **single source of truth** — the one artifact authored directly (by the assistant; see below).
