@@ -39,7 +39,9 @@ behavior DocumentIngestion {
 
 That `execution { }` block is not domain modeling. It is an embedded **orchestration script** — with assignments, sequential iteration, parallel iteration, and calls to a fixed runtime API. No amount of `fields { }` and `transitions { }` can express it naturally in the Kernel DSL.
 
-This is the criterion for a new language family member: **not that the concern is different, but that the metamodel genuinely differs**. The Kernel DSL's M2 is built around `Domain → Level → Model → State → Transition`. The Behavior DSL's M2 is built around `Behavior → ExecutionBlock → Participants → ErrorPolicy → ConcurrencyPolicy`. Different shapes need different grammars.
+This is the criterion for a new language family member: **not that the concern is different, but that the metamodel genuinely differs**. The Kernel DSL's M2 is built around `Domain → Level → Model → State → Transition`. The Behavior DSL's M2 is built around `Behavior → ExecutionBlock → Participants → ErrorPolicy → ConcurrencyPolicy`. Different shapes need different metamodels.
+
+> "Grammar" throughout this post is grammar-hosted shorthand. In a data-hosted binding (Clojure/EDN) the same new metamodel ships as a *second schema*, not a second grammar — there is no parser either way. The test is identical: **does the metamodel differ?**
 
 ### It is general, not a crew DSL
 
@@ -87,8 +89,8 @@ This is the rule that keeps a DSL family from becoming DSL sprawl. Two grammars 
 
 ## Try it
 
-Copy `dsl_first_methodology/BEHAVIOR_DSL.md` into your project alongside `KERNEL_DSL.md` when you need to model how procedures run. The grammar is small enough to implement in an afternoon with ANTLR or a PEG parser.
+Copy `dsl_first_methodology/BEHAVIOR_DSL.md` into your project alongside `KERNEL_DSL.md` when your domain has procedures to model. Grammar-hosted, it's small enough to implement in an afternoon with ANTLR or a PEG parser; data-hosted, it's a handful of EDN keywords and a schema — no parser at all.
 
 Read `in_depth_docs/case-study-provider-integration.md` before you reach for a new grammar on your next integration concern — it might just be a domain.
 
-Both are Apache 2.0. Drop them in, hand them to your AI assistant, and let it build the grammar and generators from the spec.
+Both are Apache 2.0. Drop them in, hand them to your AI assistant, and let it build the pipeline from the spec — parser and generators, or schema and interpreter, whichever your host language calls for.

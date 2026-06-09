@@ -7,6 +7,8 @@
 
 With DSL-First, the work shifts from writing boilerplate by hand to deriving it from a language that captures the domain. The typical process looks like this:
 
+> **Two derivation styles** (see the guide's *[Two Bindings](../dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md#25-two-bindings-grammar-hosted-and-data-hosted)*): a **grammar-hosted** binding parses a text DSL and *generates* code; a **data-hosted** binding (Clojure/EDN) validates the model against a *schema* and *interprets* it — frequently with no code-generation step at all. The walkthrough below shows the grammar-hosted style in Java; the concepts are identical either way.
+
 ### 1. Capture the Domain in a DSL
 
 The assistant writes a human-readable, machine-parseable DSL that strictly defines the domain's models, state machines, guards, and invariants — from your specification or legacy code.

@@ -169,8 +169,9 @@ file reveal pricing updates cleanly, without noise from structural changes.
 
 ## 5. Transformations (M2T)
 
-Because the providers domain is a normal Kernel DSL domain, the standard generators apply
-with no special tooling:
+Because the providers domain is a normal Kernel DSL domain, standard derivation applies
+with no special tooling — code generators in a grammar-hosted binding, or schema validation
+plus interpretation in a data-hosted one. The table below illustrates the grammar-hosted form:
 
 | DSL construct | Generated artifact |
 |---------------|--------------------|

@@ -19,9 +19,9 @@ We believe there should only be **ONE source of truth**: an executable specifica
 
 **DSL-First Development** is a software development methodology where a **Domain-Specific Language (DSL)** serves as that single source. 
 
-Unlike traditional spec-driven or code-first approaches, the DSL is executable — once crafted, it drives a grammar and a code generator that deterministically produce type-safe code and exhaustive tests.
+Unlike traditional spec-driven or code-first approaches, the DSL is executable — once crafted, it drives **derivation** that deterministically produces type-safe code and exhaustive tests: a parser plus code generator in a grammar-hosted binding, or a schema plus interpreter in a data-hosted one.
 
-**Key Insight**: When your specification (DSL) DRIVES your code generator, specification drift becomes physically impossible.
+**Key Insight**: When the DSL DRIVES derivation — generator or interpreter — specification drift becomes physically impossible.
 
 ## The Pillars of DSL First
 
