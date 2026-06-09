@@ -202,7 +202,7 @@ STRING          = ESCAPED_STRING
            :transitions [[:draft :published :on :publish :emits [:note-published]]]}}}}}
 ```
 
-Both syntaxes express the identical M2. See the [Clojure quick-start](../quick_start_guides/quick_start_clojure.md) and §2.5 of the [Methodology Guide](DSL_FIRST_METHODOLOGY_GUIDE.md).
+Both syntaxes express the identical M2. See the [Clojure example](../examples/clojure-edn-minimal/README.md) and §2.5 of the [Methodology Guide](DSL_FIRST_METHODOLOGY_GUIDE.md).
 
 ---
 

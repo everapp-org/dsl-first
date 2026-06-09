@@ -1,0 +1,10 @@
+;; The DSL — just data. This is the same Agent state machine as
+;; ../java-antlr-minimal/src/main/resources/domain.dsl, but here it is EDN your
+;; program reads directly. There is no grammar and no parser.
+{:domain :agent
+ :states #{:off :idle :working}
+ :transitions
+ ;; [action from to]
+ [[:activate      :off     :idle]
+  [:assign-task   :idle    :working]
+  [:complete-task :working :idle]]}

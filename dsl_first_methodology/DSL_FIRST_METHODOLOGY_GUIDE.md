@@ -130,7 +130,7 @@ DSL-First has the same shape in both bindings (§2.5): a model flows through **v
   ARTIFACTS         — live state machines & registries, optional emitted code, docs, schemas
 ```
 
-Both end in the same place: artifacts derived from one authoritative model. §5–§8 detail the grammar-hosted column; §5.3.4 and the [Clojure quick-start](../quick_start_guides/quick_start_clojure.md) give the data-hosted equivalents.
+Both end in the same place: artifacts derived from one authoritative model. §5–§8 detail the grammar-hosted column; §5.3.4 and the [Clojure example](../examples/clojure-edn-minimal/README.md) give the data-hosted equivalents.
 
 ### 2.3 DDD Alignment
 
@@ -215,9 +215,9 @@ In a **data-hosted** binding the shared toolchain is one **schema registry + loa
 
 DSL-First is paradigm-agnostic. The metamodel — `Domain / Level / Model / State / Transition` — is the same everywhere; only the **carrier** of the DSL and the **mechanism** of derivation change with the host language. There are two bindings.
 
-**Grammar-hosted** (Java, C#, Go, and most non-Lisp languages). The DSL is a text file with a concrete syntax defined by a grammar (ANTLR `.g4`, a PEG, …). A parser turns it into an AST / semantic model, and a generator emits source text (JavaPoet, etc.). → Quick start: [Java + ANTLR](../quick_start_guides/quick_start_java.md).
+**Grammar-hosted** (Java, C#, Go, and most non-Lisp languages). The DSL is a text file with a concrete syntax defined by a grammar (ANTLR `.g4`, a PEG, …). A parser turns it into an AST / semantic model, and a generator emits source text (JavaPoet, etc.). → Worked example: [Java + ANTLR](../examples/java-antlr-minimal/README.md).
 
-**Data-hosted** (Clojure, Lisp, and other homoiconic languages). The DSL *is data* (EDN, maps). There is no grammar and no parser: you read the data, validate it against a **schema** (malli, `clojure.spec`), then derive by **interpreting** the data at runtime or **macro-expanding** it at compile time. No text-generation step. → Quick start: [Clojure (data, not grammar)](../quick_start_guides/quick_start_clojure.md).
+**Data-hosted** (Clojure, Lisp, and other homoiconic languages). The DSL *is data* (EDN, maps). There is no grammar and no parser: you read the data, validate it against a **schema** (malli, `clojure.spec`), then derive by **interpreting** the data at runtime or **macro-expanding** it at compile time. No text-generation step. → Worked example: [Clojure (data, not grammar)](../examples/clojure-edn-minimal/README.md).
 
 | | Grammar-hosted | Data-hosted |
 |---|---|---|
@@ -657,7 +657,7 @@ In a homoiconic host there is no template or builder step. You **interpret** the
 **Pros:** no parser, no template language, no build step — the model is read at runtime; macros add compile-time code only where you want it.  
 **Cons:** lives inside the host language — not handed to non-programmers as a standalone tool.
 
-Full walk-through: the [Clojure quick-start](../quick_start_guides/quick_start_clojure.md).
+Full walk-through: the [Clojure example](../examples/clojure-edn-minimal/README.md).
 
 ### 5.4 Generator / Interpreter Testing
 
@@ -961,7 +961,7 @@ In a data-hosted binding the model is data your program reads at startup, so the
 ```
 
 ```clojure
-;; at startup: read -> validate -> derive (see the Clojure quick-start)
+;; at startup: read -> validate -> derive (see the Clojure example)
 (def system (load! ["notes.edn" "providers.edn"]))
 ```
 
@@ -1181,7 +1181,7 @@ JavaPoet source), and the generated executor classes — lives in
 > This is the **grammar-hosted** binding of DSL-First. In a data/homoiconic host
 > (Clojure, Lisp) stages 1–3 collapse: the DSL *is* data, validated by a schema, and the
 > "generator" is interpretation or a macro — same metamodel, no parser. See §2.5 and the
-> [Clojure quick-start](../quick_start_guides/quick_start_clojure.md).
+> [Clojure example](../examples/clojure-edn-minimal/README.md).
 
 ### 11.7 Project Structure
 
