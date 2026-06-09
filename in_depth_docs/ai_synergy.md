@@ -20,7 +20,7 @@ AI models excel at structured input and output but struggle with massive, sprawl
 
 ## Human-AI Collaboration Pattern
 
-Instead of asking an AI to "update the codebase to add a suspended state to the agent," you pair-program with the AI to update the DSL. 
+Instead of asking an AI to "update the codebase to add a suspended state to the agent," you describe that intent and the AI updates the DSL — then regenerates the code from it. The locus of change moves from the code to the model.
 
 ```
 ┌──────────────────────────────────┐

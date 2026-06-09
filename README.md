@@ -119,8 +119,9 @@ review before generating any code, tests, or docs.
 **YOLO** — end-to-end in one pass; fix issues afterwards.
 
 ```
-Go end-to-end for [your domain]: produce the DSL, the grammar, the generator,
-and the generated code in one pass. I'll review the result.
+Go end-to-end for [your domain]: produce the DSL and derive the whole app from
+it — code, tests, and docs, plus whatever the binding needs — in one pass.
+I'll review the result.
 ```
 
 (A Step 2 brainstorm flows straight into either.)

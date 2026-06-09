@@ -25,7 +25,7 @@ Unlike traditional spec-driven or code-first approaches, the DSL is executable â
 
 ## The Pillars of DSL First
 
-1. **Language as Architecture**: Instead of merely building classes or services, you build a targeted language entirely focused on the business domain.
+1. **Language as Architecture**: Instead of the system being merely classes or services, a targeted language focused on the business domain becomes the architecture â€” the AI authors it, you own and steer it.
 2. **Meta-programming First**: Using code to write code. The DSL acts as the source of truth, and generators or interpreters handle the heavy lifting of translating that intention into a running system.
 3. **High Cohesion**: Changes to business logic happen in the DSL, not in the boilerplate.
 4. **Drift-Free by Design**: Documentation and tests are generated *from* the DSL. If the DSL changes, everything downstream updates or breaks at compile time.

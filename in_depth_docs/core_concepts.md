@@ -5,11 +5,11 @@
 
 ## The DSL-First Process
 
-When practicing DSL-First, your workflows shift from writing boilerplate to designing languages. The typical process looks like this:
+With DSL-First, the work shifts from writing boilerplate by hand to deriving it from a language that captures the domain. The typical process looks like this:
 
-### 1. Define the Domain in a DSL
+### 1. Capture the Domain in a DSL
 
-You write human-readable, machine-parseable syntax that strictly defines your domain models, state machines, guards, and invariants.
+The assistant writes a human-readable, machine-parseable DSL that strictly defines the domain's models, state machines, guards, and invariants — from your specification or legacy code.
 
 ```kotlin
 domain Agent {
@@ -33,7 +33,7 @@ domain Agent {
 
 ### 2. Generate Code
 
-Your code generator parses the DSL and outputs type-safe boilerplate, enums, event classes, and extension points.
+A code generator parses the DSL and outputs type-safe boilerplate, enums, event classes, and extension points.
 
 ```java
 // GENERATED CODE - DO NOT EDIT
