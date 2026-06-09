@@ -72,9 +72,17 @@ No long reading list. Three files are all you need to drop into your project; yo
 
 ### Step 2 — (Optional) Brainstorm the domain into a PRD
 
-This is a **discovery preprocess — it runs *before* any DSL exists**, not part of authoring. Reach for it when you don't yet have a crisp spec; skip it when you do.
+This is a **discovery preprocess — it runs *before* any DSL exists**, not part of authoring. You can start here deliberately, but you don't have to remember to: the methodology makes **the assistant check your input and start interviewing on its own when the spec is too thin to model** — that's Phase 0, the [intake gate](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md#311-phase-0--the-intake-gate-the-assistants-job), and it's the assistant's job, not yours.
 
 The assistant interviews you one question at a time (each with its recommended answer), sharpens vague or overloaded terms into canonical names, probes edge cases with concrete scenarios, and reconciles your answers against any legacy code. It then writes the result up as a **PRD** — glossary, entities and their lifecycles, rules, open questions — for you to review and approve. That approved PRD is the input Step 3 authors the DSL from.
+
+**If you're only a messenger** — relaying for a stakeholder and unable to answer on the spot — ask for a **question list** instead of a live interview, and bring the answers back:
+
+```
+I can't answer domain questions myself — I'm relaying to the stakeholders.
+Instead of interviewing me, give me a grouped list of the open questions, each
+with why it matters and your provisional assumption, so I can collect answers.
+```
 
 ```
 Before writing any DSL, interview me about this domain to produce a PRD. Ask one

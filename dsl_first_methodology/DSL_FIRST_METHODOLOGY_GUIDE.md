@@ -18,6 +18,7 @@
    - 2.4 [DSL Families: Multiple DSLs, One Toolchain](#24-dsl-families-multiple-dsls-one-toolchain)
    - 2.5 [Two Bindings: Grammar-Hosted and Data-Hosted](#25-two-bindings-grammar-hosted-and-data-hosted)
 3. [The Methodology](#3-the-methodology)
+   - 3.1.1 [Phase 0 — The intake gate (auto-interview / question list)](#311-phase-0--the-intake-gate-the-assistants-job)
 4. [DSL Design Patterns](#4-dsl-design-patterns)
 5. [Deriving Artifacts](#5-deriving-artifacts)
 6. [Implementation Workflow](#6-implementation-workflow)
@@ -236,7 +237,20 @@ The choice is dictated by your host language, not by taste. **The model, the sin
 
 The phases below are the work of *building and operating the DSL pipeline* — in an AI-assisted setting, the **assistant** does this, from the spec or legacy repo you give it. You read the outputs and steer in natural language. (This particular pipeline is the **grammar-hosted** binding; a data/homoiconic host like Clojure collapses Phases 2–4 into a schema plus interpretation — same phases, less machinery.)
 
+The workflow opens with **Phase 0, an intake gate**: before any modeling, the assistant judges whether the input it was handed is actually enough to model from — and if it isn't, it goes and gets what's missing instead of guessing. This gate is part of the methodology, so it fires *automatically*; the user never has to know to ask for it (see [§3.1.1](#311-phase-0--the-intake-gate-the-assistants-job)).
+
 ```
+┌──────────────────────────────────────────────────────────────────┐
+│  PHASE 0: INTAKE — IS THE INPUT ENOUGH TO MODEL?   (gate)        │
+│  ────────────────────────────────────────────────                │
+│  • Assistant judges the spec / legacy repo, not the user         │
+│  • Gaps: ask · question-list for messengers · or guess           │
+│  • Guess → flag it out loud + ship a first iteration             │
+│  • Never proceed on a HIDDEN assumption                          │
+│  • Exit: zero *hidden* ambiguity, not zero ambiguity             │
+└──────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │  PHASE 1: DOMAIN ANALYSIS                                        │
 │  ─────────────────────────                                       │
@@ -298,6 +312,22 @@ The phases below are the work of *building and operating the DSL pipeline* — i
 │  • Output: Working system                                        │
 └──────────────────────────────────────────────────────────────────┘
 ```
+
+### 3.1.1 Phase 0 — The intake gate (the assistant's job)
+
+DSL-First only produces good output from an adequate understanding of the domain. **Guaranteeing that understanding is the assistant's responsibility, not the user's.** Before Phase 1, the assistant assesses the input it was given — a written spec, a ticket, a legacy repo — and decides whether it is enough to model from. It does this on its own; the user does not have to recognise a weak spec or know to ask for an interview.
+
+**If the input is adequate**, proceed straight to Phase 1.
+
+**If it is thin, ambiguous, or self-contradictory**, the one thing you must never do is *silently* proceed on a hidden assumption. Short of that, you have three tactics — pick by what unblocks fastest without guessing in the dark:
+
+- **The user can answer → interview them.** Ask one question at a time, each with your recommended answer, sharpening overloaded terms into canonical names and probing edge cases with concrete scenarios. Reconcile every answer against the legacy code and surface contradictions. (This is "Brainstorm" in the README — but the assistant enters it *automatically* when the spec demands it.)
+- **The user is only a messenger → hand them a question list.** When the user is relaying for a stakeholder and can't answer on the spot, don't block. Emit a structured list of the open questions — grouped, each with *why it matters* and your *provisional assumption* — for them to take away and bring back answers.
+- **The answer can wait → make an educated guess and iterate.** When a gap isn't load-bearing enough to stall over, don't stall. Choose the most reasonable interpretation, **record it explicitly as a flagged assumption**, author a first-cut DSL on top of it, and put that assumption in front of the user *with the result*: "I assumed X — here's what it produced; correct me." A concrete iteration often surfaces the right answer faster than an abstract question.
+
+These compose: ask about what's load-bearing, guess the rest, and list anything that has to go back to a stakeholder. So the exit condition is **not zero ambiguity — it is zero *hidden* ambiguity**: every gap is either resolved or surfaced as a flagged assumption the user can overturn (in the PRD when a full brainstorm was run, in the iteration's notes otherwise). On that condition, Phase 1 proceeds — and the first iteration *is* the question.
+
+**Signals that should trip the gate:** undefined or overloaded terms; entities with no lifecycle; lifecycles with unreachable or dead-end states; rules stated only for the happy path; "etc."/"and so on" standing in for a real enumeration; a legacy repo that contradicts the prose. When in doubt, ask — a cheap question now is cheaper than a wrong model later.
 
 ### 3.2 The "Generate, Don't Write" Principle
 
