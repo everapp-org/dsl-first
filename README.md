@@ -6,7 +6,7 @@
 
 **Welcome to the home of DSL-First Development.**
 
-**Spec in, app out.** Hand your AI coding assistant a specification (or a legacy repo) and get back a working application — code, tests, and docs that agree. The trick: the assistant writes only a small model (a **DSL**), and a *deterministic generator* expands it into the full codebase. You **spend cheap CPU cycles instead of expensive LLM tokens** — so you get correct code faster and cheaper, with no drift between code, tests, and docs. **You don't need to know how it works to use it.**
+**Spec in, app out.** Hand your AI coding assistant a specification (or a legacy repo) and get back a working application — code, tests, and docs that agree. The trick: the assistant writes only a small **model**, expressed in a domain-specific language (a **DSL**), and a *deterministic generator* expands it into the full codebase. You **spend cheap CPU cycles instead of expensive LLM tokens** — so you get correct code faster and cheaper, with no drift between code, tests, and docs. **You don't need to know how it works to use it.**
 
 > When one model DRIVES the code, tests, and docs, drift between them becomes impossible.
 
@@ -31,7 +31,7 @@ This methodology is designed for **developers using AI coding assistants** (Curs
 
 The core insight: AI assistants are dramatically more effective when they work from a **structured model** than from natural-language requirements alone. In the DSL-First methodology, the AI coding assistant turns your specification — or your existing/legacy repo — into small, readable models written in our domain-specific languages. These models become the single source of truth, and the assistant then deterministically generates the code, tests, and documentation from them.
 
-**You provide intent and review the results; the assistant authors and maintains the DSL.** You read it when you need to dig in, and edit it directly only when you want surgical control.
+**You provide intent and review the results; the assistant authors and maintains the model.** You read it when you need to dig in, and edit it directly only when you want surgical control.
 
 **Any host language.** Your app can be in Java, TypeScript, Python, Go, C#, or Clojure. Each is handled a little differently under the hood — a text grammar and code generator in some, plain data and a schema in others — but that's the assistant's concern while applying the methodology, not yours.
 
@@ -45,7 +45,7 @@ In traditional development, the spec, the code, the tests, and the documentation
   You provide:  a spec, or a legacy repo
         │
         ▼
-  AI assistant  ──authors──►  DSL  (single source of truth)
+  AI assistant  ──authors──►  model (single source of truth)
         │                      │
         │                      ▼   derived deterministically
         │             ┌────────┼─────────┐
@@ -72,9 +72,9 @@ No long reading list. Three files are all you need to drop into your project; yo
 
 ### Step 2 — (Optional) Brainstorm the domain into a PRD
 
-This is a **discovery preprocess — it runs *before* any DSL exists**, not part of authoring. You can start here deliberately, but you don't have to remember to: the methodology makes **the assistant check your input and start interviewing on its own when the spec is too thin to model** — that's Phase 0, the [intake gate](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md#311-phase-0--the-intake-gate-the-assistants-job), and it's the assistant's job, not yours.
+This is a **discovery preprocess — it runs *before* any model exists**, not part of authoring. You can start here deliberately, but you don't have to remember to: the methodology makes **the assistant check your input and start interviewing on its own when the spec is too thin to model** — that's Phase 0, the [intake gate](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md#311-phase-0--the-intake-gate-the-assistants-job), and it's the assistant's job, not yours.
 
-The assistant interviews you one question at a time (each with its recommended answer), sharpens vague or overloaded terms into canonical names, probes edge cases with concrete scenarios, and reconciles your answers against any legacy code. It then writes the result up as a **PRD** — glossary, entities and their lifecycles, rules, open questions — for you to review and approve. That approved PRD is the input Step 3 authors the DSL from.
+The assistant interviews you one question at a time (each with its recommended answer), sharpens vague or overloaded terms into canonical names, probes edge cases with concrete scenarios, and reconciles your answers against any legacy code. It then writes the result up as a **PRD** — glossary, entities and their lifecycles, rules, open questions — for you to review and approve. That approved PRD is the input Step 3 authors the model from.
 
 **If you're only a messenger** — relaying for a stakeholder and unable to answer on the spot — ask for a **question list** instead of a live interview, and bring the answers back:
 
@@ -85,7 +85,7 @@ with why it matters and your provisional assumption, so I can collect answers.
 ```
 
 ```
-Before writing any DSL, interview me about this domain to produce a PRD. Ask one
+Before writing any model, interview me about this domain to produce a PRD. Ask one
 question at a time, each with your recommended answer. Sharpen my terminology into
 canonical names, probe edge cases with concrete scenarios ("what if an Agent is
 assigned a task while already WORKING?"), and challenge anything in my answers that
@@ -95,26 +95,26 @@ glossary, entities and lifecycles, rules, open questions — and wait for my app
 
 > The PRD states *intent* — your human-facing "spec in". Once Step 3 authors the DSL, **the DSL is the source of truth for what the app actually does**; the PRD is your record of original intent, not a second place to edit behavior. Change behavior DSL-first (prompt → DSL → regenerate); when intent itself changes, refresh the PRD — or regenerate it from the DSL as a derived doc — so the two never silently disagree.
 
-### Step 3 — Author the DSL, then derive
+### Step 3 — Author the model, then derive
 
-Now point the assistant at the methodology and let it author the DSL (single source of truth), derive the code, tests, and docs, and get the tests green:
+Now point the assistant at the methodology and let it author the model (single source of truth), derive the code, tests, and docs, and get the tests green:
 
 ```
 I want to apply the DSL-First methodology to this project. You have all three
 methodology files in context — the Kernel DSL and Behavior DSL specs and the
-practitioner's guide. Author the DSL from the approved PRD (or, if I skipped the
-brainstorm, from the spec or legacy repo I point you at), using whichever DSL the
-domain needs. Then derive the code, tests, and docs, run the tests, and trace any
-failure to its real cause — fixing it at the source (a wrong model → the DSL;
-wrong derivation → the generator), never by editing generated code.
+practitioner's guide. Author the model from the approved PRD (or, if I skipped the
+brainstorm, from the spec or legacy repo I point you at), using whichever language
+the domain needs. Then derive the code, tests, and docs, run the tests, and trace any
+failure to its real cause — fixing it at its source (the model if a rule is wrong,
+the generator if derivation is wrong), never by editing generated code.
 ```
 
 One knob: **how much of its work you check**, from most oversight to least. Append one to the prompt above.
 
-**Step-by-step** — review each DSL file before any code is derived.
+**Step-by-step** — review each model file before any code is derived.
 
 ```
-Show me each DSL file and wait for my approval before deriving any code,
+Show me each model file and wait for my approval before deriving any code,
 tests, or docs.
 ```
 

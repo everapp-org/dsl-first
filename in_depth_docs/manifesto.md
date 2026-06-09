@@ -19,13 +19,13 @@ We believe there should only be **ONE source of truth**: an executable specifica
 
 **DSL-First Development** is a software development methodology where a **Domain-Specific Language (DSL)** serves as that single source. 
 
-Unlike traditional spec-driven or code-first approaches, the DSL is executable — once crafted, it drives **derivation** that deterministically produces type-safe code and exhaustive tests: a parser plus code generator in a grammar-hosted binding, or a schema plus interpreter in a data-hosted one.
+Unlike traditional spec-driven or code-first approaches, the model is executable — once authored, it drives **derivation** that deterministically produces type-safe code and exhaustive tests: a parser plus code generator in a grammar-hosted binding, or a schema plus interpreter in a data-hosted one.
 
-**Key Insight**: When the DSL DRIVES derivation — generator or interpreter — specification drift becomes physically impossible.
+**Key Insight**: When the model DRIVES derivation — generator or interpreter — specification drift becomes physically impossible.
 
 ## The Pillars of DSL First
 
 1. **Language as Architecture**: Instead of the system being merely classes or services, a targeted language focused on the business domain becomes the architecture — the AI authors it, you own and steer it.
-2. **Meta-programming First**: Using code to write code. The DSL acts as the source of truth, and generators or interpreters handle the heavy lifting of translating that intention into a running system.
-3. **High Cohesion**: Changes to business logic happen in the DSL, not in the boilerplate.
-4. **Drift-Free by Design**: Documentation and tests are generated *from* the DSL. If the DSL changes, everything downstream updates or breaks at compile time.
+2. **Meta-programming First**: Using code to write code. The model acts as the source of truth, and generators or interpreters handle the heavy lifting of translating that intention into a running system.
+3. **High Cohesion**: Changes to business logic happen in the model, not in the boilerplate.
+4. **Drift-Free by Design**: Documentation and tests are generated *from* the model. If the model changes, everything downstream updates or breaks at compile time.
