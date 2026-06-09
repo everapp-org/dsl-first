@@ -112,16 +112,15 @@ One knob: **how much of its work you check**, from most oversight to least. Appe
 **Step-by-step** — review each DSL file before any code is derived.
 
 ```
-Produce an initial DSL for [your domain]. Show me each DSL file and wait for my
-review before generating any code, tests, or docs.
+Show me each DSL file and wait for my approval before deriving any code,
+tests, or docs.
 ```
 
 **YOLO** — end-to-end in one pass; fix issues afterwards.
 
 ```
-Go end-to-end for [your domain]: produce the DSL and derive the whole app from
-it — code, tests, and docs, plus whatever the binding needs — in one pass.
-I'll review the result.
+Go all the way in one pass, without stopping for review. I'll check the
+finished result.
 ```
 
 (A Step 2 brainstorm flows straight into either.)
