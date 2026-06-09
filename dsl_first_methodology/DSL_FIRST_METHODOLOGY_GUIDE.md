@@ -19,6 +19,7 @@
    - 2.5 [Two Bindings: Grammar-Hosted and Data-Hosted](#25-two-bindings-grammar-hosted-and-data-hosted)
 3. [The Methodology](#3-the-methodology)
    - 3.1.1 [Phase 0 — The intake gate (auto-interview / question list)](#311-phase-0--the-intake-gate-the-assistants-job)
+   - 3.1.2 [Closing the loop — derive, run the tests, fix at the source](#312-closing-the-loop--derive-run-the-tests-fix-at-the-source)
 4. [DSL Design Patterns](#4-dsl-design-patterns)
 5. [Deriving Artifacts](#5-deriving-artifacts)
 6. [Implementation Workflow](#6-implementation-workflow)
@@ -328,6 +329,16 @@ DSL-First only produces good output from an adequate understanding of the domain
 These compose: ask about what's load-bearing, guess the rest, and list anything that has to go back to a stakeholder. So the exit condition is **not zero ambiguity — it is zero *hidden* ambiguity**: every gap is either resolved or surfaced as a flagged assumption the user can overturn (in the PRD when a full brainstorm was run, in the iteration's notes otherwise). On that condition, Phase 1 proceeds — and the first iteration *is* the question.
 
 **Signals that should trip the gate:** undefined or overloaded terms; entities with no lifecycle; lifecycles with unreachable or dead-end states; rules stated only for the happy path; "etc."/"and so on" standing in for a real enumeration; a legacy repo that contradicts the prose. When in doubt, ask — a cheap question now is cheaper than a wrong model later.
+
+### 3.1.2 Closing the loop — derive, run the tests, fix at the source
+
+Deriving the artifacts is not the end of a pass — *running* them is. After generation (or interpretation), the assistant runs the generated tests, reads the results, and traces any failure to its real cause before calling the work done. The fix always goes to the **source**, never to the output:
+
+- the failure exposes a wrong or missing rule in the model → fix the **DSL**, then re-derive;
+- the failure is bad derivation (the generator/interpreter emits the wrong thing) → fix the **generator/interpreter**;
+- the failure is in hand-written glue → fix the glue.
+
+Editing generated code to make a test pass is the cardinal anti-pattern ([§10.2](#102-generate-and-modify)): the next re-derivation erases the edit, and meanwhile the DSL — the single source of truth — still lies about the system. Under **YOLO** the assistant drives this loop to green on its own; under **step-by-step** it surfaces the test results at each checkpoint for you.
 
 ### 3.2 The "Generate, Don't Write" Principle
 

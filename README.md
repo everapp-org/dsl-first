@@ -97,14 +97,16 @@ glossary, entities and lifecycles, rules, open questions — and wait for my app
 
 ### Step 3 — Author the DSL, then derive
 
-Now point the assistant at the methodology and let it author the DSL (single source of truth) and generate the code, tests, and docs from it:
+Now point the assistant at the methodology and let it author the DSL (single source of truth), derive the code, tests, and docs, and get the tests green:
 
 ```
 I want to apply the DSL-First methodology to this project. You have all three
 methodology files in context — the Kernel DSL and Behavior DSL specs and the
 practitioner's guide. Author the DSL from the approved PRD (or, if I skipped the
 brainstorm, from the spec or legacy repo I point you at), using whichever DSL the
-domain needs.
+domain needs. Then derive the code, tests, and docs, run the tests, and trace any
+failure to its real cause — fixing it at the source (a wrong model → the DSL;
+wrong derivation → the generator), never by editing generated code.
 ```
 
 One knob: **how much of its work you check**, from most oversight to least. Append one to the prompt above.
