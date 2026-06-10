@@ -4,7 +4,7 @@
 > **License**: Apache 2.0 — see [LICENSE](../LICENSE)
 
 **Version:** 1.1
-**Purpose:** A reusable **modeling language** for describing domain structure, lifecycle behavior, service surfaces, and architecture constraints across projects (e.g., Frames, Dynamic UI, Notes).
+**Purpose:** This document defines the **Kernel DSL** — a language an AI coding assistant uses to write a **model** of an application: the things the application manages, the states each thing can be in, which state changes are allowed, the operations the application offers, and the structural rules its codebase must respect. One language, reusable across projects and host languages.
 
 ## 1. Overview
 

@@ -4,7 +4,7 @@
 
 ---
 
-Every DSL-First project eventually hits the same wall: the Kernel DSL is excellent at modeling *what things are* — domain entities, state machines, services. But some concerns resist that shape. They need to express *how things happen*.
+Every DSL-First project eventually hits the same wall: the Kernel DSL is excellent at modeling *what things are* — the things a system manages, the states they pass through, the operations it offers. But some concerns resist that shape. They need to express *how things happen*.
 
 That is the gap the new **Behavior DSL** fills. And the more interesting story is the *second* concern we looked at — provider integration — which felt like it deserved its own grammar too, but didn't. The contrast between the two is the whole lesson.
 
@@ -12,7 +12,7 @@ That is the gap the new **Behavior DSL** fills. And the more interesting story i
 
 ## The Behavior DSL: a genuine second grammar
 
-A behavior describes how a procedure unfolds — ordered steps, parallel steps, error handling, concurrency. The simplest case is a plain pipeline with no actors to coordinate:
+A behavior describes a procedure from start to finish: which steps run, in what order, which may run side by side, and what happens when a step fails. The simplest case is a plain sequence of steps with nothing to coordinate:
 
 ```dsl
 behavior DocumentIngestion {

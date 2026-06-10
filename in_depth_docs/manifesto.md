@@ -15,13 +15,13 @@ In traditional software development, the specification, the code, the tests, and
 
 ## Our Belief
 
-We believe there should only be **ONE source of truth**: an executable specification.
+We believe there should be only **ONE source of truth**: a single document from which everything else — the code, the tests, the documentation — is produced.
 
-**DSL-First Development** is a software development methodology where a **Domain-Specific Language (DSL)** serves as that single source. 
+**DSL-First Development** is a software development methodology where that single source is a **model**: a precise description of the application, written in a **Domain-Specific Language (DSL)** — a small language built specifically for describing one kind of thing.
 
-Unlike traditional spec-driven or code-first approaches, the model is executable — once authored, it drives **derivation** that deterministically produces type-safe code and exhaustive tests: a parser plus code generator in a grammar-hosted binding, or a schema plus interpreter in a data-hosted one.
+Unlike a traditional specification, the model is not just a description for humans to read — programs read it too, and they produce the application code and the matching tests from it. The same model always produces the same output. (The exact machinery differs by host language; the guide's *[Two Bindings](../dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md#25-two-bindings-grammar-hosted-and-data-hosted)* section describes both styles.)
 
-**Key Insight**: When the model DRIVES derivation — generator or interpreter — specification drift becomes physically impossible.
+**Key Insight**: When the code and the tests are *produced from* the model rather than written next to it, they cannot drift away from it — there is nothing left to drift.
 
 ## The Pillars of DSL First
 

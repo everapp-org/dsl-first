@@ -16,11 +16,11 @@ AI models excel at structured input and output but struggle with massive, sprawl
 
 1. **Structured Input/Output**: DSL syntax is formal and unambiguous. This is much easier for an LLM to reason about than arbitrary code.
 2. **High-Level Intent**: The model expresses "what" not "how". This matches the LLM's strength (reasoning) and avoids low-level implementation details.
-3. **Deterministic Validation**: The derived artifacts are validated deterministically — by the compiler in a grammar-hosted binding, or by the schema and generated tests in a data-hosted one. 
+3. **Machine-Checked Output**: The derived code is checked by machines, not by eyeballs — the compiler or a schema rejects anything malformed, and the generated tests check the behavior.
 
 ## Human-AI Collaboration Pattern
 
-Instead of asking an AI to "update the codebase to add a suspended state to the agent," you describe that intent and the AI updates the model — then regenerates the code from it. The locus of change moves from the code to the model.
+Instead of asking an AI to "update the codebase to add a suspended state to the agent," you describe that intent and the AI updates the model — then regenerates the code from it. The place where change happens moves from the code to the model.
 
 ```
 ┌──────────────────────────────────┐

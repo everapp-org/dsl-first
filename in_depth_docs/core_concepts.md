@@ -7,11 +7,11 @@
 
 With DSL-First, the work shifts from writing boilerplate by hand to deriving it from a model that captures the domain (a model written in one of the methodology's languages). The typical process looks like this:
 
-> **Two derivation styles** (see the guide's *[Two Bindings](../dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md#25-two-bindings-grammar-hosted-and-data-hosted)*): a **grammar-hosted** binding parses a text DSL and *generates* code; a **data-hosted** binding (Clojure/EDN) validates the model against a *schema* and *interprets* it — frequently with no code-generation step at all. The walkthrough below shows the grammar-hosted style in Java; the concepts are identical either way.
+> **Two derivation styles** (see the guide's *[Two Bindings](../dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md#25-two-bindings-grammar-hosted-and-data-hosted)*): in some host languages (such as Java) the model is a small text file with its own syntax — a parser reads it and a **generator** writes the code; the guide calls this **grammar-hosted**. In others (such as Clojure) the model is plain structured data — it is checked against a **schema** and executed directly, often with no generated code at all; the guide calls this **data-hosted**. The walkthrough below shows the first style, in Java; the concepts are identical either way.
 
 ### 1. Capture the Domain in a Model
 
-The assistant writes a human-readable, machine-parseable **model** — in a domain-specific language — that strictly defines the domain's entities, state machines, guards, and invariants, from your specification or legacy code.
+The assistant writes a **model** — readable by humans, processable by programs — that strictly defines the domain: the things it manages, the states they pass through, and the rules that allow or forbid each change. It builds this model from your specification or your existing code, using one of the methodology's languages.
 
 ```kotlin
 domain Agent {

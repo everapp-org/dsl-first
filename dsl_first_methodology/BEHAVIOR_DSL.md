@@ -5,7 +5,7 @@
 
 **Version:** 1.0  
 **Companion:** [Kernel DSL Specification v1.1](KERNEL_DSL.md)  
-**Purpose:** A modeling language for describing **behaviors** — how a procedure unfolds as an ordered and parallel sequence of steps invoking a fixed runtime API — as M1 models compiled into typed executor classes.
+**Purpose:** This document defines the **Behavior DSL** — a language an AI coding assistant uses to write a **model** of a procedure: which steps the application performs, in what order, which steps may run side by side, and what to do when a step fails. Each step calls one of a fixed set of operations the host application provides; from the model, executable code is derived.
 
 ---
 

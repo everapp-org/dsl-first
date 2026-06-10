@@ -10,7 +10,7 @@
 
 ## 1. The Temptation — and Why We Resisted It
 
-While building jCrew we needed to model LLM provider integration: a catalog of models
+While building **jCrew** (one of our internal projects) we needed to model LLM provider integration: a catalog of models
 with capabilities and costs, HTTP protocol bindings, retry rules, and a runtime
 model-selection policy. It had its own vocabulary (`provider`, `protocolBinding`,
 `selectionPolicy`), its own change cadence, and warranted its own file. The instinct was
