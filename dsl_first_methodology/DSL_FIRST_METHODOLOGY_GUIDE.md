@@ -1233,7 +1233,7 @@ JavaPoet source), and the generated executor classes — lives in
 > "generator" is interpretation or a macro — same metamodel, no parser. See §2.5 and the
 > [Clojure example](../examples/clojure-edn-minimal/README.md).
 
-### 11.7 Project Structure
+### 11.3 Project Structure
 
 ```
 jcrew/
@@ -1427,5 +1427,5 @@ my-project/
 ---
 
 **Document Version**: 1.0  
-**Last Updated**: 2026-01-29  
+**Last Updated**: 2026-06-11  
 **License**: Apache 2.0 — https://github.com/everapp-org/dsl-first/blob/main/LICENSE

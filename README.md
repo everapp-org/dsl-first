@@ -99,13 +99,7 @@ This step is for when you don't yet have a written specification — it runs **b
 
 The assistant interviews you one question at a time (each with its recommended answer), turns vague or double-duty words into one agreed name per thing, probes edge cases with concrete scenarios, and checks your answers against any existing code. It then writes the result up as a **PRD** — a Product Requirements Document: a short, structured statement of what to build, covering the agreed vocabulary, the things your application manages and the states they pass through, the rules, and the questions still open. You review and approve it, and that approved PRD is what Step 3 works from.
 
-**If you're only a messenger** — relaying for a stakeholder and unable to answer on the spot — ask for a **question list** instead of a live interview, and bring the answers back:
-
-```
-I can't answer domain questions myself — I'm relaying to the stakeholders.
-Instead of interviewing me, give me a grouped list of the open questions, each
-with why it matters and your provisional assumption, so I can collect answers.
-```
+The prompt to start it deliberately:
 
 ```
 Before writing any model, interview me about this domain to produce a PRD. Ask one
@@ -115,6 +109,14 @@ customer cancels an order that has already shipped?"), and challenge anything in
 answers that the existing code contradicts. When the domain is clear, write it up
 as a PRD — vocabulary, the things managed and their states, rules, open questions —
 and wait for my approval.
+```
+
+**If you're only a messenger** — relaying for a stakeholder and unable to answer on the spot — ask for a **question list** instead of a live interview, and bring the answers back:
+
+```
+I can't answer domain questions myself — I'm relaying to the stakeholders.
+Instead of interviewing me, give me a grouped list of the open questions, each
+with why it matters and your provisional assumption, so I can collect answers.
 ```
 
 > The PRD states *intent* — what you asked for. Once Step 3 authors the model, **the model is the source of truth for what the app actually does**; the PRD is your record of original intent, not a second place to edit behavior. To change behavior, prompt the assistant: it updates the model and regenerates the code. When the intent itself changes, refresh the PRD — or have it regenerated from the model as a derived document — so the two never silently disagree.
