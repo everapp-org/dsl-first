@@ -218,7 +218,7 @@ A DSL family shares one toolchain. In a **grammar-hosted** binding that is:
 - **Build orchestration** — a single entry point (e.g., `DslCodeGenerator.main`) that runs all grammars and all generators
 - **Output directory conventions** — all generated artifacts share one `generated/` root
 
-In a **data-hosted** binding the shared toolchain is one **schema registry + loader**: a single malli/spec registry validating every model file, and one `load!` that reads, validates, and assembles them all — same idea, no parsers. (This is how ikc3's `gi` runtime carries eight EDN DSLs on one schema + loader.)
+In a **data-hosted** binding the shared toolchain is one **schema registry + loader**: a single malli/spec registry validating every model file, and one `load!` that reads, validates, and assembles them all — same idea, no parsers. (In practice this scales well: one production agent runtime carries eight EDN model files on a single schema registry and one loader.)
 
 ### 2.5 Two Bindings: Grammar-Hosted and Data-Hosted
 
