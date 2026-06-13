@@ -37,7 +37,7 @@
 
 ### 1.1 What is DSL-First Development?
 
-**DSL-First Development** has one core move: the domain is captured in a **model**, expressed using one or more of the small, domain-specific languages this methodology provides (the Kernel DSL and the Behavior DSL). Everything else — the code, the tests, the documentation — is then *derived* from that model.
+**DSL-First Development** has one core move: the domain is captured in a **model**, expressed using one or more of the small, domain-specific languages this methodology provides (the Kernel DSL, the Behavior DSL, and the Verification DSL). Everything else — the code, the tests, the documentation — is then *derived* from that model.
 
 - **The language** is a *domain-specific language (DSL)* — a small notation tailored to one domain (a state machine, a provider catalog, a workflow), not a general-purpose programming language.
 - **The model** is what's written in that language: the actual files (e.g. `domain.dsl` or `domain.edn`). The model is the **single source of truth** — the one artifact authored directly (by the assistant; see below).
@@ -188,6 +188,7 @@ Each DSL is a modeling language for *one concern*. Both share the same toolchain
 |---------|----------|-------------|-----|
 | **Domain structure & lifecycle** | [KERNEL_DSL.md](KERNEL_DSL.md) | Yes — core grammar | The foundational metamodel: `Domain / Model / State / Transition` |
 | **Behavior / procedure shape** | [BEHAVIOR_DSL.md](BEHAVIOR_DSL.md) | **Yes — distinct grammar** | Its `execution { }` block is a mini imperative language — assignment, `foreach`, `parallelForEach` — with no analog in the Kernel DSL's declarative world |
+| **Checkable claims & living documentation** | [VERIFICATION_DSL.md](VERIFICATION_DSL.md) | **Yes — distinct grammar** | Its `check { given / when / expect }` block reuses the Behavior DSL's call-and-bind shape but adds an *expectation* matched against a result, yielding a four-way verdict — asserting on output has no analog in either sibling |
 | **Provider integration** | [case study](../in_depth_docs/case-study-provider-integration.md) | **No — Kernel DSL domain** | `provider`, `protocolBinding`, `selectionPolicy` are all entities with fields; they map directly onto `model / fields`. Value is the three-layer discipline, not new syntax |
 
 The Behavior DSL earns a separate metamodel because the *shape of a procedure* —

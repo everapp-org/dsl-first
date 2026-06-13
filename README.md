@@ -83,13 +83,15 @@ The boundary between the two moves in one direction: when a hand-written pattern
 
 No long reading list. Three files are all you need to drop into your project; your AI coding assistant does the rest.
 
-### Step 1 — Copy these three files into your project
+### Step 1 — Copy these four files into your project
 
-These files are not for you to study — they are the instructions your AI coding assistant works from. Copy all three into your project; the assistant applies whichever it needs.
+These files are not for you to study — they are the instructions your AI coding assistant works from. Copy all four into your project; the assistant applies whichever it needs.
 
 [`dsl_first_methodology/KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md) teaches your assistant the language for describing what your application **manages**: the things it keeps track of (orders, customers, payments), the states each thing can be in (an order can be *placed*, *paid*, *shipped*, or *refunded*), and which state changes are allowed (a refunded order cannot be shipped again).
 
 [`dsl_first_methodology/BEHAVIOR_DSL.md`](dsl_first_methodology/BEHAVIOR_DSL.md) teaches your assistant the language for describing what your application **does**: its step-by-step procedures — for example, "when an order is placed: check the stock, charge the customer, then ship; if charging fails, cancel the order."
+
+[`dsl_first_methodology/VERIFICATION_DSL.md`](dsl_first_methodology/VERIFICATION_DSL.md) teaches your assistant the language for describing what must **hold**: the checkable claims your application makes — "a placed order can be paid; a declined card cancels it." From these it produces **living documentation**: prose a newcomer can read, where each claim is shown passing or failing against the running system, so a page that drifts from the code does not read poorly — it *fails*.
 
 [`dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md`](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) gives your assistant its working instructions: when to interview you about your project, how to write the model from what you provide, and how to produce the code, the tests, and the docs from that model.
 
@@ -159,9 +161,10 @@ finished result.
 ```
 dsl-first/
 ├── README.md
-├── dsl_first_methodology/          # THE METHODOLOGY — copy these three files into your project
+├── dsl_first_methodology/          # THE METHODOLOGY — copy these four files into your project
 │   ├── KERNEL_DSL.md               #   the language for what your app manages
 │   ├── BEHAVIOR_DSL.md             #   the language for what your app does, step by step
+│   ├── VERIFICATION_DSL.md         #   the language for what must hold — and living documentation
 │   └── DSL_FIRST_METHODOLOGY_GUIDE.md  #   the instructions your assistant follows
 ├── in_depth_docs/                  # for the curious: why it works, when not to use it
 └── examples/                       # the same small app built two ways — both runnable
@@ -174,6 +177,7 @@ dsl-first/
 ### The Methodology (`dsl_first_methodology/`)
 * [Kernel DSL Specification v1.1](dsl_first_methodology/KERNEL_DSL.md) — The language for describing what an application **manages**: the things it keeps track of, the states each can be in, and which state changes are allowed.
 * [Behavior DSL Specification v1.0](dsl_first_methodology/BEHAVIOR_DSL.md) — The language for describing what an application **does**: its procedures, step by step, including which steps may run side by side and what happens when a step fails. It is a separate language because describing a process needs different building blocks than describing things and their states.
+* [Verification DSL Specification v1.0](dsl_first_methodology/VERIFICATION_DSL.md) — The language for describing what must **hold**: the checkable claims an application makes about itself, and the **living documentation** derived from them — prose that renders each claim with its current pass/fail verdict. It is a separate language because asserting on a result is foreign to describing things or procedures.
 * [DSL-First Methodology Guide](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The instructions the assistant follows from start to finish: checking your input, interviewing you when needed, writing the model, and producing the code, tests, and docs from it.
 
 ### Examples (`examples/`) — the same small app, built two ways
