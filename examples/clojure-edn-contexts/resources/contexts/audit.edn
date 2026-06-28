@@ -1,0 +1,12 @@
+{:domain :audit
+ :description "Audit trail context — records every command for inspection."
+
+ :levels
+ {:middleware
+  {:models
+   {:record-command
+    {:description "Record every command before dispatch."
+     :status :ready
+     :phase :inbound
+     :priority 0
+     :handled-by :audit.middleware/record-command}}}}}
