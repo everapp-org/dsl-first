@@ -8,6 +8,8 @@
 
 Hand your AI coding assistant a written description of what you want (or an existing codebase), and the methodology carries the structured part of the work. The assistant writes a small **model** — a precise description of your application, in a special-purpose language (a **DSL**, domain-specific language) — and an ordinary program, not an AI, expands that model into your application's backbone: the domain classes, the state rules, the workflow skeletons, the tests for all of it, and the documentation. The parts no model can express — the user interface, the bodies of the individual steps, the connections to outside systems — are written as ordinary code that plugs into that backbone. Everything that comes from the model always comes out the same way and cannot drift apart — and producing it costs **cheap computing time instead of expensive AI calls**. **You don't need to know how it works to use it.**
 
+The same model also drives **test automation and QA**: the state machine yields transition coverage, the procedure model yields workflow tests, and the verification model produces living documentation — prose where each claim shows its current pass/fail verdict. See the [QA & Test Automation Guide](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md).
+
 > When the code, the tests, and the docs are all produced from one model, they cannot quietly stop agreeing with each other.
 
 > ⭐ **If you find this methodology useful, please star this repo** — it helps others discover it!
@@ -81,17 +83,21 @@ The boundary between the two moves in one direction: when a hand-written pattern
 
 ## Getting Started
 
-No long reading list. Three files are all you need to drop into your project; your AI coding assistant does the rest.
+No long reading list. Five files are all you need to drop into your project; your AI coding assistant does the rest.
 
-### Step 1 — Copy these three files into your project
+### Step 1 — Copy these five files into your project
 
-These files are not for you to study — they are the instructions your AI coding assistant works from. Copy all three into your project; the assistant applies whichever it needs.
+These files are not for you to study — they are the instructions your AI coding assistant works from. Copy all five into your project; the assistant applies whichever it needs.
 
 [`dsl_first_methodology/KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md) teaches your assistant the language for describing what your application **manages**: the things it keeps track of (orders, customers, payments), the states each thing can be in (an order can be *placed*, *paid*, *shipped*, or *refunded*), and which state changes are allowed (a refunded order cannot be shipped again).
 
 [`dsl_first_methodology/BEHAVIOR_DSL.md`](dsl_first_methodology/BEHAVIOR_DSL.md) teaches your assistant the language for describing what your application **does**: its step-by-step procedures — for example, "when an order is placed: check the stock, charge the customer, then ship; if charging fails, cancel the order."
 
+[`dsl_first_methodology/VERIFICATION_DSL.md`](dsl_first_methodology/VERIFICATION_DSL.md) teaches your assistant the language for describing what must **hold**: the checkable claims your application makes — "a placed order can be paid; a declined card cancels it." From these it produces **living documentation**: prose a newcomer can read, where each claim is shown passing or failing against the running system, so a page that drifts from the code does not read poorly — it *fails*.
+
 [`dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md`](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) gives your assistant its working instructions: when to interview you about your project, how to write the model from what you provide, and how to produce the code, the tests, and the docs from that model.
+
+[`dsl_first_methodology/DSL_FIRST_QA_GUIDE.md`](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) teaches your assistant how to apply the three DSL languages to **test automation**: extracting testable specifications from existing codebases, generating test suites (Gherkin, step definitions, test data factories), and producing living documentation with live PASS/FAIL verdicts. It covers both grammar-hosted (Java) and data-hosted (Clojure) bindings.
 
 ### Step 2 — (Optional) Brainstorm: from a vague idea to a requirements document
 
@@ -126,14 +132,14 @@ with why it matters and your provisional assumption, so I can collect answers.
 Now point the assistant at the methodology. It writes the model — the single source of truth — produces the code, the tests, and the docs from it, runs the tests, and fixes whatever fails:
 
 ```
-I want to apply the DSL-First methodology to this project. You have all three
-methodology files in context — the Kernel DSL and Behavior DSL specifications and
-the methodology guide. Author the model from the approved PRD (or, if I skipped the
-brainstorm, from the specification or existing code I point you at), using whichever
-language the domain needs. Then generate the code, tests, and docs, run the tests,
-and trace any failure to its real cause — fixing it at its source (the model if a
-rule is wrong, the generator if the expansion is wrong), never by editing generated
-code.
+I want to apply the DSL-First methodology to this project. You have all five
+methodology files in context — the Kernel DSL, Behavior DSL, and Verification DSL
+specifications, the methodology guide, and the QA guide. Author the model from the
+approved PRD (or, if I skipped the brainstorm, from the specification or existing
+code I point you at), using whichever language the domain needs. Then generate the
+code, tests, and docs, run the tests, and trace any failure to its real cause —
+fixing it at its source (the model if a rule is wrong, the generator if the
+expansion is wrong), never by editing generated code.
 ```
 
 One knob: **how much of its work you check**, from most oversight to least. Append one to the prompt above.
@@ -159,14 +165,17 @@ finished result.
 ```
 dsl-first/
 ├── README.md
-├── dsl_first_methodology/          # THE METHODOLOGY — copy these three files into your project
+├── dsl_first_methodology/          # THE METHODOLOGY — copy these five files into your project
 │   ├── KERNEL_DSL.md               #   the language for what your app manages
 │   ├── BEHAVIOR_DSL.md             #   the language for what your app does, step by step
-│   └── DSL_FIRST_METHODOLOGY_GUIDE.md  #   the instructions your assistant follows
+│   ├── VERIFICATION_DSL.md         #   the language for what must hold — and living documentation
+│   ├── DSL_FIRST_METHODOLOGY_GUIDE.md  #   the instructions your assistant follows
+│   └── DSL_FIRST_QA_GUIDE.md       #   how to apply the DSLs to test automation and QA
 ├── in_depth_docs/                  # for the curious: why it works, when not to use it
-└── examples/                       # the same small app built two ways — both runnable
+└── examples/                       # runnable examples — from minimal to advanced
     ├── java-antlr-minimal/         # Java: the model is a text file; the code is generated from it
-    └── clojure-edn-minimal/        # Clojure: the model is plain data; nothing is generated
+    ├── clojure-edn-minimal/        # Clojure: the model is plain data; nothing is generated
+    └── clojure-edn-contexts/       # Clojure advanced: multi-level interpreters, composition, status-gated wiring
 ```
 
 ## Documentation Navigation
@@ -174,13 +183,15 @@ dsl-first/
 ### The Methodology (`dsl_first_methodology/`)
 * [Kernel DSL Specification v1.1](dsl_first_methodology/KERNEL_DSL.md) — The language for describing what an application **manages**: the things it keeps track of, the states each can be in, and which state changes are allowed.
 * [Behavior DSL Specification v1.0](dsl_first_methodology/BEHAVIOR_DSL.md) — The language for describing what an application **does**: its procedures, step by step, including which steps may run side by side and what happens when a step fails. It is a separate language because describing a process needs different building blocks than describing things and their states.
+* [Verification DSL Specification v1.0](dsl_first_methodology/VERIFICATION_DSL.md) — The language for describing what must **hold**: the checkable claims an application makes about itself, and the **living documentation** derived from them — prose that renders each claim with its current pass/fail verdict. It is a separate language because asserting on a result is foreign to describing things or procedures.
 * [DSL-First Methodology Guide](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The instructions the assistant follows from start to finish: checking your input, interviewing you when needed, writing the model, and producing the code, tests, and docs from it.
+* [DSL-First QA & Test Automation Guide](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) — How to apply the three DSL languages to QA work: extracting testable specifications from existing code, generating test suites (Gherkin, step definitions, data factories), and producing living documentation with live verdicts. Covers both grammar-hosted (Java) and data-hosted (Clojure) bindings.
 
-### Examples (`examples/`) — the same small app, built two ways
+### Examples (`examples/`) — from minimal to advanced, all runnable
 
-Both are runnable, and both implement the same example — a small agent that can be activated and assigned tasks — for developers who want to see exactly what the assistant builds under the hood:
 * [`java-antlr-minimal`](examples/java-antlr-minimal/README.md) — **Java**: the model is a small text file with its own syntax; a parser reads it and the Java code is generated from it. The generated code is committed, so you can read it without building anything.
 * [`clojure-edn-minimal`](examples/clojure-edn-minimal/README.md) — **Clojure**: the model is plain structured data; the program checks it against a schema and runs it directly. Nothing is generated.
+* [`clojure-edn-contexts`](examples/clojure-edn-contexts/README.md) — **Clojure advanced**: multi-level interpretation, `requiring-resolve` dispatch, status-gated wiring, and composition/leasing. Demonstrates techniques extracted from a production codebase, with zero project-specific dependencies.
 
 ### In-Depth Docs (`in_depth_docs/`) — for those peeking into internals
 * [The Manifesto](in_depth_docs/manifesto.md) — Why this methodology exists: the problem of code, tests, and docs drifting apart, and the belief behind the fix.
@@ -188,6 +199,7 @@ Both are runnable, and both implement the same example — a small agent that ca
 * [AI Synergy](in_depth_docs/ai_synergy.md) — Why an AI assistant produces better results writing a small model than writing a whole codebase.
 * [Tradeoffs](in_depth_docs/tradeoffs.md) — An honest list of when this methodology pays off and when it is not worth the cost.
 * [Case study: Provider Integration Is a Domain, Not a Grammar](in_depth_docs/case-study-provider-integration.md) — A worked example of a real design decision: when a new concern needs its own language, and when it does not.
+* [Case study: Context Interpreters — Techniques vs. Code](in_depth_docs/case-study-context-interpreters.md) — How generic interpreter techniques (multi-level interpretation, `requiring-resolve` dispatch, status-gated wiring, composition/leasing) were extracted from a production Clojure codebase into a self-contained example, and why the interpreters themselves don't belong in the methodology distribution.
 
 ## Contributing
 

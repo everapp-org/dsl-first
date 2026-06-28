@@ -37,7 +37,7 @@
 
 ### 1.1 What is DSL-First Development?
 
-**DSL-First Development** has one core move: the domain is captured in a **model**, expressed using one or more of the small, domain-specific languages this methodology provides (the Kernel DSL and the Behavior DSL). Everything else — the code, the tests, the documentation — is then *derived* from that model.
+**DSL-First Development** has one core move: the domain is captured in a **model**, expressed using one or more of the small, domain-specific languages this methodology provides (the Kernel DSL, the Behavior DSL, and the Verification DSL). Everything else — the code, the tests, the documentation — is then *derived* from that model.
 
 - **The language** is a *domain-specific language (DSL)* — a small notation tailored to one domain (a state machine, a provider catalog, a workflow), not a general-purpose programming language.
 - **The model** is what's written in that language: the actual files (e.g. `domain.dsl` or `domain.edn`). The model is the **single source of truth** — the one artifact authored directly (by the assistant; see below).
@@ -188,6 +188,7 @@ Each DSL is a modeling language for *one concern*. Both share the same toolchain
 |---------|----------|-------------|-----|
 | **Domain structure & lifecycle** | [KERNEL_DSL.md](KERNEL_DSL.md) | Yes — core grammar | The foundational metamodel: `Domain / Model / State / Transition` |
 | **Behavior / procedure shape** | [BEHAVIOR_DSL.md](BEHAVIOR_DSL.md) | **Yes — distinct grammar** | Its `execution { }` block is a mini imperative language — assignment, `foreach`, `parallelForEach` — with no analog in the Kernel DSL's declarative world |
+| **Checkable claims & living documentation** | [VERIFICATION_DSL.md](VERIFICATION_DSL.md) | **Yes — distinct grammar** | Its `check { given / when / expect }` block reuses the Behavior DSL's call-and-bind shape but adds an *expectation* matched against a result, yielding a four-way verdict — asserting on output has no analog in either sibling |
 | **Provider integration** | [case study](../in_depth_docs/case-study-provider-integration.md) | **No — Kernel DSL domain** | `provider`, `protocolBinding`, `selectionPolicy` are all entities with fields; they map directly onto `model / fields`. Value is the three-layer discipline, not new syntax |
 
 The Behavior DSL earns a separate metamodel because the *shape of a procedure* —
@@ -435,6 +436,84 @@ Hand-written files:
 1. It implements a specific protocol (JSON-RPC 2.0)
 2. It's a one-time integration, not a repeating pattern
 3. The model defines *what* tools exist; the adapter defines *how* to expose them
+
+### 3.5 Two Modes of Governance: Derivation and Conformance
+
+The methodology's central promise is **the model governs the code**. It is worth being
+precise about the word *governs*, because there are **two** ways a model can govern, and
+most of this guide describes only the first.
+
+| Mode | How the model governs | Drift is caught by | Typical use |
+|------|-----------------------|--------------------|-------------|
+| **Derivation** | The artifact is *produced from* the model — generated (grammar-hosted) or interpreted (data-hosted). There is no independent hand-written version. | Re-derivation: the code *is* the model's output, so it cannot disagree with it. | The default for everything derivable (§3.4 "Generate These"). |
+| **Conformance** | The artifact is *written by hand*, independently of the model, but a **conformance test** asserts that the hand-written thing equals what the model declares. | A test that fails the build the moment code and model disagree. | The few primitives that cannot be derived (below). |
+
+Both keep the model as the single source of truth. The difference is only the
+*enforcement mechanism*: derivation makes drift **impossible**; conformance makes it
+**loud**.
+
+#### Why conformance has to exist: the substrate cannot derive itself
+
+Derivation is not free-standing — it runs on something. A generator runs in a build; an
+interpreter runs on a runtime (a registry, a dispatcher, an evaluation loop). That
+**substrate is the one component the model cannot derive**, because deriving it would
+require the substrate to already exist in order to do the deriving. This is the ordinary
+bootstrap problem: you cannot interpret the manifest that produces your interpreter
+*using* that same interpreter; you cannot compile a compiler purely from itself. At
+exactly one point the relationship has to invert.
+
+So the foundational runtime primitive is **modelled like everything else** — it still
+gets a manifest, declared in the same idiom as every other concern, so it is documented,
+reviewable, and authoritative — but it is **not derived from that manifest**. Instead the
+hand-written primitive is pinned to its model by a conformance test (e.g. "the operations
+this manifest declares *equal* the real protocol's methods"). The manifest governs the
+code; it just governs by conformance rather than by derivation.
+
+Two consequences worth internalising:
+
+- **"Governed, not generated" is not an escape hatch.** It does *not* mean the primitive
+  has no model, and it does *not* mean the DSL was too weak to describe it (its surface —
+  operations, events, invariants — usually *is* expressible). It means the primitive sits
+  *under* the derivation pipeline, so its manifest is conformed-to instead of run.
+- **This is a discipline, not an excuse.** Conformance is justified only for the genuine
+  metacircular core (the substrate derivation depends on). Reaching for "I'll just
+  hand-write it and add a conformance test" to dodge modelling a derivable concern is the
+  drift anti-pattern (§10.3) wearing a disguise. If it *can* be derived, derive it.
+
+#### What makes a conformance test trustworthy
+
+Conformance *relocates* trust rather than removing it: with derivation you trust the
+deriver; with conformance you trust the test. So a conformance test is only worth its
+name if it cannot quietly stop testing anything. Two properties are load-bearing, and
+both are visible by *reading the test* — they are not enforced by yet another test:
+
+- **Independent provenance (non-vacuity).** The two sides being compared must come from
+  *different* origins — e.g. one read from the model file, the other obtained by
+  reflecting the live code at runtime. If both sides are derived from the model, the test
+  is a tautology that can never fail. This is the single property a reviewer must always
+  check, and the reason conformance terminates the "who tests the test?" regress at a
+  small, readable artifact instead of an infinite tower.
+- **Bidirectional check.** Assert *equality* of the two surfaces, not that one is a subset
+  of the other. A subset check is blind to drift on one side (a renamed or stray element
+  slips through); equality catches both directions.
+
+#### Conformance carries a coverage obligation that derivation does not
+
+Under derivation, a model element with *no* test still cannot drift — the code is the
+model's output, so the two agree by construction; an untested element is merely untested,
+not unsafe. Under conformance the code is hand-written, so a model element that *no* test
+pins drifts **invisibly**: nothing produces it and nothing checks it. "Governed by
+conformance" silently degrades into "governed by whichever parts someone remembered to
+test."
+
+So conformance mode needs a **second gate beyond the conformance tests themselves**: a
+*coverage check* that fails the build when a model element declared as conformed (an
+operation, a contract surface) has no test pinning it. The cheap, robust form is to tag
+each conformance test with the model coordinate it pins, then assert — statically, so the
+gate does not depend on load order — that every conformed coordinate in the model appears
+in some test's tag. The coverage gate and the two properties above compose: coverage
+ensures a test *exists* for each element; independent provenance and bidirectionality
+ensure each such test actually *bites*.
 
 ---
 
@@ -1169,6 +1248,10 @@ transitions {
 - Generated code is the ONLY implementation (no parallel hand-written version)
 - CI validates the model parses and generates successfully
 - Runtime uses generated classes directly
+- The one principled exception is the bootstrap substrate that derivation itself runs on
+  (§3.5): it is hand-written, but not a *parallel* version — it is pinned to its model by
+  a **conformance test** that fails the build on drift. Governance by conformance, not a
+  licence to fork the implementation.
 
 ### 10.4 Over-Generation
 
