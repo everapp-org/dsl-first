@@ -1171,6 +1171,91 @@ transitions {
 - CI validates the model parses and generates successfully
 - Runtime uses generated classes directly
 
+#### 10.3.1 The Silent-Skip Trap in Data-Hosted Bindings
+
+In a **grammar-hosted** binding (Java, TypeScript), the compiler enforces the
+contract between model and code: if a generated interface references a handler
+that doesn't exist, compilation fails. Drift is **structurally impossible**
+because the build breaks.
+
+In a **data-hosted** binding (Clojure, EDN + interpretation), there is no
+compile step. The interpreter resolves model pointers (e.g. `:handled-by
+:agent.run/on-prompt`) at runtime via `requiring-resolve`. If the handler var
+doesn't exist, the resolve returns `nil` and the interpreter's `when-let`
+**silently skips** the registration — no error, no log, no signal. The system
+boots appearing healthy, but the handler is unwired. This is the **silent-skip
+trap**: drift that should be a compile error becomes a three-day debugging
+session.
+
+A validation script (`validate.clj`) that checks pointer resolution outside
+the application process helps, but it has two gaps:
+
+1. **Coverage is manual.** Each new pointer type (`:stream-fn-impl`, FSM
+   guards/actions, saga step commands) requires a hand-written check in the
+   validator. Missing a type means the drift goes undetected.
+2. **Timing.** The validator runs before the application starts. If a handler
+   is deleted between validation and boot, the validator can't catch it.
+
+#### 10.3.2 The Thin Contract Layer Pattern
+
+**Pattern**: Generate a single namespace from the DSL models that contains one
+`delay`-wrapped `requiring-resolve` per pointer and a `check-all` function that
+dereferences every delay and throws on `nil`. Load this namespace at boot time,
+right after the interpreter installs all contexts.
+
+```clojure
+;; Generated from DSL manifests — do not edit by hand.
+(ns contracts
+  (:require [clojure.core :refer [requiring-resolve]]))
+
+(def ^:private agent-handlers
+  {:agent/on-prompt
+   (delay (try (requiring-resolve 'agent.run/on-prompt) (catch Throwable _ nil)))
+   :agent/on-steer
+   (delay (try (requiring-resolve 'agent.run/on-steer) (catch Throwable _ nil)))})
+
+(defn- check-map [label m]
+  (doseq [[kw d] m]
+    (when-not @d
+      (throw (ex-info (str "DSL contract: " label " " kw " does not resolve")
+                      {:pointer kw :kind label})))))
+
+(defn check-all [registered-commands]
+  (check-map "handler" agent-handlers)
+  ;; ... one per context group ...
+  :ok)
+```
+
+**Properties**:
+
+- **Generated, not hand-written.** The generator reads the same DSL manifests
+  as the interpreter, extracting every pointer type mechanically. New pointer
+  types are covered automatically — the generator just extracts them.
+- **Committed and diffed.** A stale contract file in git is a visible signal.
+  The pre-commit hook regenerates and fails if the committed file differs.
+- **Loaded at boot time.** `check-all` runs after the interpreter installs all
+  contexts. A stale pointer is a **loud boot failure**, not a silent skip.
+- **No handler bodies generated.** This is not code generation of behavior —
+  it's verification of pointer integrity. The interpreter still wires handlers
+  at runtime; the contract layer just confirms the pointers resolve.
+
+**What it catches** that a validation script misses:
+
+- `:handled-by` pointers on commands, queries, subscribers, middleware
+- `:stream-fn-impl` pointers on catalogue entries (e.g. provider API families)
+- State-machine guard/action symbols in `:handlers` namespaces
+- Saga step commands that must be registered on the bus
+
+**What it does NOT check** (by design):
+
+- Payload shape conformance (a handler accepting the wrong shape is still a
+  runtime malli error, not a contract-layer failure)
+- Behavioral correctness (the handler exists, but does it do the right thing?)
+
+This pattern restores the "drift is structurally impossible" guarantee from
+grammar-hosted bindings to data-hosted bindings, adapted to a dynamic
+language's load-time semantics instead of compile-time.
+
 ### 10.4 Over-Generation
 
 **Problem**: Generating code that's simpler to write by hand.
