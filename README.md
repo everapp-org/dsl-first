@@ -179,7 +179,8 @@ dsl-first/
     ├── java-antlr-minimal/         # Java: the model is a text file; the code is generated from it
     ├── clojure-edn-minimal/        # Clojure: the model is plain data; nothing is generated
     ├── clojure-edn-contexts/       # Clojure advanced: multi-level interpreters, composition, status-gated wiring
-    └── python-toml-gates/          # Python: the model is TOML; ten declared gates, each proven able to fail
+    ├── python-toml-gates/          # Python: the model is TOML; ten declared gates, each proven able to fail
+    └── java-yaml-gates/            # Java: the same application and gates; the model is YAML, wired by reflection
 ```
 
 ## Documentation Navigation
@@ -191,7 +192,7 @@ dsl-first/
 * [DSL-First Methodology Guide](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The instructions the assistant follows from start to finish: checking your input, interviewing you when needed, writing the model, and producing the code, tests, and docs from it.
 * [DSL-First QA & Test Automation Guide](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) — How to apply the three DSL languages to QA work: extracting testable specifications from existing code, generating test suites (Gherkin, step definitions, data factories), and producing living documentation with live verdicts. Covers both grammar-hosted (Java) and data-hosted (Clojure) bindings.
 
-* [DSL-First Gates Guide](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) — How the rules that hold a model and its code together are themselves declared, introduced without breaking the build (ratchets), and proven able to fail (planted failures). Also: declaring the joins between operations, declaring what is not built, and a vocabulary that the build enforces. Language-neutral, with Python and Java bindings.
+* [DSL-First Gates Guide](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) — How the rules that hold a model and its code together are themselves declared, introduced without breaking the build (ratchets), and proven able to fail (planted failures). Also: declaring the joins between operations, declaring what is not built, and a vocabulary that the build enforces. Language-neutral, with Python and Java bindings, each with a runnable example.
 
 ### Examples (`examples/`) — from minimal to advanced, all runnable
 
@@ -200,6 +201,7 @@ dsl-first/
 * [`clojure-edn-contexts`](examples/clojure-edn-contexts/README.md) — **Clojure advanced**: multi-level interpretation, `requiring-resolve` dispatch, status-gated wiring, and composition/leasing. Demonstrates techniques extracted from a production codebase, with zero project-specific dependencies.
 
 * [`python-toml-gates`](examples/python-toml-gates/README.md) — **Python**: the model is TOML read with the standard library; an interpreter wires the application from it. Ten gates are declared as data, and a harness puts 14 defects back to prove that each gate fires. No dependency to install.
+* [`java-yaml-gates`](examples/java-yaml-gates/README.md) — **Java, data-hosted**: the same application, model and ten gates as the Python example. The model is YAML, an interpreter wires it by reflection, and `mvn verify` runs the gates and 15 planted failures. One run-time dependency (SnakeYAML).
 
 ### In-Depth Docs (`in_depth_docs/`) — for those peeking into internals
 * [The Manifesto](in_depth_docs/manifesto.md) — Why this methodology exists: the problem of code, tests, and docs drifting apart, and the belief behind the fix.
@@ -213,7 +215,7 @@ dsl-first/
 
 We are looking for implementers to contribute guides and examples for:
 - Python, grammar-hosted (`Lark`, `astor`) — a data-hosted Python example exists: [`python-toml-gates`](examples/python-toml-gates/README.md)
-- Java, data-hosted with gates (YAML/JSON + reflection + ArchUnit) — see the bindings table of the [Gates Guide](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) §13
+- Java, data-hosted with Jackson, ArchUnit or Gradle — [`java-yaml-gates`](examples/java-yaml-gates/README.md) uses SnakeYAML, the parser of the JDK compiler and Maven; the alternatives in the bindings table of the [Gates Guide](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) §13 are not run
 - TypeScript (`ts-morph`)
 - Go (`jennifer`)
 - C# (`Roslyn`)

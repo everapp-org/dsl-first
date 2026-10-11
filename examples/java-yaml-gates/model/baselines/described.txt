@@ -1,0 +1,4 @@
+# The debt of the gate `described`, frozen on the day the gate arrived.
+# THIS FILE ONLY SHRINKS. Write the description, then delete the line.
+# A line that no longer fails makes the gate red, so a paid debt must leave.
+audit.record

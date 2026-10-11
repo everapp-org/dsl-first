@@ -5,7 +5,7 @@
 **Version**: 1.0
 **Who reads this document**: the **AI coding assistant**. It follows this guide when it adds a rule to a project, and when it adds a model that existing rules must cover. You can read it too.
 **Depends on**: the [Methodology Guide](DSL_FIRST_METHODOLOGY_GUIDE.md) §3.5, "Two Modes of Governance: Derivation and Conformance". That section says *why* conformance exists. This guide says *how to run it for years*.
-**Runnable companion**: [`examples/python-toml-gates`](../examples/python-toml-gates/README.md) implements every rule below in about 900 lines of Python with no dependency. Every claim of the form "the build fails when…" can be watched there.
+**Runnable companion**: [`examples/python-toml-gates`](../examples/python-toml-gates/README.md) implements every rule below in about 900 lines of Python with no dependency. Every claim of the form "the build fails when…" can be watched there. [`examples/java-yaml-gates`](../examples/java-yaml-gates/README.md) is the same application, model and gates in Java.
 
 > **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.
 > **License**: Apache 2.0 — see [LICENSE](../LICENSE)
@@ -322,21 +322,21 @@ Nothing in this guide needs a particular language. Each technique needs one capa
 
 | technique | needs | Python | Java |
 |---|---|---|---|
-| model as data | a data format with a standard reader | TOML (`tomllib`, standard library from 3.11), JSON, YAML | YAML or JSON with Jackson; or records and annotations as an internal DSL |
-| a pointer resolves | name → callable at run time | `importlib.import_module` + `getattr` | `Class.forName` + `getMethod`; or `ServiceLoader` |
-| one registration site | a scan of source for a call | `ast.walk` over `ast.Call` nodes | an ArchUnit rule; or an annotation processor |
+| model as data | a data format with a standard reader | TOML (`tomllib`, standard library from 3.11), JSON, YAML | YAML with SnakeYAML, or JSON or YAML with Jackson; or records and annotations as an internal DSL |
+| a pointer resolves | name → callable at run time | `importlib.import_module` + `getattr` | `Class.forName` + `getMethod` with the parameter types, so the shape is checked too; or `ServiceLoader` |
+| one registration site | a scan of source for a call | `ast.walk` over `ast.Call` nodes | the parser of the JDK compiler (`com.sun.source`), with no extra library; or an ArchUnit rule |
 | wiring types agree | both ends declared in the model | plain comparison of the declared types | the same; or generate typed adapters and let `javac` refuse |
-| derived files are fresh | deterministic generation | regenerate in memory, compare | regenerate in `generate-sources`, then `git diff --exit-code` |
-| planted failures | copy a tree, edit a file, run a process | `shutil.copytree` + `subprocess` | the same script; or JUnit with a `@TempDir` copy |
-| runs on every change | a build hook | pre-commit + CI: `python3 tools/validate.py` | `mvn verify` (exec plugin) or a Gradle `check` task |
+| derived files are fresh | deterministic generation | regenerate in memory, compare | regenerate in memory, compare; or regenerate in `generate-sources`, then `git diff --exit-code` |
+| planted failures | copy a tree, edit a file, run a process | `shutil.copytree` + `subprocess` | a copy in a temporary directory and the gates in the same JVM; or the Python script |
+| runs on every change | a build hook | pre-commit + CI: `python3 tools/validate.py` | `mvn verify` (the tests run the gates) or a Gradle `check` task |
 
 Two notes.
 
-**Data-hosted is not only for Lisps.** The Methodology Guide §2.5 presents the data-hosted binding with Clojure. Any language that can read a data file and resolve a name to a callable can host one. Python does it with the standard library, as the companion example shows. What a Lisp adds is that the model and the code share one syntax. That is a convenience, not a requirement.
+**Data-hosted is not only for Lisps.** The Methodology Guide §2.5 presents the data-hosted binding with Clojure. Any language that can read a data file and resolve a name to a callable can host one. Python does it with the standard library, and Java does it with one YAML reader and reflection, as the two companion examples show. What a Lisp adds is that the model and the code share one syntax. That is a convenience, not a requirement.
 
 **The gates can be in a different language from the application.** A gate reads files. The declared model, the baseline files and the planted failures are language-neutral data. A Java application can keep its gates in a Python script. The gate then cannot share a bug with the code it checks.
 
-A runnable Java example of these gates is not in this repository yet. The Python example is the reference. The existing [`java-antlr-minimal`](../examples/java-antlr-minimal/README.md) example shows the *derivation* side for Java, and its `verify-generated-preview.sh` is a `docs-fresh` gate in shell.
+Both columns are run, not only listed. [`python-toml-gates`](../examples/python-toml-gates/README.md) is the reference, and [`java-yaml-gates`](../examples/java-yaml-gates/README.md) is the same application, model and gates in Java. In each Java cell, the first mechanism is the one that the example runs. A mechanism after "or" is an alternative that this repository does not run. The existing [`java-antlr-minimal`](../examples/java-antlr-minimal/README.md) example shows the *derivation* side for Java in the grammar-hosted binding, and its `verify-generated-preview.sh` is a `docs-fresh` gate in shell.
 
 ---
 
@@ -385,7 +385,7 @@ What is proven there, and what is newer:
 | the vocabulary gate and the derived glossary (§9) | in use |
 | a domain-level model above the technical one (§10) | in use |
 | grammar as data (§11) | in use for one model family |
-| **every gate declared in one file, with a population floor and a ceiling on every report (§4, §5, §6.2)** | **designed there and not built yet. The companion example in this repository is its first implementation** |
+| **every gate declared in one file, with a population floor and a ceiling on every report (§4, §5, §6.2)** | **designed there and not built yet. The two companion examples in this repository are its first implementations** |
 
 That last row is stated plainly because this project's rule is honest claims: the single gate declaration is the youngest idea here. It is included because the defects it answers are measured, and because the example shows that it costs very little.
 

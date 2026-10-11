@@ -238,7 +238,7 @@ DSL-First is paradigm-agnostic. The metamodel — `Domain / Level / Model / Stat
 | Parse step | lexer + parser → AST | none (`read-string`) |
 | Derivation | generator → source text | interpret, or macro-expand |
 
-The choice is mostly dictated by your host language, not by taste. One correction to a common reading of the table: **data-hosted is not only for Lisps.** Any language that can read a data file and resolve a name to a callable at run time can host a data-hosted model — Python with TOML or JSON and `importlib`, Java with YAML or JSON and reflection. What a Lisp adds is that the model and the code share one syntax, which is a convenience and not a requirement. → Worked example: [Python (TOML, standard library only)](../examples/python-toml-gates/README.md). **The model, the single-source-of-truth discipline, and the whole methodology apply to both** — only "how derivation works" differs. The rest of this guide is written for both bindings: where a section is necessarily concrete it shows the grammar-hosted form *and* its data-hosted counterpart (e.g. §2.2 pipelines, §5.3.4, §8.4), so neither is the default.
+The choice is mostly dictated by your host language, not by taste. One correction to a common reading of the table: **data-hosted is not only for Lisps.** Any language that can read a data file and resolve a name to a callable at run time can host a data-hosted model — Python with TOML or JSON and `importlib`, Java with YAML or JSON and reflection. What a Lisp adds is that the model and the code share one syntax, which is a convenience and not a requirement. → Worked examples: [Python (TOML, standard library only)](../examples/python-toml-gates/README.md) and [Java (YAML and reflection)](../examples/java-yaml-gates/README.md). **The model, the single-source-of-truth discipline, and the whole methodology apply to both** — only "how derivation works" differs. The rest of this guide is written for both bindings: where a section is necessarily concrete it shows the grammar-hosted form *and* its data-hosted counterpart (e.g. §2.2 pipelines, §5.3.4, §8.4), so neither is the default.
 
 ---
 
@@ -539,8 +539,9 @@ The rules it adds, in one line each:
 | 7 | **Statements, not prose.** A claim that carries weight is a checkable statement or a typed field; the description only explains. | a description that was false |
 | 8 | **The vocabulary is a model.** One thing, one name; the build refuses a refused synonym used as an identifier, and the glossary is derived. | two names for one thing |
 
-Every rule is implemented in the runnable example
-[`python-toml-gates`](../examples/python-toml-gates/README.md).
+Every rule is implemented in two runnable examples:
+[`python-toml-gates`](../examples/python-toml-gates/README.md) and
+[`java-yaml-gates`](../examples/java-yaml-gates/README.md).
 
 ---
 

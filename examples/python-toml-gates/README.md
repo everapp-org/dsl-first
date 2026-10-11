@@ -157,3 +157,5 @@ This example uses both modes of the [Methodology Guide](../../dsl_first_methodol
 Copy `tools/validate.py`, `tools/verify_gates.py` and `model/gates.toml`, then replace the gate functions with your own rules. Keep the runner, the three kinds, the floor and the harness as they are. Call both tools from your pre-commit hook and from CI.
 
 The gates read files, so they do not need to be in the language of the application. A Java or TypeScript project can use this runner unchanged and write only the gate functions.
+
+For a project that wants its gates in Java, [`java-yaml-gates`](../java-yaml-gates/README.md) is this example in Java: the same application, model and gates.

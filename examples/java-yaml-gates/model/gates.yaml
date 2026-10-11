@@ -1,0 +1,144 @@
+# Every gate of this project, declared.
+#
+# A gate is a rule that a program checks. The class tools/Gates.java implements
+# each gate named here, and the gate `gates-declared` fails the build when the
+# two lists differ. docs/generated/gates.md is derived from this file, so a
+# person can read what the build refuses with no read of the Java code.
+#
+#   refuses         one sentence: what the gate refuses
+#   kind            hard | ratchet | report
+#   baseline        ratchet only: the file of frozen debt. It only shrinks
+#   ceiling         report only: the count must not go above it
+#   reads_at_least  the population the gate must read. Less is a failure
+#   planted         a defect to put back. tools/VerifyGates.java applies each
+#                   one to a copy of the project and requires a failure that
+#                   holds the text of `expect`
+
+gates:
+  handler-resolves:
+    refuses: An operation that is built and whose handler is not a real method of the correct shape.
+    kind: hard
+    reads_at_least: 6
+    planted:
+      # The name is wrong.
+      - file: model/contexts/tasks.yaml
+        find: "org.everapp.taskapp.tasks.Handlers#complete"
+        replace: "org.everapp.taskapp.tasks.Handlers#compleet"
+        expect: "tasks.complete: handled_by 'org.everapp.taskapp.tasks.Handlers#compleet' is not a public static method"
+      # The name is correct and the shape is wrong: a middleware as a query.
+      - file: model/contexts/tasks.yaml
+        find: "org.everapp.taskapp.tasks.Queries#listAll"
+        replace: "org.everapp.taskapp.audit.Middleware#record"
+        expect: "tasks.list: handled_by 'org.everapp.taskapp.audit.Middleware#record' is not a public static method that takes (Map, Map, Emit)"
+
+  single-registration-site:
+    refuses: A call that registers a handler, a subscriber or a middleware outside the interpreter.
+    kind: hard
+    reads_at_least: 9
+    planted:
+      - file: src/main/java/org/everapp/taskapp/tasks/Queries.java
+        find: "    public static Object listAll("
+        replace: "    public static void sneak(org.everapp.taskapp.Bus bus) {\n        bus.registerHandler(\"tasks.sneak\", null);\n    }\n\n    public static Object listAll("
+        expect: "src/main/java/org/everapp/taskapp/tasks/Queries.java:13 calls registerHandler"
+
+  event-declared:
+    refuses: An event that an operation emits or hears and that no context declares.
+    kind: hard
+    reads_at_least: 3
+    planted:
+      - file: model/contexts/tasks.yaml
+        find: "emits: [task.completed]"
+        replace: "emits: [task.done]"
+        expect: "tasks.complete names the event 'task.done'"
+
+  wiring-typed:
+    refuses: A wiring whose two ends are not both declared, or do not agree on the type.
+    kind: hard
+    reads_at_least: 1
+    planted:
+      # The defect this gate exists for: one side changes its type and the other does not.
+      - file: model/contexts/tasks.yaml
+        find: "result_item: {task_id: int, title: str, done: bool}"
+        replace: "result_item: {task_id: str, title: str, done: bool}"
+        expect: "tasks.list.task_id is str, and tasks.complete.task_id is int"
+      # The gate must not go green because its population went away.
+      - file: model/app.yaml
+        find: "wirings:"
+        replace: "removed:"
+        expect: "read 0, and it must read at least 1"
+
+  not-built-stated:
+    refuses: A status outside the closed set, or a not-built operation with no reason.
+    kind: hard
+    reads_at_least: 7
+    planted:
+      - file: model/contexts/tasks.yaml
+        find: "    reason: No decision yet on how long an archived task is kept.\n"
+        replace: ""
+        expect: "tasks.archive: a not-built operation gives a reason"
+
+  vocabulary:
+    refuses: A refused word used as an identifier in a model. The message names the approved word.
+    kind: hard
+    reads_at_least: 20
+    planted:
+      - file: model/app.yaml
+        find: "name: complete-from-list"
+        replace: "name: finish-from-list"
+        expect: "the word 'finish' is refused. Write 'complete'"
+
+  described:
+    refuses: An operation or an event with no description.
+    kind: ratchet
+    baseline: model/baselines/described.txt
+    reads_at_least: 9
+    planted:
+      # New debt is refused.
+      - file: model/contexts/tasks.yaml
+        find: "    description: Mark one task as done.\n"
+        replace: ""
+        expect: "tasks.complete has no description. This is new"
+      # Paid debt must leave the baseline.
+      - file: model/contexts/audit.yaml
+        find: "  record:\n"
+        replace: "  record:\n    description: Record the command.\n"
+        expect: "'audit.record' is in model/baselines/described.txt and no longer fails"
+
+  not-built-count:
+    refuses: More operations that are declared and not built than the ceiling allows.
+    kind: report
+    ceiling: 1
+    reads_at_least: 7
+    planted:
+      - file: model/contexts/tasks.yaml
+        find: "queries:\n  list:"
+        replace: "  snooze:\n    description: Stop a task for a time.\n    status: not-built\n    reason: Not decided.\n    payload: {task_id: int}\n\nqueries:\n  list:"
+        expect: "count 2 is above the ceiling 1"
+
+  docs-fresh:
+    refuses: A derived document that differs from what the model gives now.
+    kind: hard
+    reads_at_least: 3
+    planted:
+      - file: model/contexts/tasks.yaml
+        find: "description: List every task."
+        replace: "description: List each task."
+        expect: "docs/generated/reference.md differs from the model"
+
+  gates-declared:
+    refuses: A gate that is implemented and not declared, declared and not implemented, or declared in part.
+    kind: hard
+    reads_at_least: 10
+    planted:
+      - file: model/gates.yaml
+        find: "  event-declared:\n"
+        replace: "  event-declard:\n"
+        expect: "gate 'event-declard' is declared in model/gates.yaml and no method implements it"
+      - file: model/gates.yaml
+        find: "  vocabulary:\n"
+        replace: "  vocabulary-two:\n"
+        expect: "gate 'vocabulary' is implemented and model/gates.yaml does not declare it"
+      - file: model/gates.yaml
+        find: "    ceiling: 1\n"
+        replace: ""
+        expect: "a report with no ceiling can grow with no failure"
