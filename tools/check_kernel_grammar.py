@@ -96,6 +96,8 @@ INVALID = {
         'domain D { level l { service S { operation a status planned } } }',
     "a reason with no status":
         'domain D { level l { service S { operation a reason "why" } } }',
+    "a status before returns":
+        'domain D { level l { service S { operation a status ready returns (x: Int) } } }',
     "returns with no fields":
         'domain D { level l { service S { operation a returns () } } }',
     "a wiring endpoint of two parts":
@@ -125,17 +127,22 @@ WRAP = {
     "service": "domain D {{ level l {{ {} }} }}",
     "transitions": "domain D {{ level l {{ model M {{ {} }} }} }}",
     "constraints": "domain D {{ {} }}",
+    "wiring": "domain D {{ {} }}",
 }
 
 
 def models_in(text: str) -> dict:
     """Every example of the specification. A fragment (a model, a service, ...)
     is put inside the smallest domain that can hold it. A block that holds
-    `...` is a sketch, not a model, and is not read."""
+    `...` is a sketch, not a model, and is not read. A block that starts with a
+    word WRAP does not know is a failure, so no example is left out silently."""
     found = {}
     for number, block in enumerate(re.findall(r"```kotlin\n(.*?)```", text, re.S), 1):
         first = block.split(None, 1)[0]
-        if "..." in block or first not in WRAP:
+        if "..." in block:
+            continue
+        if first not in WRAP:
+            found[f"specification example {number} ({first})"] = None
             continue
         found[f"specification example {number} ({first})"] = WRAP[first].format(block)
     return found
@@ -150,6 +157,10 @@ def main() -> int:
         return 1
     bad = 0
     for name, model in {**from_spec, **VALID}.items():
+        if model is None:
+            bad += 1
+            print(f"FAIL     {name} starts with a word that WRAP does not know. Add it to WRAP.")
+            continue
         try:
             parser.parse(model)
             print(f"parses   {name}")

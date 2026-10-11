@@ -241,7 +241,7 @@ We are looking for implementers to contribute guides and examples for:
 - Go (`jennifer`)
 - C# (`Roslyn`)
 
-If you change `KERNEL_DSL.md`, run `python3 tools/check_kernel_grammar.py` (it needs `pip install lark`). It builds a parser from the grammar in the specification and reads every example of the specification. Nobody needs this tool to *use* the methodology.
+If you change `KERNEL_DSL.md`, run `python3 tools/check_kernel_grammar.py` (it needs `pip install lark`). It builds a parser from the grammar in the specification and reads every example of the specification. The workflow `.github/workflows/check.yml` runs it on each pull request. Nobody needs this tool to *use* the methodology.
 
 See an issue or want to contribute? Open a PR!
 

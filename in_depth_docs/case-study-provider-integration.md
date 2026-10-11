@@ -4,7 +4,7 @@
 > **License**: Apache 2.0 — see [LICENSE](../LICENSE)
 
 **Type:** Case study — a worked example of the *"when do I add a grammar?"* decision (see Methodology Guide §2.4)  
-**Uses:** [Kernel DSL v1.1](../dsl_first_methodology/KERNEL_DSL.md) — **no new grammar**
+**Uses:** [Kernel DSL](../dsl_first_methodology/KERNEL_DSL.md), the elements of v1.1 only. They are valid in v1.2 with the same meaning — **no new grammar**
 
 ---
 

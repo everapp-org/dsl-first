@@ -177,6 +177,8 @@ service NoteService {
 
 Both additions are optional. An operation with no types and no `returns` is valid, as in v1.1. But an operation with no declared result cannot be the source of a wiring (§3.8), because there is nothing to compare.
 
+The order is fixed: the parameters, then `returns`, then `status` (§3.7). `operation a status ready returns (x: Int)` is not valid.
+
 A type in a parameter list is one word with no space and no comma (`NoteId`, `List<Note>`, `String[]`). Give a longer type a name, and use the name.
 
 ### 3.6 Constraints
@@ -197,7 +199,7 @@ An operation has a **status**. The set is closed.
 | status | class | meaning |
 |---|---|---|
 | `ready` | built | The operation is implemented. This is the default when no status is written. |
-| `in-progress` | built | An implementation exists and is not complete. The operation is wired. |
+| `in-progress` | built | An implementation exists and is not complete. A caller can call the operation. |
 | `not-built` | not built | The operation is declared, and nothing implements it. A `reason` is required. |
 
 ```kotlin
