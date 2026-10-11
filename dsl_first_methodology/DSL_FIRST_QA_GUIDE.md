@@ -2,19 +2,46 @@
 
 > **A guide for QA engineers and AI coding assistants: how to apply the DSL-First language family to test automation — extracting testable specifications, generating test suites, and producing living documentation.**
 
-**Version**: 2.0  
-**Date**: June 2026  
+**Version**: 2.1  
+**Date**: October 2026  
 **Target Audience**: QA Engineers, Test Automation Engineers, AI Coding Assistants (Claude Code, Cursor, Windsurf, etc.)  
-**Prerequisites**: Basic understanding of BDD, state machines, and the system under test. Familiarity with the [DSL-First Methodology Guide](DSL_FIRST_METHODOLOGY_GUIDE.md) and its three languages: [Kernel DSL](KERNEL_DSL.md), [Behavior DSL](BEHAVIOR_DSL.md), and [Verification DSL](VERIFICATION_DSL.md).
+**Prerequisites**: **none.** Access to the system under test is enough. The TL;DR below defines the few terms this guide uses. The three language specifications ([Kernel DSL](KERNEL_DSL.md), [Behavior DSL](BEHAVIOR_DSL.md), [Verification DSL](VERIFICATION_DSL.md)) are reference for your assistant, not a reading list for you.
 
 > **What's new in v2.0:** This guide no longer invents a separate "Test DSL" grammar. Instead it shows how to apply the three existing DSL-First languages to QA work: the **Kernel DSL** models state machines for transition coverage, the **Behavior DSL** models procedures for workflow testing, and the **Verification DSL** produces checkable claims and living documentation. Both bindings are covered: grammar-hosted (Java/ANTLR) and data-hosted (Clojure/EDN).
+
+> **What's new in v2.1:** §13, gates for the test suite: how to know that a green suite can fail. It also shows what the Kernel DSL v1.2 gives to QA (a status on an operation, and wirings). The prerequisites are removed, and a TL;DR is added.
+
+---
+
+## TL;DR — pick one use case and apply it
+
+**Prerequisites: none.** Each row can be done alone. Give this file to your AI coding assistant with the prompt of the row. You do not need to read the other sections first.
+
+| you want to | say to the assistant | section it uses |
+|---|---|---|
+| get a test model out of existing code | *"Use section 3 of DSL_FIRST_QA_GUIDE.md. Analyse this entity and write the behavior notes: states, transitions, guards, events, rules."* | §3 |
+| turn the notes into a model | *"Use section 4. Write the Kernel DSL state machine and the Verification DSL checks for these notes."* | §4 |
+| generate Gherkin and step definitions | *"Use section 5. Generate the feature files and the step definitions from this model."* | §5 |
+| get a coverage matrix and test data | *"Use section 6. Generate the test matrix and the data factories from this model."* | §6 |
+| get documentation with PASS/FAIL verdicts | *"Use section 7. Generate the living documentation from the last run."* | §7 |
+| know that a green suite can fail | *"Use section 13. Make this test suite able to fail."* (the full prompt is in §13.6) | §13 |
+| do all of it for one entity in a few hours | follow the Quick Start template | §12.1 |
+
+**The terms, in one minute.**
+
+- **Model**: a small file that states what the system manages and what it must do. The tests are generated from it.
+- **State machine**: the states a thing can be in (an order is *placed*, *paid*, *shipped*) and the allowed changes between them (a **transition**). A **guard** is the condition of a transition.
+- **Kernel DSL**: the language for the state machine and the operations. **Behavior DSL**: the language for step-by-step procedures. **Verification DSL**: the language for claims that are checked against the running system.
+- **Gherkin**: test scenarios in `Given / When / Then` sentences. A **step definition** is the code behind one sentence.
+- **Living documentation**: prose in which each claim shows its present verdict.
+- **Gate**: a program that stops the build when a rule is broken.
 
 ---
 
 ## Table of Contents
 
 1. [Introduction](#1-introduction)
-2. [The QA Workflow](#2-the-qa-dsl-workflow)
+2. [The QA Workflow](#2-the-qa-workflow)
 3. [Phase 1: Discovery & Extraction](#3-phase-1-discovery--extraction)
 4. [Phase 2: Modeling with the DSL Family](#4-phase-2-modeling-with-the-dsl-family)
 5. [Phase 3: BDD/Gherkin Integration](#5-phase-3-bddgherkin-integration)
@@ -25,6 +52,7 @@
 10. [Process Improvements & Open Questions](#10-process-improvements--open-questions)
 11. [Tool Recommendations](#11-tool-recommendations)
 12. [Templates & Examples](#12-templates--examples)
+13. [Gates: Make the Test Suite Able to Fail](#13-gates-make-the-test-suite-able-to-fail)
 
 ---
 
@@ -758,6 +786,8 @@ public class OrderSteps {
 | **Invariant** | Kernel DSL `invariants` | Verify invariant after each operation |
 | **Business Rule** | Verification DSL checks | Rule trigger/not-trigger scenarios |
 | **Living Documentation** | Verification DSL prose layer | PASS/FAIL verdicts rendered in docs |
+| **Not built** | Kernel DSL `status not-built` (v1.2) | 1 per operation: the refusal, with its reason (§13.5) |
+| **Wiring** | Kernel DSL `wiring` (v1.2) | 1 integration test per wiring (§13.5) |
 
 ### 6.2 Test Matrix Generator
 
@@ -966,7 +996,7 @@ stateDiagram-v2
 
 ### 7.2 Coverage by DSL Concept
 
-Traditional coverage measures lines/branches. DSL-First QA measures coverage by Kernel DSL and Verification DSL concepts:
+Traditional coverage measures lines/branches. DSL-First QA measures coverage by Kernel DSL and Verification DSL concepts. A number in this report is not a rule until the build limits it: each `❌ (TODO)` row below belongs in a baseline file that only shrinks (§13.2).
 
 ```markdown
 ## DSL Concept Coverage Report
@@ -1546,6 +1576,13 @@ jobs:
         
       - name: Run Cucumber tests
         run: mvn test -Dcucumber.filter.tags="@generated"
+
+      # Section 13: the suite checks the system, and the gates check the suite.
+      - name: Run the gates (floors, ratchets, freshness)
+        run: ./scripts/run-gates.sh
+
+      - name: Prove that each gate can fail (planted failures)
+        run: ./scripts/verify-gates.sh
         
       - name: Generate living documentation
         run: ./scripts/generate-living-docs.sh
@@ -1564,6 +1601,177 @@ jobs:
 
 ---
 
+## 13. Gates: Make the Test Suite Able to Fail
+
+*New in v2.1. This section needs no other file.*
+
+### 13.1 The problem, and one word
+
+A generated test suite can be green and prove nothing. A **gate** is a small program that reads the suite, the model, or the report, and stops the build when a rule is broken. The suite checks the system. The gates check the suite.
+
+Each row below is a way a green suite gives a wrong answer, and the gate that makes it red.
+
+| the suite is green, and… | the gate | kind |
+|---|---|---|
+| the tag filter matched nothing, so **zero scenarios ran** | each feature runs at least its declared number of scenarios | hard, with a floor |
+| a generated test **cannot fail**: its expected value comes from the same model as the code | a planted failure: change the model or the system, and require a red suite (§13.4) | hard |
+| a coverage number is **printed and not limited** (the `❌ (TODO)` rows of §7.2) | the list of guards with no test is a baseline file that only shrinks | ratchet |
+| the list of **skipped or quarantined tests grows** | the same: a baseline file of known failures | ratchet |
+| the generated tests are **older than the model** | generate again in memory, and compare with the committed files | hard |
+| a scenario has a **step with no definition**, and the runner reports it as pending | run the suite in strict mode (pending is a failure) | hard |
+| an operation is **declared and not built**, and its test is skipped | a test that the system refuses the operation with its reason (§13.5) | hard |
+| two operations are correct alone, and **the join between them is wrong** | one integration test for each declared wiring (§13.5) | hard |
+
+### 13.2 Three kinds of gate
+
+- **hard** — one item is a failure. Use it for a rule that is clean today.
+- **ratchet** — for a rule that the project does not obey yet. The items that fail today go into a baseline file. A new item is a failure. An item of the baseline that no longer fails is *also* a failure, until someone deletes its line. So the file only shrinks, and a new rule is never red on its first day.
+- **report** — a count with a ceiling or a floor. A number that the build prints and does not limit is not a rule.
+
+A ratchet replaces three weak habits: a `@skip` tag that nobody removes, a `TODO` in a coverage table, and a threshold that is lowered when it hurts.
+
+```
+# qa/baselines/untested-guards.txt
+# THIS FILE ONLY SHRINKS. Write the test, then delete the line.
+Order.inventory.reserved=false
+Order.shippingLabel.generated=false
+```
+
+### 13.3 Declare the gates
+
+Write the gates down as data, in one file. A person can then read what the build refuses with no read of the scripts. A meta-gate compares this file with the gates that are implemented, in both directions.
+
+```yaml
+# qa/gates.yaml
+gates:
+  scenarios-ran:
+    refuses: A feature that ran fewer scenarios than its floor.
+    kind: hard
+    reads_at_least: 12            # features
+    planted:
+      - file: scripts/run-tests.sh
+        find: '@generated'
+        replace: '@genrated'
+        expect: "ran 0 scenarios, and it must run at least"
+
+  guard-coverage:
+    refuses: A guard that no test takes on both branches.
+    kind: ratchet
+    baseline: qa/baselines/untested-guards.txt
+    reads_at_least: 15            # guards
+    planted:
+      - file: models/order.dsl
+        find: "if payment.amount == total"
+        replace: "if payment.amount == total && currency.supported"
+        expect: "Order.currency.supported=false has no test. This is new"
+
+  quarantine:
+    refuses: A skipped test that is not in the baseline, or a baseline line whose test is correct again.
+    kind: ratchet
+    baseline: qa/baselines/quarantine.txt
+    reads_at_least: 1
+    planted:
+      - file: features/order_lifecycle.feature
+        find: "Scenario: Pay a placed order"
+        replace: "@skip\n  Scenario: Pay a placed order"
+        expect: "is skipped and is not in the baseline"
+```
+
+- `reads_at_least` is the **population floor**. A gate that reads nothing cannot fail. Without the floor, a renamed directory turns the gate green.
+- `planted` is the proof that the gate can fail (§13.4).
+
+### 13.4 Planted failures: watch each gate, and each test, fail
+
+A check that nobody has watched fail is not yet a rule. It can be green because it looks at nothing.
+
+**For a gate.** A harness copies the project, applies one `planted` edit, runs the gates on the copy, and requires a failure of that gate with the expected text. It does this for every planted edit.
+
+**For the generated tests.** The same idea, one level down. The model is the source of the tests, so a change of the system that the model forbids must turn a test red.
+
+| planted change in the system under test | the suite must fail in |
+|---|---|
+| remove one guard from a transition | the negative test of that guard |
+| let a forbidden transition through | the invalid-state test of that pair of states |
+| stop the emit of one event | the happy-path test of that transition |
+| change the type of one returned field | the integration test of each wiring that carries it |
+
+A planted change that leaves the suite green has found a test that cannot fail. Correct the generator, not the one test.
+
+Start with one planted change for each test category of §6.1.
+
+### 13.5 What the Kernel DSL v1.2 gives to QA
+
+Two model elements of the [Kernel DSL](KERNEL_DSL.md) v1.2 produce tests directly. You can use them from this section alone.
+
+**A status on an operation.** An operation is `ready`, `in-progress`, or `not-built` with a reason.
+
+```kotlin
+operation archiveOrder(order_id: OrderId)
+    status not-built reason "No decision yet on how long an archived order is kept."
+```
+
+Do not generate a skipped test for it. A skipped test is green for years. Generate this test:
+
+```gherkin
+Scenario: archiveOrder is declared and not built
+  When I call archiveOrder for an order
+  Then the system refuses the call
+  And the answer holds the reason "No decision yet on how long an archived order is kept."
+```
+
+On the day the operation is built, the status changes in the model, this scenario is no longer generated, and the normal tests of the operation are. Nobody must remember to remove a `@skip`.
+
+**A wiring.** A wiring declares that a value which one operation returns is what another operation receives.
+
+```kotlin
+wiring payFromList {
+    from OrderService.listOrders.order_id
+    to   OrderService.payOrder.order_id
+}
+```
+
+It gives two things. A static gate compares the two declared types and fails the build when they differ. And the generator writes one integration test:
+
+```gherkin
+Scenario: payFromList — a row of listOrders can be paid
+  Given an order in state "Placed"
+  When I take "order_id" from the first row of listOrders
+  And I call payOrder with that value
+  Then the call is accepted
+```
+
+This is the test that unit tests of the two operations cannot replace. Each operation is correct alone. The defect is in the join.
+
+Two rows join the table of §6.1:
+
+| Category | Source in DSL | Generated Tests |
+|----------|--------------|-----------------|
+| **Not built** | Kernel DSL `status not-built` | 1 per operation: the refusal, with its reason |
+| **Wiring** | Kernel DSL `wiring` | 1 integration test per wiring, and 1 static type comparison |
+
+### 13.6 Prompt template
+
+```
+Make this test suite able to fail. Use only section 13 of DSL_FIRST_QA_GUIDE.md.
+
+1. List every way this suite can be green and wrong, from the table of 13.1.
+   For each one, say if it can occur here, with the evidence.
+2. Declare one gate for each in qa/gates.yaml: refuses, kind, reads_at_least,
+   and one planted failure or more.
+3. For a rule that the project does not obey today, make a ratchet. Freeze the
+   present failures in a baseline file. Do not turn the build red.
+4. Write the harness that applies each planted failure to a copy of the
+   project. Run it. Show me each gate that did not fire.
+5. Apply one planted change of the system for each test category. Show me
+   each change that left the suite green.
+```
+
+### 13.7 What is run, and what is not
+
+The gates of this section are run in this repository on a **model**: [`examples/python-toml-gates`](../examples/python-toml-gates/README.md) and [`examples/java-yaml-gates`](../examples/java-yaml-gates/README.md) implement the three kinds, the floor, the declared gates and the harness. This repository has no example that applies them to a Cucumber suite. The gates of §13.3 and the Gherkin of §13.5 are designs, not measured results. For the rules in full, with the reasons, refer to the [Gates Guide](DSL_FIRST_GATES_GUIDE.md). You do not need it to apply this section.
+
+---
+
 ## Appendix A: Glossary
 
 | Term | Definition |
@@ -1579,6 +1787,11 @@ jobs:
 | **Living Documentation** | Prose rendered with live PASS/FAIL verdicts from Verification DSL checks |
 | **Step Definition** | Code that implements Gherkin steps |
 | **Test Factory** | Class that generates test data variations from DSL annotations |
+| **Gate** | A program that stops the build when a rule is broken (§13) |
+| **Ratchet** | A gate with a baseline file of present failures. The file only shrinks |
+| **Planted failure** | A defect that is put back on purpose, to prove that a gate or a test can fail |
+| **Not built** | A status of an operation that is declared and not implemented, with a reason (Kernel DSL v1.2) |
+| **Wiring** | A declared join: a value that one operation returns and another receives (Kernel DSL v1.2) |
 
 ---
 
@@ -1614,3 +1827,15 @@ jobs:
 - [ ] Test factories produce valid/invalid data
 - [ ] Coverage matrix is complete
 - [ ] No duplicate scenarios
+
+### Gates Checklist (§13)
+- [ ] Each feature has a floor on the number of scenarios that ran
+- [ ] The runner is in strict mode: a pending step is a failure
+- [ ] Each coverage number has a baseline file or a limit
+- [ ] Skipped and quarantined tests are in a baseline file that only shrinks
+- [ ] Generated tests are compared with the model on each build
+- [ ] Each `not-built` operation has a test of its refusal, and no skipped test
+- [ ] Each wiring has an integration test
+- [ ] Every gate is declared in one file, with a planted failure
+- [ ] The harness ran, and each gate fired
+- [ ] One planted change of the system for each test category turned the suite red

@@ -4,6 +4,8 @@ A runnable data-hosted pipeline in Java, with **one run-time dependency** (Snake
 
 This is the Java twin of [`python-toml-gates`](../python-toml-gates/README.md), and the companion of the [Gates Guide](../../dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md). The application, the model and the ten gates are the same. Only the carrier (YAML for TOML) and the host mechanisms differ.
 
+The `status`, `reason`, `result` and `wirings` keys of the model are the data-hosted form of the [Kernel DSL v1.2](../../dsl_first_methodology/KERNEL_DSL.md) elements for status and wiring (§3.7, §3.8, and the table in §4.1).
+
 ## Run it
 
 You need a JDK 17 or later, and Maven.
