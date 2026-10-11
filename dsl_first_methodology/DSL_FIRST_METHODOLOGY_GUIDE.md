@@ -2,10 +2,10 @@
 
 > **A methodology for building maintainable software: the domain is captured in a model, written using the small, domain-specific languages this methodology provides, and the code, tests, and documentation are all derived from that model.**
 
-**Version**: 1.0  
+**Version**: 1.1  
 **Who reads this document**: the **AI coding assistant** — this guide is the specification it follows to apply DSL-First. You can read it too, but you don't have to.  
 **Who the methodology is for**: developers at every level, from interns to architects.  
-**Prerequisites to use it**: **none.** You don't need to know how it works to get a working app out. Everything below is the internals — read it if you're curious, or just hand the three methodology files to your assistant and ask.
+**Prerequisites to use it**: **none.** You don't need to know how it works to get a working app out. Everything below is the internals — read it if you're curious, or just hand the methodology files to your assistant and ask.
 
 > **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.  
 > **License**: Apache 2.0 — see [LICENSE](LICENSE)
@@ -21,6 +21,8 @@
 3. [The Methodology](#3-the-methodology)
    - 3.1.1 [Phase 0 — The intake gate (auto-interview / question list)](#311-phase-0--the-intake-gate-the-assistants-job)
    - 3.1.2 [Closing the loop — derive, run the tests, fix at the source](#312-closing-the-loop--derive-run-the-tests-fix-at-the-source)
+   - 3.5 [Two Modes of Governance: Derivation and Conformance](#35-two-modes-of-governance-derivation-and-conformance)
+   - 3.6 [Gate Discipline: Keeping Conformance Honest](#36-gate-discipline-keeping-conformance-honest)
 4. [DSL Design Patterns](#4-dsl-design-patterns)
 5. [Deriving Artifacts](#5-deriving-artifacts)
 6. [Implementation Workflow](#6-implementation-workflow)
@@ -236,7 +238,7 @@ DSL-First is paradigm-agnostic. The metamodel — `Domain / Level / Model / Stat
 | Parse step | lexer + parser → AST | none (`read-string`) |
 | Derivation | generator → source text | interpret, or macro-expand |
 
-The choice is dictated by your host language, not by taste. **The model, the single-source-of-truth discipline, and the whole methodology apply to both** — only "how derivation works" differs. The rest of this guide is written for both bindings: where a section is necessarily concrete it shows the grammar-hosted form *and* its data-hosted counterpart (e.g. §2.2 pipelines, §5.3.4, §8.4), so neither is the default.
+The choice is mostly dictated by your host language, not by taste. One correction to a common reading of the table: **data-hosted is not only for Lisps.** Any language that can read a data file and resolve a name to a callable at run time can host a data-hosted model — Python with TOML or JSON and `importlib`, Java with YAML or JSON and reflection. What a Lisp adds is that the model and the code share one syntax, which is a convenience and not a requirement. → Worked examples: [Python (TOML, standard library only)](../examples/python-toml-gates/README.md) and [Java (YAML and reflection)](../examples/java-yaml-gates/README.md). **The model, the single-source-of-truth discipline, and the whole methodology apply to both** — only "how derivation works" differs. The rest of this guide is written for both bindings: where a section is necessarily concrete it shows the grammar-hosted form *and* its data-hosted counterpart (e.g. §2.2 pipelines, §5.3.4, §8.4), so neither is the default.
 
 ---
 
@@ -514,6 +516,32 @@ gate does not depend on load order — that every conformed coordinate in the mo
 in some test's tag. The coverage gate and the two properties above compose: coverage
 ensures a test *exists* for each element; independent provenance and bidirectionality
 ensure each such test actually *bites*.
+
+### 3.6 Gate Discipline: Keeping Conformance Honest
+
+§3.5 says why conformance exists and what makes one conformance test trustworthy. A
+project that applies it for months collects dozens of such checks — call each one a
+**gate** — and a second-order problem appears: gates that are green because they read
+an empty list, counts that are printed and never limited, rules that live in a checklist
+nobody runs. None of these is caught by the gates themselves.
+
+The full treatment is its own document, the **[Gates Guide](DSL_FIRST_GATES_GUIDE.md)**.
+The rules it adds, in one line each:
+
+| # | rule | the defect it answers |
+|---|------|-----------------------|
+| 1 | **A rule is a program, not a paragraph.** A convention arrives with its gate in the same change. | a checklist that was never run |
+| 2 | **Declare the edges, not only the nodes.** A provider declares what it returns; a wiring between two operations is a model element with a type check. | both ends were correct and the join was broken |
+| 3 | **A gate is a declaration**: what it refuses, its kind, its limit, the population it must read, a planted failure. A meta-gate compares declared gates with implemented gates, in both directions. | nobody can say what the build refuses |
+| 4 | **Three kinds: hard, ratchet, report.** A new rule in an old project arrives as a ratchet and is never red on arrival. A ratchet is two-sided, so its baseline only shrinks. A report has a ceiling. | a red gate that was disabled; a count that grew |
+| 5 | **A gate must be able to fail.** Each gate has a planted failure that a harness puts back, and a floor on how much it reads. | a check that reads nothing |
+| 6 | **Declare what is not built.** `not-built` is a status with a reason; the system answers with it, and a query lists it. | controls that do nothing over a green build |
+| 7 | **Statements, not prose.** A claim that carries weight is a checkable statement or a typed field; the description only explains. | a description that was false |
+| 8 | **The vocabulary is a model.** One thing, one name; the build refuses a refused synonym used as an identifier, and the glossary is derived. | two names for one thing |
+
+Every rule is implemented in two runnable examples:
+[`python-toml-gates`](../examples/python-toml-gates/README.md) and
+[`java-yaml-gates`](../examples/java-yaml-gates/README.md).
 
 ---
 
@@ -1278,6 +1306,46 @@ public class Order extends GeneratedEntityBase<OrderState> { ... }
 
 **Solution**: Generate standalone code with no special dependencies.
 
+### 10.6 The Gate That Cannot Fail
+
+**Problem**: A check is green because it looks at nothing. It iterates over a list that
+became empty after a refactor, or it compares two values that both come from the model,
+or its scan covers one file extension of two. It prints "0 violations" on every build.
+
+**Solution**: Give every gate a **planted failure** — put the defect back in a copy of the
+project and require a red build with a named message — and a **floor** on how many things
+it must read. See the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) §6.
+
+### 10.7 The Undeclared Seam
+
+**Problem**: Both ends of a join are modelled and tested, and the join is not. A query
+returns an `id` as a string; a command takes it as a UUID; a screen passes one to the
+other. Every test is green, because each test exercises one end.
+
+**Solution**: Declare what each provider returns, and declare the wiring between
+operations as a model element. A gate then compares the two types.
+See the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) §3.
+
+### 10.8 Prose as Substance
+
+**Problem**: The model's weight sits in `description` strings. A gate checks that each
+one exists; nothing can check that it is true. Rules live in a checklist, and promises
+that are not built live in comments.
+
+**Solution**: A claim that carries weight becomes a statement or a typed field. A rule
+becomes a program. Something promised and not built becomes a declared `not-built`
+status with a reason. See the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) §2, §7, §8.
+
+### 10.9 Red on Arrival
+
+**Problem**: A new rule is switched on in an existing project and finds 400 violations.
+The build is red on the first day, so the gate is disabled, or every commit skips all
+the gates to get past this one.
+
+**Solution**: Introduce the rule as a **two-sided ratchet**: freeze today's violations in
+a baseline file that only shrinks, and refuse new ones. Never skip the gates wholesale.
+See the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) §5.
+
 ---
 
 ## 11. Case Study: jCrew
@@ -1395,21 +1463,28 @@ jcrew/
 - [ ] Test the deriver
 - [ ] Wire into the build (grammar-hosted) or load at startup (data-hosted)
 - [ ] Document the model
+- [ ] Declare what each provider returns, and each wiring between operations
+- [ ] Declare what is promised and not built, with a reason
 
 **Ongoing:**
 - [ ] The model is the single source of truth
 - [ ] Derived artifacts are never manually edited
 - [ ] All changes flow through the model
 - [ ] Version the DSL for breaking changes
+- [ ] Every rule is a declared gate; a new rule in old code arrives as a ratchet
+- [ ] Every gate has a planted failure, and the harness that runs them is green
+- [ ] One thing has one name: the vocabulary is declared and the build reads it
+
+The last three items are the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) checklist in brief.
 
 ### 12.2 Technology Options
 
 | Language | Carrier + validation | Derivation |
 |----------|----------------------|------------|
-| Java | text DSL · ANTLR 4, JavaCC | JavaPoet, Roaster |
+| Java | text DSL · ANTLR 4, JavaCC — or YAML/JSON data · Jackson, records | JavaPoet, Roaster — or interpretation via reflection |
 | Kotlin | text DSL · ANTLR 4 | KotlinPoet |
 | TypeScript | text DSL · PEG.js, Chevrotain — or typed object literals · Zod | ts-morph, TS AST |
-| Python | text DSL · ANTLR 4, Lark | Jinja2, `ast` |
+| Python | text DSL · ANTLR 4, Lark — or TOML/JSON data · `tomllib`, dataclasses, pydantic | Jinja2, `ast` — or interpretation via `importlib` |
 | Go | text DSL · ANTLR 4, Participle | jennifer, text/template |
 | Rust | text DSL · pest, nom | `quote`, proc-macros |
 | C# | text DSL · ANTLR 4, Parlot | Roslyn, T4 |
@@ -1443,6 +1518,10 @@ jcrew/
 | **Semantic Model** | In-memory representation of the DSL's domain concepts | both |
 | **Meta-program** | A program that operates on other programs | both |
 | **Single Source of Truth** | One authoritative definition from which all artifacts are derived | both |
+| **Gate** | A program that reads the model, the code, or both, and stops the build when a rule is broken | both |
+| **Ratchet** | A gate over a rule the project does not meet yet: a baseline file freezes today's violations, new ones fail, and the baseline only shrinks | both |
+| **Planted failure** | A named defect put back into a copy of the project to prove that a gate fires | both |
+| **Wiring** | A declared edge of the model: a value one operation returns and another receives | both |
 
 ---
 
