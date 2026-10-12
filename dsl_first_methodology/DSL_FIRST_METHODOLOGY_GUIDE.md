@@ -2,13 +2,41 @@
 
 > **A methodology for building maintainable software: the domain is captured in a model, written using the small, domain-specific languages this methodology provides, and the code, tests, and documentation are all derived from that model.**
 
-**Version**: 1.1  
+**Version**: 1.2  
 **Who reads this document**: the **AI coding assistant** — this guide is the specification it follows to apply DSL-First. You can read it too, but you don't have to.  
 **Who the methodology is for**: developers at every level, from interns to architects.  
 **Prerequisites to use it**: **none.** You don't need to know how it works to get a working app out. Everything below is the internals — read it if you're curious, or just hand the methodology files to your assistant and ask.
 
 > **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.  
-> **License**: Apache 2.0 — see [LICENSE](LICENSE)
+> **License**: Apache 2.0 — see [LICENSE](../LICENSE)
+
+---
+
+## TL;DR — pick one use case and apply it
+
+**Prerequisites: none.** Each row can be done alone, with the files it names. You do not need to read this guide: your AI coding assistant does. Copy the files of the row into your project and say the sentence.
+
+| you want to | files the assistant needs | say to the assistant |
+|---|---|---|
+| build a new application from an idea | this guide + `KERNEL_DSL.md` | *"Apply the DSL-First methodology. Interview me first (Phase 0), write the model, then derive the code, the tests and the docs."* (§3.1, §3.1.1) |
+| get a readable model of existing code | `KERNEL_DSL.md` | *"Read this codebase and write the Kernel DSL model that it implements. List what you could not decide."* |
+| add one feature with no drift | this guide + `KERNEL_DSL.md` | *"Change the model first. Then derive again. Do not edit derived code."* (§3.2, §3.3) |
+| model a step-by-step procedure | `BEHAVIOR_DSL.md` | *"Write a Behavior DSL model of this procedure."* |
+| get documentation with PASS/FAIL verdicts | `VERIFICATION_DSL.md` | *"Write the checks for these criteria, and a page that links each claim to its check."* |
+| generate a test suite from a model | `DSL_FIRST_QA_GUIDE.md` | pick a row of the TL;DR of that guide |
+| keep the model and hand-written code in agreement | `DSL_FIRST_GATES_GUIDE.md` | pick a row of the TL;DR of that guide |
+| decide what to model and what to write by hand | this guide | read §3.4, which is two pages |
+| choose between a text DSL and a data model | this guide | read §2.5, which is one page |
+
+**The method in five lines.**
+
+1. The **model** is the one place where the application is defined. The assistant writes it. You review it.
+2. Code, tests and documentation are **derived** from the model by an ordinary program, the same way each time.
+3. What a model cannot express (the user interface, the body of a step, a connection to another system) is written **by hand**, and plugs into the derived part.
+4. Where hand-written code must agree with the model, a **gate** compares the two and stops the build.
+5. To change behavior, change the model, never the derived output.
+
+Each of the six methodology files has a TL;DR of its own, and each can be used alone.
 
 ---
 

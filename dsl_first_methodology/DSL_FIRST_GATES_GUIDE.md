@@ -2,13 +2,30 @@
 
 > **A model governs code only as far as a program checks it. This guide is about those programs: what a gate is, how to declare one, how to bring one into a project that is not clean yet, and how to know that a gate can fail.**
 
-**Version**: 1.0
+**Version**: 1.1
 **Who reads this document**: the **AI coding assistant**. It follows this guide when it adds a rule to a project, and when it adds a model that existing rules must cover. You can read it too.
-**Depends on**: the [Methodology Guide](DSL_FIRST_METHODOLOGY_GUIDE.md) §3.5, "Two Modes of Governance: Derivation and Conformance". That section says *why* conformance exists. This guide says *how to run it for years*.
+**Prerequisites**: **none.** The TL;DR below says what the guide needs you to know. The [Methodology Guide](DSL_FIRST_METHODOLOGY_GUIDE.md) §3.5 says *why* conformance exists. This guide says *how to run it for years*, and it can be applied to a project that uses no other part of the methodology.
 **Runnable companion**: [`examples/python-toml-gates`](../examples/python-toml-gates/README.md) implements every rule below in about 900 lines of Python with no dependency. Every claim of the form "the build fails when…" can be watched there. [`examples/java-yaml-gates`](../examples/java-yaml-gates/README.md) is the same application, model and gates in Java.
 
 > **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.
 > **License**: Apache 2.0 — see [LICENSE](../LICENSE)
+
+---
+
+## TL;DR — pick one use case and apply it
+
+**Prerequisites: none.** You need a project with a build, and one rule that you want the build to enforce. The project does not need a DSL-First model: a gate can read any file.
+
+**The idea in four lines.** A **gate** is a program that stops the build when a rule is broken. Declare every gate in one file. Bring a new rule into an old project as a **ratchet**, so the build is not red on the first day. Put a defect back on purpose (a **planted failure**) to prove that each gate can fail.
+
+| you want to | say to the assistant | sections it uses |
+|---|---|---|
+| add one rule to a project, and not break the build | *"Use sections 4 to 6 of DSL_FIRST_GATES_GUIDE.md. Add this rule as a ratchet, with a baseline file and a planted failure."* | §4, §5, §6 |
+| find the checks that are green and can never fail | *"Use section 6. For each check of this project, plant the defect it must find. Show me each check that stays green."* | §6 |
+| stop defects in the joins between operations | *"Use section 3. Declare the wirings of this model, and add the gate that compares the types of the two ends."* | §3 |
+| make visible what is promised and not built | *"Use section 7. Give each operation a status, and list the not-built ones with their reasons."* | §7 |
+| have one name for one thing | *"Use section 9. Write the vocabulary file, and add the gate that refuses a refused word."* | §9 |
+| start from code that runs | copy the gate runner of [`python-toml-gates`](../examples/python-toml-gates/README.md) or of [`java-yaml-gates`](../examples/java-yaml-gates/README.md), and replace the gate functions | §13 |
 
 ---
 
@@ -68,6 +85,8 @@ Consequences for the assistant:
 ---
 
 ## 3. Declare the edges, not only the nodes
+
+*In the Kernel DSL v1.2 this is the `wiring` element, with typed parameters and `returns` on an operation ([Kernel DSL](KERNEL_DSL.md) §3.5, §3.8). This section explains it in full, so you do not need that file.*
 
 A model usually lists **nodes**: commands, queries, events, entities, screens. It is easy to stop there. The defects then live in what joins the nodes.
 
@@ -214,6 +233,8 @@ A gate must not read what it checks from a file that the same build generated fr
 ---
 
 ## 7. Declare what is not built
+
+*In the Kernel DSL v1.2 this is `status not-built reason "..."` on an operation ([Kernel DSL](KERNEL_DSL.md) §3.7). This section explains it in full, so you do not need that file.*
 
 Intent and absence usually live in three places that no query reaches: a comment, a disabled flag, or nothing at all. The result is a screen with five buttons, three of which do nothing, over a green build. The gate is green because an operation that is not declared has no payload to compare.
 

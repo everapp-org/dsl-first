@@ -22,6 +22,7 @@ The same model also drives **test automation and QA**: the state machine yields 
 - [The problem it solves](#the-problem-it-solves)
 - [How it works](#how-it-works)
 - [Getting started](#getting-started)
+- [Pick one use case](#pick-one-use-case)
 - [Project structure](#project-structure)
 - [Documentation navigation](#documentation-navigation)
 - [Contributing](#contributing)
@@ -162,6 +163,25 @@ finished result.
 
 (If you did the Step 2 brainstorm, its approved PRD feeds straight into either mode.)
 
+## Pick One Use Case
+
+You do not need all six files, and you do not need to read any of them. **Each file can be used alone, and each starts with a TL;DR** that gives the prompts. Pick the row that is your case, copy its file into your project, and give the assistant the prompt from the TL;DR of that file.
+
+| you want to | copy this file | example that runs |
+|---|---|---|
+| build a new application from an idea or a specification | [`DSL_FIRST_METHODOLOGY_GUIDE.md`](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) + [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md) | [`java-antlr-minimal`](examples/java-antlr-minimal/README.md), [`clojure-edn-minimal`](examples/clojure-edn-minimal/README.md) |
+| get a short, readable model of a legacy codebase | [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md) | — |
+| model a step-by-step procedure, with its failure handling | [`BEHAVIOR_DSL.md`](dsl_first_methodology/BEHAVIOR_DSL.md) | — |
+| get documentation where each claim shows PASS or FAIL | [`VERIFICATION_DSL.md`](dsl_first_methodology/VERIFICATION_DSL.md) | — |
+| generate tests for an existing system | [`DSL_FIRST_QA_GUIDE.md`](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) | — |
+| know that a green test suite can fail | [`DSL_FIRST_QA_GUIDE.md`](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md), §13 only | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
+| add a rule to an old project, and not break the build | [`DSL_FIRST_GATES_GUIDE.md`](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
+| stop defects in the joins between operations | [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md), §3.8 | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
+| make visible what is promised and not built | [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md), §3.7 | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
+| apply all of it | all six files, as in [Getting started](#getting-started) | — |
+
+A dash means that this repository has no runnable example for that case yet.
+
 ## Project Structure
 
 ```
@@ -175,6 +195,7 @@ dsl-first/
 │   ├── DSL_FIRST_QA_GUIDE.md       #   how to apply the DSLs to test automation and QA
 │   └── DSL_FIRST_GATES_GUIDE.md    #   how to keep model and code honest: declared gates, ratchets, planted failures
 ├── in_depth_docs/                  # for the curious: why it works, when not to use it
+├── tools/                          # for contributors only: a check of the grammar in KERNEL_DSL.md
 └── examples/                       # runnable examples — from minimal to advanced
     ├── java-antlr-minimal/         # Java: the model is a text file; the code is generated from it
     ├── clojure-edn-minimal/        # Clojure: the model is plain data; nothing is generated
@@ -186,7 +207,7 @@ dsl-first/
 ## Documentation Navigation
 
 ### The Methodology (`dsl_first_methodology/`)
-* [Kernel DSL Specification v1.1](dsl_first_methodology/KERNEL_DSL.md) — The language for describing what an application **manages**: the things it keeps track of, the states each can be in, and which state changes are allowed.
+* [Kernel DSL Specification v1.2](dsl_first_methodology/KERNEL_DSL.md) — The language for describing what an application **manages**: the things it keeps track of, the states each can be in, and which state changes are allowed. Since v1.2 also: what each operation receives and returns, what is declared and not built yet, and the joins between operations.
 * [Behavior DSL Specification v1.0](dsl_first_methodology/BEHAVIOR_DSL.md) — The language for describing what an application **does**: its procedures, step by step, including which steps may run side by side and what happens when a step fails. It is a separate language because describing a process needs different building blocks than describing things and their states.
 * [Verification DSL Specification v1.0](dsl_first_methodology/VERIFICATION_DSL.md) — The language for describing what must **hold**: the checkable claims an application makes about itself, and the **living documentation** derived from them — prose that renders each claim with its current pass/fail verdict. It is a separate language because asserting on a result is foreign to describing things or procedures.
 * [DSL-First Methodology Guide](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The instructions the assistant follows from start to finish: checking your input, interviewing you when needed, writing the model, and producing the code, tests, and docs from it.
@@ -219,6 +240,8 @@ We are looking for implementers to contribute guides and examples for:
 - TypeScript (`ts-morph`)
 - Go (`jennifer`)
 - C# (`Roslyn`)
+
+If you change `KERNEL_DSL.md`, run `python3 tools/check_kernel_grammar.py` (it needs `pip install lark`). It builds a parser from the grammar in the specification and reads every example of the specification. The workflow `.github/workflows/check.yml` runs it on each pull request. Nobody needs this tool to *use* the methodology.
 
 See an issue or want to contribute? Open a PR!
 

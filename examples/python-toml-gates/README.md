@@ -4,6 +4,8 @@ A runnable data-hosted pipeline in Python, with **no dependency to install**. Th
 
 This is the companion of the [Gates Guide](../../dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md). Every rule of that guide is implemented here.
 
+The `status`, `reason`, `result` and `wirings` keys of the model are the data-hosted form of the [Kernel DSL v1.2](../../dsl_first_methodology/KERNEL_DSL.md) elements for status and wiring (§3.7, §3.8, and the table in §4.1).
+
 ## Run it
 
 ```bash

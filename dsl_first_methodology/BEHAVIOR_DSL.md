@@ -4,8 +4,20 @@
 > **License**: Apache 2.0 — see [LICENSE](../LICENSE)
 
 **Version:** 1.0  
-**Companion:** [Kernel DSL Specification v1.1](KERNEL_DSL.md)  
+**Companion:** [Kernel DSL Specification v1.2](KERNEL_DSL.md)  
 **Purpose:** This document defines the **Behavior DSL** — a language an AI coding assistant uses to write a **model** of a procedure: which steps the application performs, in what order, which steps may run side by side, and what to do when a step fails. Each step calls one of a fixed set of operations the host application provides; from the model, executable code is derived.
+
+## TL;DR — this file can be used alone
+
+**What it gives you.** One small language to write down a procedure: which steps run, in what order, which run side by side, and what happens when a step fails. Executable code is derived from it.
+
+**Prerequisites: none.** The Behavior DSL has its own metamodel and its own grammar, both in this file. You do not need the Kernel DSL to write a behavior. You need only the list of operations that your application offers, because each step calls one of them.
+
+| you want to | say to the assistant |
+|---|---|
+| model one procedure | *"Read BEHAVIOR_DSL.md. Write a Behavior DSL model of this procedure. First list the host operations that its steps call."* |
+| read a procedure out of existing code | *"Read BEHAVIOR_DSL.md. Write the behavior model that this function implements. Show the error policy for each step that can fail."* |
+| see a complete example first | read §7, which is one page |
 
 ---
 
