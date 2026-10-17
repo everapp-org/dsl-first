@@ -331,6 +331,17 @@ When `readHistory` is later changed or removed, `PromptAppendsToHistory` turns r
 **Guidelines for extending:**
 - New optional constructs (shared setup, ambient bindings) are additive — v1.x.
 - Adding operators to `expect` (comparison, negation) is a **deliberate non-goal**: it erodes the legibility that makes a check a sentence. Resist it; decompose the claim instead.
+
+#### v0.2-draft proposal — a bounded operator set (this branch)
+
+Field experience ([qa-tafBase case study](../in_depth_docs/case-study-qa-tafbase.md)) found real claims that need more than `==` — "the fail list is empty", "the verdict is one of {Matched, AltMatched}", "locator count > 0". Proposed: a *bounded* extension that keeps the sentence legibility by restricting, not generalizing:
+
+```ebnf
+assertion          = path ("==" | "!=" | "<" | "<=" | ">" | ">=") value
+                   | path "in" "{" value ("," value)* "}"
+```
+
+`!=` covers absence claims; `< <= > >=` cover cardinality claims; `in` covers the "one of" set-membership claim that otherwise forces N near-duplicate checks. No boolean combinators, no negation of assertions — the claim stays a sentence. If this erodes legibility in practice, the fallback convention is: document the decomposition pattern (one claim per disjunct) in the guide and keep `==` alone.
 - Do not bake host-specific operations into this grammar; they belong in the host-operation contract, shared with the Behavior DSL, not in the spec.
 
 ---

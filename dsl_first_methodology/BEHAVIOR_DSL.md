@@ -80,6 +80,7 @@ The heart of the DSL: an embedded orchestration script inside an `execution { ..
 |-----------|--------|---------|
 | Function call | `validate(documents)` | Invoke a runtime API function |
 | Assignment | `parsed = parseAll(documents)` | Bind a result to a local variable |
+| Conditional *(v0.2-draft proposal)* | `when videoEnabled { ... }` | Steps run only when the named guard holds — real teardown/setup is full of config-flag branches (`if VIDEO_RECORDING_ENABLED`, `if keepBrowserOpen`). Guards are named runtime predicates, like `guard` in the Kernel DSL. |
 | Foreach | `foreach doc in parsed { ... }` | Sequential iteration |
 | Parallel foreach | `parallelForEach doc in parsed { ... }` | Concurrent iteration (governed by `concurrency`) |
 
@@ -155,8 +156,11 @@ multiplicity        = INTEGER ".." ("*" | INTEGER)
 execution_block     = "execution" "{" statement+ "}"
 statement           = call_stmt
                     | assign_stmt
+                    | when_stmt
                     | foreach_stmt
                     | parallel_foreach_stmt
+
+when_stmt           = "when" NAME "{" statement+ "}"
 
 call_stmt           = NAME "(" arg_list? ")"
 assign_stmt         = NAME "=" expr
@@ -344,7 +348,8 @@ Notice that `onManagerError` and `PROMOTE_WORKER_TO_MANAGER` are project-defined
 
 - This document defines **Behavior DSL v1.0**.
 - v1.0 includes: named behaviors, optional participants, execution scripts (`call` / `assign` / `foreach` / `parallelForEach`), error handling, concurrency policy.
-- Planned v1.x additions: `timeout { ... }`, `retryPolicy { ... }`, conditional (`when`) statements, `compensationStep { ... }`.
+- v0.2-draft proposal (this branch): conditional `when NAME { ... }` statements — needed by real teardown/setup code which is full of config-flag branches (`if VIDEO_RECORDING_ENABLED`, `if keepBrowserOpen`).
+- Planned v1.x additions: `timeout { ... }`, `retryPolicy { ... }`, `compensationStep { ... }`.
 - Breaking grammar changes require v2.0.
 
 **Guidelines for extending:**
