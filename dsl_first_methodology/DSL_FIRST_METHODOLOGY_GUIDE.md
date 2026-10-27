@@ -672,6 +672,61 @@ model Order {
 
 The generator creates a stub; developers implement the `@custom` actions.
 
+### 4.4 Validation & Environment Patterns
+
+#### 4.4.1 The Environment Reference
+
+Secrets do not belong in a model — but the model still has to say *where*
+a secret goes. Spell the reference, never the value:
+
+```dsl
+# Bad: the secret is in the model — on disk, in review, in every clone
+steps {
+    fill secret with "hunter2"
+}
+
+# Good: the model names the need; the environment supplies the value
+steps {
+    fill secret with env:SUT_SECRET
+}
+```
+
+Rules that make this honest:
+
+- The model **names the need** (`env:NAME`); the run reads the variable.
+  The generated code carries `os.environ["SUT_SECRET"]`, not the secret.
+- Needs **derive from declared use** — a `model.env_needs()` that walks
+  every `env:`/`env-pool:` reference — so preflight can gate on what's
+  missing *before* anything executes.
+- The indirection never leaks back into artifacts: captions, journals,
+  and error output name the variable (`fill secret`), never its value.
+- `env-pool:` is the same pattern for single-use values (one-time
+  codes): the environment is a pool consumed one-per-call, exhaustion
+  is a named runtime error.
+
+#### 4.4.2 The Named Refusal Table
+
+A validator that throws on the first problem forces the author to fix
+one error at a time. Instead, collect *refusals* — and give every
+refusal a **name**:
+
+```json
+{"clause": "journey.board-to-tot.steps[2]",
+ "reason": "unknown-element",
+ "message": "click names no element: \"open-tot\""}
+```
+
+Rules:
+
+- Validation **collects**, it does not throw — the author gets the
+  whole list in one pass.
+- The refusal's `reason` is part of the language's contract: an
+  enumerable, stable name (`unknown-step`, `bad-env`, `bad-auth`…)
+  that the spec lists and consumers may switch on — CLI exit codes,
+  CI annotations, IDE diagnostics.
+- Refusal names grow **only with the grammar** — a new language
+  construct earns its refusal name in the same change.
+
 ---
 
 ## 5. Deriving Artifacts
