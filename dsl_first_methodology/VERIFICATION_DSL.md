@@ -4,8 +4,20 @@
 > **License**: Apache 2.0 — see [LICENSE](../LICENSE)
 
 **Version:** 1.0  
-**Companions:** [Kernel DSL Specification v1.1](KERNEL_DSL.md) · [Behavior DSL Specification v1.0](BEHAVIOR_DSL.md)  
+**Companions:** [Kernel DSL Specification v1.2](KERNEL_DSL.md) · [Behavior DSL Specification v1.0](BEHAVIOR_DSL.md)  
 **Purpose:** This document defines the **Verification DSL** — a language an AI coding assistant uses to write a **model** of what must hold: the checkable claims a system makes about itself. Each claim invokes one of the same fixed set of operations the host application provides, observes the result, and asserts on it. From the model, two artifacts are derived: a runnable check suite, and **living documentation** — prose a newcomer can read, in which each claim is rendered with its current verdict.
+
+## TL;DR — this file can be used alone
+
+**What it gives you.** One small language to write down claims that a system must hold, each as *setup → operation → expectation*. Two things are derived from it: a suite of checks that runs, and **living documentation**, which is prose where each claim shows its present verdict.
+
+**Prerequisites: none.** The grammar and every term are in this file. You do not need a Kernel or a Behavior model. You need only the operations that your application offers, because a claim calls them.
+
+| you want to | say to the assistant |
+|---|---|
+| state what a feature must do, in a form that runs | *"Read VERIFICATION_DSL.md. Write the checks for these acceptance criteria. Use only operations that exist."* |
+| get documentation that cannot go out of date | *"Read VERIFICATION_DSL.md. Write a page that explains this feature, and link each claim of the page to a check."* |
+| see a complete example first | read §7, which is one page |
 
 ---
 

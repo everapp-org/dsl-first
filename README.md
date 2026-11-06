@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
-[![Examples](https://img.shields.io/badge/Runnable_Examples-Java%20%26%20Clojure-orange.svg)](examples/)
+[![Examples](https://img.shields.io/badge/Runnable_Examples-Java%2C%20Python%20%26%20Clojure-orange.svg)](examples/)
 
 **Welcome to the home of DSL-First Development.**
 
@@ -22,6 +22,7 @@ The same model also drives **test automation and QA**: the state machine yields 
 - [The problem it solves](#the-problem-it-solves)
 - [How it works](#how-it-works)
 - [Getting started](#getting-started)
+- [Pick one use case](#pick-one-use-case)
 - [Project structure](#project-structure)
 - [Documentation navigation](#documentation-navigation)
 - [Contributing](#contributing)
@@ -83,11 +84,11 @@ The boundary between the two moves in one direction: when a hand-written pattern
 
 ## Getting Started
 
-No long reading list. Five files are all you need to drop into your project; your AI coding assistant does the rest.
+No long reading list. Six files are all you need to drop into your project; your AI coding assistant does the rest.
 
-### Step 1 — Copy these five files into your project
+### Step 1 — Copy these six files into your project
 
-These files are not for you to study — they are the instructions your AI coding assistant works from. Copy all five into your project; the assistant applies whichever it needs.
+These files are not for you to study — they are the instructions your AI coding assistant works from. Copy all six into your project; the assistant applies whichever it needs.
 
 [`dsl_first_methodology/KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md) teaches your assistant the language for describing what your application **manages**: the things it keeps track of (orders, customers, payments), the states each thing can be in (an order can be *placed*, *paid*, *shipped*, or *refunded*), and which state changes are allowed (a refunded order cannot be shipped again).
 
@@ -98,6 +99,8 @@ These files are not for you to study — they are the instructions your AI codin
 [`dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md`](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) gives your assistant its working instructions: when to interview you about your project, how to write the model from what you provide, and how to produce the code, the tests, and the docs from that model.
 
 [`dsl_first_methodology/DSL_FIRST_QA_GUIDE.md`](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) teaches your assistant how to apply the three DSL languages to **test automation**: extracting testable specifications from existing codebases, generating test suites (Gherkin, step definitions, test data factories), and producing living documentation with live PASS/FAIL verdicts. It covers both grammar-hosted (Java) and data-hosted (Clojure) bindings.
+
+[`dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md`](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) teaches your assistant how to keep the model and the hand-written code **honest over time**: every rule is a small program (a *gate*) that stops the build, a new rule is brought into an existing project without turning the build red, and every gate is proven able to fail. Without it, a project collects checks that are green because they look at nothing.
 
 *(Draft proposal on this branch)* [`dsl_first_methodology/CATALOG_DSL.md`](dsl_first_methodology/CATALOG_DSL.md) teaches the language for **declaration tables** — typed rows of named things that are data, not lifecycles: element catalogs, config keys, device matrices, suite manifests. Motivated by a real test-framework extraction (see the case study in `in_depth_docs/`).
 
@@ -134,9 +137,9 @@ with why it matters and your provisional assumption, so I can collect answers.
 Now point the assistant at the methodology. It writes the model — the single source of truth — produces the code, the tests, and the docs from it, runs the tests, and fixes whatever fails:
 
 ```
-I want to apply the DSL-First methodology to this project. You have all five
+I want to apply the DSL-First methodology to this project. You have all six
 methodology files in context — the Kernel DSL, Behavior DSL, and Verification DSL
-specifications, the methodology guide, and the QA guide. Author the model from the
+specifications, the methodology guide, the QA guide, and the gates guide. Author the model from the
 approved PRD (or, if I skipped the brainstorm, from the specification or existing
 code I point you at), using whichever language the domain needs. Then generate the
 code, tests, and docs, run the tests, and trace any failure to its real cause —
@@ -162,28 +165,51 @@ finished result.
 
 (If you did the Step 2 brainstorm, its approved PRD feeds straight into either mode.)
 
+## Pick One Use Case
+
+You do not need all six files, and you do not need to read any of them. **Each file can be used alone, and each starts with a TL;DR** that gives the prompts. Pick the row that is your case, copy its file into your project, and give the assistant the prompt from the TL;DR of that file.
+
+| you want to | copy this file | example that runs |
+|---|---|---|
+| build a new application from an idea or a specification | [`DSL_FIRST_METHODOLOGY_GUIDE.md`](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) + [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md) | [`java-antlr-minimal`](examples/java-antlr-minimal/README.md), [`clojure-edn-minimal`](examples/clojure-edn-minimal/README.md) |
+| get a short, readable model of a legacy codebase | [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md) | — |
+| model a step-by-step procedure, with its failure handling | [`BEHAVIOR_DSL.md`](dsl_first_methodology/BEHAVIOR_DSL.md) | — |
+| get documentation where each claim shows PASS or FAIL | [`VERIFICATION_DSL.md`](dsl_first_methodology/VERIFICATION_DSL.md) | — |
+| generate tests for an existing system | [`DSL_FIRST_QA_GUIDE.md`](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) | — |
+| know that a green test suite can fail | [`DSL_FIRST_QA_GUIDE.md`](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md), §13 only | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
+| add a rule to an old project, and not break the build | [`DSL_FIRST_GATES_GUIDE.md`](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
+| stop defects in the joins between operations | [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md), §3.8 | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
+| make visible what is promised and not built | [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md), §3.7 | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
+| apply all of it | all six files, as in [Getting started](#getting-started) | — |
+
+A dash means that this repository has no runnable example for that case yet.
+
 ## Project Structure
 
 ```
 dsl-first/
 ├── README.md
-├── dsl_first_methodology/          # THE METHODOLOGY — copy these five files into your project
+├── dsl_first_methodology/          # THE METHODOLOGY — copy these six files into your project
 │   ├── KERNEL_DSL.md               #   the language for what your app manages
 │   ├── BEHAVIOR_DSL.md             #   the language for what your app does, step by step
 │   ├── VERIFICATION_DSL.md         #   the language for what must hold — and living documentation
 │   ├── DSL_FIRST_METHODOLOGY_GUIDE.md  #   the instructions your assistant follows
-│   └── DSL_FIRST_QA_GUIDE.md       #   how to apply the DSLs to test automation and QA
+│   ├── DSL_FIRST_QA_GUIDE.md       #   how to apply the DSLs to test automation and QA
+│   └── DSL_FIRST_GATES_GUIDE.md    #   how to keep model and code honest: declared gates, ratchets, planted failures
 ├── in_depth_docs/                  # for the curious: why it works, when not to use it
+├── tools/                          # for contributors only: a check of the grammar in KERNEL_DSL.md
 └── examples/                       # runnable examples — from minimal to advanced
     ├── java-antlr-minimal/         # Java: the model is a text file; the code is generated from it
     ├── clojure-edn-minimal/        # Clojure: the model is plain data; nothing is generated
-    └── clojure-edn-contexts/       # Clojure advanced: multi-level interpreters, composition, status-gated wiring
+    ├── clojure-edn-contexts/       # Clojure advanced: multi-level interpreters, composition, status-gated wiring
+    ├── python-toml-gates/          # Python: the model is TOML; ten declared gates, each proven able to fail
+    └── java-yaml-gates/            # Java: the same application and gates; the model is YAML, wired by reflection
 ```
 
 ## Documentation Navigation
 
 ### The Methodology (`dsl_first_methodology/`)
-* [Kernel DSL Specification v1.1](dsl_first_methodology/KERNEL_DSL.md) — The language for describing what an application **manages**: the things it keeps track of, the states each can be in, and which state changes are allowed.
+* [Kernel DSL Specification v1.2](dsl_first_methodology/KERNEL_DSL.md) — The language for describing what an application **manages**: the things it keeps track of, the states each can be in, and which state changes are allowed. Since v1.2 also: what each operation receives and returns, what is declared and not built yet, and the joins between operations.
 * [Behavior DSL Specification v1.0](dsl_first_methodology/BEHAVIOR_DSL.md) — The language for describing what an application **does**: its procedures, step by step, including which steps may run side by side and what happens when a step fails. It is a separate language because describing a process needs different building blocks than describing things and their states.
 * [Verification DSL Specification v1.0](dsl_first_methodology/VERIFICATION_DSL.md) — The language for describing what must **hold**: the checkable claims an application makes about itself, and the **living documentation** derived from them — prose that renders each claim with its current pass/fail verdict. It is a separate language because asserting on a result is foreign to describing things or procedures.
 * [Catalog DSL Specification v0.1 (proposal)](dsl_first_methodology/CATALOG_DSL.md) — *proposal on this branch*: the language for **declaration tables** — typed rows of named things (element catalogs, config keys, device matrices, suite manifests), plus `bind` selection rules and `format` name-grammars that generate renderer+parser pairs.
@@ -191,11 +217,16 @@ dsl-first/
 * [DSL-First Methodology Guide](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The instructions the assistant follows from start to finish: checking your input, interviewing you when needed, writing the model, and producing the code, tests, and docs from it.
 * [DSL-First QA & Test Automation Guide](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) — How to apply the three DSL languages to QA work: extracting testable specifications from existing code, generating test suites (Gherkin, step definitions, data factories), and producing living documentation with live verdicts. Covers both grammar-hosted (Java) and data-hosted (Clojure) bindings.
 
+* [DSL-First Gates Guide](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) — How the rules that hold a model and its code together are themselves declared, introduced without breaking the build (ratchets), and proven able to fail (planted failures). Also: declaring the joins between operations, declaring what is not built, and a vocabulary that the build enforces. Language-neutral, with Python and Java bindings, each with a runnable example.
+
 ### Examples (`examples/`) — from minimal to advanced, all runnable
 
 * [`java-antlr-minimal`](examples/java-antlr-minimal/README.md) — **Java**: the model is a small text file with its own syntax; a parser reads it and the Java code is generated from it. The generated code is committed, so you can read it without building anything.
 * [`clojure-edn-minimal`](examples/clojure-edn-minimal/README.md) — **Clojure**: the model is plain structured data; the program checks it against a schema and runs it directly. Nothing is generated.
 * [`clojure-edn-contexts`](examples/clojure-edn-contexts/README.md) — **Clojure advanced**: multi-level interpretation, `requiring-resolve` dispatch, status-gated wiring, and composition/leasing. Demonstrates techniques extracted from a production codebase, with zero project-specific dependencies.
+
+* [`python-toml-gates`](examples/python-toml-gates/README.md) — **Python**: the model is TOML read with the standard library; an interpreter wires the application from it. Ten gates are declared as data, and a harness puts 14 defects back to prove that each gate fires. No dependency to install.
+* [`java-yaml-gates`](examples/java-yaml-gates/README.md) — **Java, data-hosted**: the same application, model and ten gates as the Python example. The model is YAML, an interpreter wires it by reflection, and `mvn verify` runs the gates and 15 planted failures. One run-time dependency (SnakeYAML).
 
 ### In-Depth Docs (`in_depth_docs/`) — for those peeking into internals
 * [The Manifesto](in_depth_docs/manifesto.md) — Why this methodology exists: the problem of code, tests, and docs drifting apart, and the belief behind the fix.
@@ -208,10 +239,13 @@ dsl-first/
 ## Contributing
 
 We are looking for implementers to contribute guides and examples for:
-- Python (`astor`)
+- Python, grammar-hosted (`Lark`, `astor`) — a data-hosted Python example exists: [`python-toml-gates`](examples/python-toml-gates/README.md)
+- Java, data-hosted with Jackson, ArchUnit or Gradle — [`java-yaml-gates`](examples/java-yaml-gates/README.md) uses SnakeYAML, the parser of the JDK compiler and Maven; the alternatives in the bindings table of the [Gates Guide](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) §13 are not run
 - TypeScript (`ts-morph`)
 - Go (`jennifer`)
 - C# (`Roslyn`)
+
+If you change `KERNEL_DSL.md`, run `python3 tools/check_kernel_grammar.py` (it needs `pip install lark`). It builds a parser from the grammar in the specification and reads every example of the specification. The workflow `.github/workflows/check.yml` runs it on each pull request. Nobody needs this tool to *use* the methodology.
 
 See an issue or want to contribute? Open a PR!
 

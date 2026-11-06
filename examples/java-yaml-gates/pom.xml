@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.everapp</groupId>
+    <artifactId>dsl-java-yaml-gates</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- The one run-time dependency: a reader for the model files. -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+
+            <!-- `mvn verify` runs the tests. The tests run the gates and the
+                 planted failures, so one command is the whole check. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+
+            <!-- The three tools, each with a name:
+                   mvn -q compile exec:java@gates
+                   mvn -q compile exec:java@verify-gates
+                   mvn -q compile exec:java@generate-docs -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>gates</id>
+                        <configuration>
+                            <mainClass>org.everapp.taskapp.tools.Gates</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>verify-gates</id>
+                        <configuration>
+                            <mainClass>org.everapp.taskapp.tools.VerifyGates</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-docs</id>
+                        <configuration>
+                            <mainClass>org.everapp.taskapp.tools.GenerateDocs</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
