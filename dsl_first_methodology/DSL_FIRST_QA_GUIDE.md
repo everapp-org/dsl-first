@@ -25,6 +25,7 @@
 | get a coverage matrix and test data | *"Use section 6. Generate the test matrix and the data factories from this model."* | §6 |
 | get documentation with PASS/FAIL verdicts | *"Use section 7. Generate the living documentation from the last run."* | §7 |
 | know that a green suite can fail | *"Use section 13. Make this test suite able to fail."* (the full prompt is in §13.6) | §13 |
+| map QA tests across ISTQB, Playwright, Selenium, JUnit, pytest, and TS/JS | *"Use section 14 and TARGET_DSL.md. Map our test model to the 3-tier QA ontology (ISTQB -> QA Archetypes -> Target Runner/Driver) and stamp `@concept` tags."* | §14 |
 | do all of it for one entity in a few hours | follow the Quick Start template | §12.1 |
 
 **The terms, in one minute.**
@@ -53,6 +54,7 @@
 11. [Tool Recommendations](#11-tool-recommendations)
 12. [Templates & Examples](#12-templates--examples)
 13. [Gates: Make the Test Suite Able to Fail](#13-gates-make-the-test-suite-able-to-fail)
+14. [The QA, ISTQB & Test Automation Concept Ontology](#14-the-qa-istqb--test-automation-concept-ontology)
 
 ---
 
@@ -1772,6 +1774,86 @@ The gates of this section are run in this repository on a **model**: [`examples/
 
 ---
 
+## 14. The QA, ISTQB & Test Automation Concept Ontology
+
+When a QA framework is generated from a DSL model across multiple languages and tools (for example, Python/`pytest`/Playwright, Java 21++/JUnit 5/Playwright or Selenium, and TypeScript/JavaScript `@playwright/test`), learners and engineers need a clear bridge between **testing theory**, **automation architecture patterns**, and **tool-specific APIs**.
+
+Paired with **GAKS** and the **[Target Profile Specification](TARGET_DSL.md)**, DSL-First organizes QA knowledge into a three-tier ontology where every generated file stamps `# @concept <ID>` / `// @concept <ID>` annotations:
+
+```
+  Tier 0: ISTQB Foundation Level (CTFL v4.0)     CONCEPT-istqb-v1-*   (L0-theory)
+                  │
+                  ▼  realizes:
+  Tier 1: QA Automation Archetypes               CONCEPT-qa-v1-*      (L1-archetype)
+                  │
+                  ▼  realizes:  (contrasts-with: across sibling tools)
+  Tier 2: Tool & Runner Realizations             CONCEPT-playwright-v1-* / CONCEPT-selenium-v1-*
+                                                 CONCEPT-junit-v1-* / CONCEPT-pytest-v1-* / CONCEPT-pwtest-v1-*
+```
+
+### 14.1 Tier 0 — ISTQB Foundation Level (CTFL v4.0) (`CONCEPT-istqb-v1-*`)
+
+Every DSL-First QA construct is grounded in a standard ISTQB CTFL v4.0 concept:
+
+| Concept ID | ISTQB Concept (CTFL v4.0) | How DSL-First & Gates Realize It |
+|---|---|---|
+| `CONCEPT-istqb-v1-001-01-error-defect-failure` | Error (mistake) → Defect (fault) → Failure causal chain (§1.2.3) | Planted failures (§13.4) inject a known *defect* into the model or SUT and verify that the test or gate observes the resulting *failure* |
+| `CONCEPT-istqb-v1-002-01-verification-vs-validation` | Verification vs. Validation (§1.1.1) | Static model validation & wiring checks verify the specification; Verification DSL checks validate the running system |
+| `CONCEPT-istqb-v1-003-01-seven-testing-principles` | The Seven Testing Principles (§1.3) | Early testing (shift-left model validation), defect clustering (priority tags), pesticide paradox (seeded model walks) |
+| `CONCEPT-istqb-v1-004-01-test-levels` | Test Levels: Component, Integration, System, Acceptance (§2.2.1) | Kernel unit tests, `wiring` integration tests (§13.5), Behavior/Verification system & acceptance journeys |
+| `CONCEPT-istqb-v1-005-01-test-types` | Functional, Non-Functional, Black-Box, White-Box (§2.2.2) | Black-box `check` claims and semantic locators alongside white-box transition/guard coverage |
+| `CONCEPT-istqb-v1-006-01-static-vs-dynamic-testing` | Static vs. Dynamic Testing (§3.1) | Named model refusals (`validate`) and compile-time gates (JSpecify/NullAway, `tsc`, `mypy`) before dynamic browser execution |
+| `CONCEPT-istqb-v1-007-01-equivalence-partitioning` | Equivalence Partitioning (EP) (§4.2.1) | Valid and invalid partitions declared in model annotations and Catalog DSL tables |
+| `CONCEPT-istqb-v1-008-01-boundary-value-analysis` | Boundary Value Analysis (BVA — 2-value & 3-value) (§4.2.2) | Boundary data factories (`min - 1`, `min`, `min + 1`, `max - 1`, `max`, `max + 1`) generated from numeric constraints |
+| `CONCEPT-istqb-v1-009-01-decision-table-testing` | Decision Table Testing (§4.2.3) | Multi-condition guard combinations and Catalog DSL `bind` matrices |
+| `CONCEPT-istqb-v1-010-01-state-transition-testing` | State Transition Testing (§4.2.4) | Kernel DSL `states` and `transitions` — 0-switch (all valid transitions), 1-switch (transition pairs), and invalid-transition refusal tests |
+| `CONCEPT-istqb-v1-011-01-statement-and-branch-coverage` | Statement & Branch Coverage (§4.3) | Guard branch coverage ratchets (`qa/baselines/untested-guards.txt`) and state-graph edge coverage |
+| `CONCEPT-istqb-v1-012-01-test-oracle` | Test Oracle (§1.4) | Verification DSL `expect` clauses, screen markers, and mail/API state oracles |
+| `CONCEPT-istqb-v1-013-01-confirmation-vs-regression-testing` | Confirmation vs. Regression Testing (§2.2.3) | Targeted bug-fix verification checks vs. full generated regression suites |
+| `CONCEPT-istqb-v1-014-01-entry-and-exit-criteria` | Entry Criteria (DoR) & Exit Criteria (DoD) (§5.1.3) | Environment `preflight` checks (`env:` needs) as entry criteria; zero-violation gates and coverage floors as exit criteria |
+| `CONCEPT-istqb-v1-015-01-defect-lifecycle` | Defect Lifecycle & Diagnostic Evidence (§5.5) | Structured failure artifacts (screenshot, DOM snapshot, trace, step journal) emitted by the failure funnel |
+
+### 14.2 Tier 1 — QA Automation Archetypes (`CONCEPT-qa-v1-*`)
+
+Tier 1 captures tool-independent test automation patterns that realize the ISTQB foundations:
+
+1. `CONCEPT-qa-v1-001-01-arrange-act-assert` — Arrange-Act-Assert (`Given / When / Then`) test structure (`realizes: istqb-012, istqb-014`).
+2. `CONCEPT-qa-v1-002-01-the-locator-ladder` — Resilient element targeting: semantic Role/Label first, `data-testid` second, CSS/XPath last (`realizes: istqb-005`).
+3. `CONCEPT-qa-v1-003-01-synchronization-and-actionability` — Deterministic UI synchronization without fixed sleeps (`realizes: istqb-006`).
+4. `CONCEPT-qa-v1-004-01-session-and-context-isolation` — Clean browser context/session per test so tests never leak cookies or storage (`realizes: istqb-013, prog-006`).
+5. `CONCEPT-qa-v1-005-01-page-object-model` — Screen/Page Object & Screenplay encapsulation generated from `CATALOG_DSL` (`requires: qa-002`).
+6. `CONCEPT-qa-v1-006-01-api-fixture-seeding` — Out-of-band HTTP/API state seeding to bypass slow UI setup (`realizes: istqb-004, istqb-014`).
+7. `CONCEPT-qa-v1-007-01-hard-vs-soft-assertions` — Hard assertions, grouped soft assertions, and web-first retrying assertions (`realizes: istqb-012`).
+8. `CONCEPT-qa-v1-008-01-failure-funnel-and-artifacts` — Automatic diagnostic capture (screenshot, DOM, trace, network HAR) on failure (`realizes: istqb-001, istqb-015`).
+9. `CONCEPT-qa-v1-009-01-deterministic-replay-and-flakiness` — Network mocking, deterministic clocks, and quarantine ratchets (`realizes: istqb-013`).
+10. `CONCEPT-qa-v1-010-01-model-based-seeded-walk` — Seeded state-machine walks over the Kernel/Behavior graph (`realizes: istqb-010, istqb-003`).
+
+### 14.3 Tier 2 — Cross-Tool Rosetta Stone (`playwright` vs. `selenium`, `junit` vs. `pytest` vs. `pwtest`)
+
+Because every Tier 2 tool concept declares `realizes: CONCEPT-qa-v1-...` and `contrasts-with:` its sibling tool, the GAKS static site automatically renders a **Rosetta Stone** across engines and runners:
+
+| QA Archetype (`qa`) | Playwright (`CONCEPT-playwright-v1-*`) | Selenium WebDriver (`CONCEPT-selenium-v1-*`) |
+|---|---|---|
+| `004-01-session-and-context-isolation` | `001-01-browser-context-page-hierarchy` (`BrowserContext` per test in ms) + `008-01-storage-state-reuse` | `001-01-webdriver-session-lifecycle` (`WebDriver` + `SeleniumManager`) + `010-01-remote-webdriver-and-grid` |
+| `002-01-the-locator-ladder` | `002-01-semantic-locators` (lazy `Locator`, `getByRole`, strict mode) + `009-01-frame-and-shadow-dom-piercing` | `002-01-by-locators-and-webelement` (eager `By`, `findElement`, `StaleElementReferenceException`) + `008-01-switchto-frame-and-shadow-root` |
+| `003-01-synchronization-and-actionability` | `003-01-auto-waiting-and-actionability` (built-in visibility/stability/enabled checks before action) | `003-01-webdriverwait-and-expected-conditions` (explicit `WebDriverWait`; never mix with implicit waits) + `009-01-actions-api` |
+| `007-01-hard-vs-soft-assertions` | `004-01-web-first-assertions` (`expect(locator).toBeVisible()`, `assertThat(locator)`) | `004-01-one-shot-dom-assertions` (`wait.until(...)` followed by runner assertion) |
+| `006-01-api-fixture-seeding` | `005-01-api-request-context` (`APIRequestContext` sharing auth state) | `005-01-external-http-seeding` (`HttpClient` + `driver.manage().addCookie(...)`) |
+| `008-01-failure-funnel-and-artifacts` | `006-01-trace-viewer-and-artifacts` (`context.tracing`, Trace Viewer ZIP) | `006-01-takes-screenshot-and-logs` (`TakesScreenshot`, `getPageSource()`, BiDi console logs) |
+| `009-01-deterministic-replay-and-flakiness` | `007-01-network-interception-route` (`page.route`) + `010-01-clock-and-deterministic-time` | `007-01-bidi-network-interception` (W3C WebDriver BiDi `Network`) |
+
+And across the three test runners (`CONCEPT-junit-v1-*`, `CONCEPT-pytest-v1-*`, `CONCEPT-pwtest-v1-*`):
+
+| Capability | JUnit 5 (`junit` — Java 21++) | pytest (`pytest` — Python 3.12) | Playwright Test (`pwtest` — TS / JS) |
+|---|---|---|---|
+| **Fixture Lifecycle** (`prog-006`, `qa-004`) | `001-01-per-method-test-instance-lifecycle` (`@BeforeEach` / `@AfterEach`) | `001-01-dependency-injected-fixtures` (`@pytest.fixture` + `yield`) | `001-01-test-extend-fixtures` (`test.extend<T>()` + `await use(...)`) |
+| **EP & BVA Parameterization** (`istqb-007`, `istqb-008`) | `002-01-parameterized-test-and-sources` (`@ParameterizedTest`, `@MethodSource`) | `002-01-mark-parametrize` (`@pytest.mark.parametrize`) | `002-01-data-driven-test-loop` (`for (const c of cases) test(...)`) |
+| **Assertions** (`qa-007`) | `003-01-assertall-grouped-assertions` (`Assertions.assertAll`) | `003-01-assert-introspection` (AST-introspected `assert`) | `003-01-expect-soft-and-poll` (`expect.soft`, `expect.poll`) |
+| **Failure Artifact Hook** (`qa-008`) | `004-01-testwatcher-failure-extension` (`TestWatcher`) | `004-01-makereport-failure-hook` (`pytest_runtest_makereport`) | `004-01-automatic-trace-and-screenshot-config` (`retain-on-failure`) |
+| **Tags & Parallelism** (`istqb-013`, `prog-007`) | `005-01-tag-filtering-and-parallel-execution` (`@Tag`) | `005-01-markers-and-xdist-parallelism` (`@pytest.mark`, `-n auto`) | `005-01-projects-matrix-and-sharding` (`--grep`, `--shard`) |
+
+---
+
 ## Appendix A: Glossary
 
 | Term | Definition |
@@ -1792,6 +1874,8 @@ The gates of this section are run in this repository on a **model**: [`examples/
 | **Planted failure** | A defect that is put back on purpose, to prove that a gate or a test can fail |
 | **Not built** | A status of an operation that is declared and not implemented, with a reason (Kernel DSL v1.2) |
 | **Wiring** | A declared join: a value that one operation returns and another receives (Kernel DSL v1.2) |
+| **Target Profile** | Declarative platform binding (`TARGET_DSL.md`) mapping DSL constructs and QA archetypes to a specific language, runner, and browser driver |
+| **QA Concept Ontology** | Three-tier hierarchy linking ISTQB CTFL v4.0 theory (`CONCEPT-istqb-v1-*`), QA automation archetypes (`CONCEPT-qa-v1-*`), and tool/runner realizations (`playwright`, `selenium`, `junit`, `pytest`, `pwtest`) |
 
 ---
 

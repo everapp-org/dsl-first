@@ -220,6 +220,7 @@ Each DSL is a modeling language for *one concern*. Both share the same toolchain
 | **Behavior / procedure shape** | [BEHAVIOR_DSL.md](BEHAVIOR_DSL.md) | **Yes — distinct grammar** | Its `execution { }` block is a mini imperative language — assignment, `foreach`, `parallelForEach` — with no analog in the Kernel DSL's declarative world |
 | **Checkable claims & living documentation** | [VERIFICATION_DSL.md](VERIFICATION_DSL.md) | **Yes — distinct grammar** | Its `check { given / when / expect }` block reuses the Behavior DSL's call-and-bind shape but adds an *expectation* matched against a result, yielding a four-way verdict — asserting on output has no analog in either sibling |
 | **Declaration tables** | [CATALOG_DSL.md](CATALOG_DSL.md) *(v0.1 proposal)* | **Yes — distinct grammar** | Typed rows of named things that are data, not lifecycles — element catalogs, config keys, device matrices, suite manifests. `fields { name: TYPE }` cannot hold quoted locator values or dotted keys, and a sparse `(version × language)` matrix isn't a fields shape. Plus `bind` selection rules and `format` name-grammars. See the [qa-tafBase case study](../in_depth_docs/case-study-qa-tafbase.md) |
+| **Target profile / platform binding** | [TARGET_DSL.md](TARGET_DSL.md) *(v0.1)* | **Yes — platform binding** | Binds the platform-independent model to a concrete host language version, runner, driver, compile-time tooling, complexity budget, and Tier 1 → Tier 2 concept mappings (`realize`, `prefer`, `avoid`) |
 | **Provider integration** | [case study](../in_depth_docs/case-study-provider-integration.md) | **No — Kernel DSL domain** | `provider`, `protocolBinding`, `selectionPolicy` are all entities with fields; they map directly onto `model / fields`. Value is the three-layer discipline, not new syntax |
 
 The Behavior DSL earns a separate metamodel because the *shape of a procedure* —
@@ -928,6 +929,21 @@ Data-hosted, the interpreter is just a function, so the test is just a function 
     (is (= :draft     (step :draft :unknown)))))   ; no transition => unchanged
 ```
 
+### 5.5 Target Profiles and the Two-Tier Concept Ontology
+
+When an emitter translates a DSL model (M2) into host code (Java, Python, TypeScript, JavaScript), it is performing an ontological mapping from **platform-independent domain concepts** to **target-language constructs**. Left implicit, that mapping drifts across generators or relies on whatever legacy idiom an AI assistant happens to recall.
+
+The **[Target Profile Specification](TARGET_DSL.md)** makes this platform binding explicit through a two-tier concept ontology (maintained as shared catalogs when paired with GAKS):
+
+1. **Tier 1 — Abstract Programming Archetypes (`CONCEPT-prog-v1-*`):** Language-neutral constructs required by DSL-First generators — *Immutable Data Carrier* (`001`), *Closed Type Union* (`002`), *Exhaustive Pattern Branching* (`003`), *Null-Safe Optionality* (`004`), *Scoped Resource Cleanup* (`005`), *Scoped Test Fixture* (`006`), *Parallel Fan-Out* (`007`), *Immutable Collection Literal* (`008`), *Higher-Order Function* (`009`), and *External Environment Binding* (`010`).
+2. **Tier 2 — Host-Language Realizations (`CONCEPT-{java,python,ts,js}-v1-*`):** Concrete language constructs linked via `realizes:` to their Tier 1 archetype and `contrasts-with:` to sibling languages:
+   - **Java 21++ (`java`):** `record` (`002`), `sealed interface` (`004`), pattern-matching `switch` (`006`), JSpecify `@NullMarked` + Error Prone/NullAway (`019`), `try-with-resources` (`012`), `List.of`/`Map.of` (`011`), Virtual Threads (`009`), `var` (`003`), text blocks (`008`).
+   - **Python 3.12 (`python`):** `@dataclass(frozen=True, slots=True)` (`001`), `X | Y` unions (`002`), `match`/`case` + `assert_never` (`003`), `T | None` strict typing (`004`), `with` context managers (`005`), `yield` fixtures (`006`).
+   - **TypeScript (`ts`):** `readonly` interfaces & `as const` (`001`), discriminated unions (`002`), exhaustive `never` narrowing (`003`), `strictNullChecks` (`004`), `using` / `Disposable` (`005`), `test.extend<T>()` (`006`).
+   - **JavaScript ESM (`js`):** `Object.freeze({...})` (`001`), tagged discriminants (`002`), `?.` and `??` (`004`), `try/finally` (`005`), JSDoc `@ts-check`.
+
+A project's `target` block selects which Tier 2 construct realizes each Tier 1 archetype (`realize ... with ...`), which idioms are preferred (`prefer ...`), and which legacy anti-patterns are refused (`avoid ...`). When generating source files, the emitter stamps `# @concept <ID>` / `// @concept <ID>` headers so every generated file is traceable to the exact concepts it embodies. See [TARGET_DSL.md](TARGET_DSL.md) for the complete grammar and mapping tables.
+
 ---
 
 ## 6. Implementation Workflow
@@ -1308,6 +1324,34 @@ public class OrderMigration_v1_to_v2 {
 }
 ```
 
+### 9.4 How New Concepts Arrive: The Three-Channel Funnel
+
+Host languages and libraries evolve even when the domain model does not. New target-language concepts enter a DSL-First project through three channels:
+
+1. **Channel 1 — Human-Curated Source (Presentations, Books, Post-Mortems):** A developer or architect encounters a better construct (for example, a conference talk on modern Java 21–25 *"Java++"* covering `record`, `sealed interface`, JSpecify `@NullMarked`, and NullAway) and proposes it to improve readability or compile-time safety.
+2. **Channel 2 — AI Coding Assistant Proposal:** While generating or refactoring an emitter or adapter, the assistant identifies a construct that reduces boilerplate or eliminates a bug class under the project's declared language version.
+3. **Channel 3 — Toolchain / Language Upgrade:** Bumping the compiler or test runner baseline (e.g., Java 17 → 21, Python 3.10 → 3.12, TypeScript 4 → 5) unlocks constructs that were previously unavailable.
+
+To prevent style drift (where half the codebase uses an old idiom and half uses a new one), **neither a human nor an AI assistant edits generated files or emitter templates ad hoc**. Every candidate construct follows the same three-step governance funnel:
+
+```
+  Candidate concept arrives (Talk / AI proposal / Toolchain bump)
+        │
+        ▼
+  1. Catalog entry (CONCEPT-<lang>-v1-NNN-01-<slug>.md)
+     Defines the construct, minimum version (since:), and Tier 1 archetype (realizes:)
+        │
+        ▼
+  2. Decision gate ([!decision] state: open)
+     Weighs readability, tooling compatibility, and migration impact
+        │
+        ▼  Human approves (state: decided)
+  3. Update Target Profile (realize / prefer / avoid) + Emitter
+     Regenerate all affected files atomically; gates verify 0 violations
+```
+
+If a candidate construct is rejected (for example, a non-standard compiler plugin like Manifold that breaks IDE portability), its concept page stays in the catalog with `standing: discouraged` and is added to the Target Profile's `avoid` list — preserving the institutional memory of *why* the project does not use it.
+
 ---
 
 ## 10. Anti-Patterns
@@ -1606,6 +1650,8 @@ The last three items are the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) checklist i
 | **Ratchet** | A gate over a rule the project does not meet yet: a baseline file freezes today's violations, new ones fail, and the baseline only shrinks | both |
 | **Planted failure** | A named defect put back into a copy of the project to prove that a gate fires | both |
 | **Wiring** | A declared edge of the model: a value one operation returns and another receives | both |
+| **Target Profile** | Declarative platform binding (`TARGET_DSL.md`) specifying host language version, runner, driver, tooling, complexity budget, and Tier 1 → Tier 2 concept mappings | both |
+| **Concept Ontology** | Hierarchy of abstract programming/QA archetypes (`Tier 1`) and concrete host-language/tool realizations (`Tier 2`) stamped as `@concept` tags by emitters | both |
 
 ---
 
