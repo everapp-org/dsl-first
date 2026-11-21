@@ -91,12 +91,12 @@ DSL-First:    Spec / legacy → model (SSOT) → Generated code + tests + docs (
 |------|------------|---------|
 | **DSL** | Domain-Specific Language - a constrained language for a specific problem domain | SQL for databases, jCrew DSL for agent modeling |
 | **Meta-program** | A program that operates on programs (generates, transforms, analyzes) | Code generators, compilers, linters |
-| **Generator** | A meta-program that produces source code from a model | JavaPoet-based class generator |
+| **Generator** | A meta-program that produces source code from a model | JavaPoet- or Roslyn-based class generator |
 | **Grammar** | Formal specification of DSL syntax | ANTLR .g4 file, PEG grammar |
 | **Parser** | Transforms a model's text into a structured representation (AST/parse tree) | ANTLR-generated parser |
 | **Semantic Model** | In-memory representation of DSL concepts (domain model of the DSL itself) | `DomainDef`, `ModelDef`, `TransitionDef` classes |
 | **Extractor/Visitor** | Traverses parse tree to build semantic model | ANTLR visitor pattern implementation |
-| **Emitter** | Produces output artifacts from semantic model | Template engine, code builder (JavaPoet) |
+| **Emitter** | Produces output artifacts from semantic model | Template engine, code builder (JavaPoet, Roslyn) |
 | **Schema** | Validation rules for a *data-hosted* DSL (data, not text) — the counterpart of a Grammar | malli schema, `clojure.spec` |
 | **Interpreter** | Walks the validated model and yields runtime values directly — the counterpart of a Generator, emitting no code | a Clojure function over the model |
 
@@ -224,7 +224,7 @@ In a **data-hosted** binding the shared toolchain is one **schema registry + loa
 
 DSL-First is paradigm-agnostic. The metamodel — `Domain / Level / Model / State / Transition` — is the same everywhere; only the **carrier** of the DSL and the **mechanism** of derivation change with the host language. There are two bindings.
 
-**Grammar-hosted** (Java, C#, Go, and most non-Lisp languages). The DSL is a text file with a concrete syntax defined by a grammar (ANTLR `.g4`, a PEG, …). A parser turns it into an AST / semantic model, and a generator emits source text (JavaPoet, etc.). → Worked example: [Java + ANTLR](../examples/java-antlr-minimal/README.md).
+**Grammar-hosted** (Java, C#, Go, and most non-Lisp languages). The DSL is a text file with a concrete syntax defined by a grammar (ANTLR `.g4`, a PEG, …). A parser turns it into an AST / semantic model, and a generator emits source text (JavaPoet, Roslyn, etc.). → Worked examples: [Java + ANTLR](../examples/java-antlr-minimal/README.md), [C# / .NET + ANTLR + Roslyn](../examples/csharp-antlr-minimal/README.md).
 
 **Data-hosted** (Clojure, Lisp, and other homoiconic languages). The DSL *is data* (EDN, maps). There is no grammar and no parser: you read the data, validate it against a **schema** (malli, `clojure.spec`), then derive by **interpreting** the data at runtime or **macro-expanding** it at compile time. No text-generation step. → Worked example: [Clojure (data, not grammar)](../examples/clojure-edn-minimal/README.md).
 
@@ -235,7 +235,7 @@ DSL-First is paradigm-agnostic. The metamodel — `Domain / Level / Model / Stat
 | Parse step | lexer + parser → AST | none (`read-string`) |
 | Derivation | generator → source text | interpret, or macro-expand |
 
-The choice is dictated by your host language, not by taste. **The model, the single-source-of-truth discipline, and the whole methodology apply to both** — only "how derivation works" differs. The rest of this guide is written for both bindings: where a section is necessarily concrete it shows the grammar-hosted form *and* its data-hosted counterpart (e.g. §2.2 pipelines, §5.3.4, §8.4), so neither is the default.
+The choice is dictated by your host language, not by taste. **The model, the single-source-of-truth discipline, and the whole methodology apply to both** — only "how derivation works" differs. The rest of this guide is written for both bindings: where a section is necessarily concrete it shows the grammar-hosted form *and* its data-hosted counterpart (e.g. §2.2 pipelines, §5.3.4, §8.5), so neither is the default.
 
 ---
 
@@ -657,10 +657,10 @@ public class ${className} {
 
 #### 5.3.2 Builder-Based Generation
 
-Use a code builder library (JavaPoet, KotlinPoet, ts-morph):
+Use a code builder library (JavaPoet, Roslyn `SyntaxFactory`, KotlinPoet, ts-morph):
 
 ```java
-// JavaPoet example
+// JavaPoet example (Java)
 TypeSpec classSpec = TypeSpec.classBuilder(className)
     .addModifiers(Modifier.PUBLIC)
     .addFields(fields.stream()
@@ -670,6 +670,15 @@ TypeSpec classSpec = TypeSpec.classBuilder(className)
         .map(this::generateGetter)
         .toList())
     .build();
+```
+
+```csharp
+// Roslyn SyntaxFactory example (C#)
+ClassDeclarationSyntax classDecl = ClassDeclaration(className)
+    .AddModifiers(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.SealedKeyword))
+    .AddMembers(fields
+        .Select(f => ParseMemberDeclaration($"public {f.Type} {f.PascalName} {{ get; private set; }}")!)
+        .ToArray());
 ```
 
 **Pros:** Type-safe, refactorable, testable  
@@ -926,7 +935,7 @@ The data-hosted equivalent generates the same transition cases, but as `deftest`
 
 ## 8. Build Integration
 
-How derivation hooks into your build depends on the binding. **Grammar-hosted** projects add a *generate-sources* step that runs the generator before compilation (§8.1–§8.3). **Data-hosted** projects often add *nothing*: the model is read and interpreted at startup, so there is no generation phase to wire in at all (§8.4).
+How derivation hooks into your build depends on the binding. **Grammar-hosted** projects add a *generate-sources* step that runs the generator before compilation (§8.1–§8.4). **Data-hosted** projects often add *nothing*: the model is read and interpreted at startup, so there is no generation phase to wire in at all (§8.5).
 
 ### 8.1 Build Phase Placement (Grammar-Hosted)
 
@@ -987,7 +996,31 @@ How derivation hooks into your build depends on the binding. **Grammar-hosted** 
 </plugin>
 ```
 
-### 8.3 npm/Node.js Integration
+### 8.3 .NET / MSBuild Integration (C#)
+
+```xml
+<ItemGroup>
+  <!-- ANTLR 4 MSBuild task compiles Grammar/*.g4 into C# lexer/parser classes before compilation -->
+  <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+  <PackageReference Include="Antlr4BuildTasks" Version="12.14.0" PrivateAssets="all" />
+  <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+
+  <Antlr4 Include="Grammar/MyDSL.g4">
+    <Package>Everapp</Package>
+  </Antlr4>
+</ItemGroup>
+
+<Target Name="GenerateFromDsl" BeforeTargets="CoreCompile">
+  <Exec Command="dotnet run --project ../DslGenerator/DslGenerator.csproj" />
+  <ItemGroup>
+    <Compile Include="$(IntermediateOutputPath)generated-sources/dsl/**/*.cs" />
+  </ItemGroup>
+</Target>
+```
+
+(Alternatively, package the ANTLR + Roslyn pipeline as a Roslyn incremental source generator implementing `IIncrementalGenerator` with `<AdditionalFiles Include="Resources/domain.dsl" />` so the C# compiler runs it in-process during `dotnet build`.)
+
+### 8.4 npm/Node.js Integration
 
 ```json
 {
@@ -1000,7 +1033,7 @@ How derivation hooks into your build depends on the binding. **Grammar-hosted** 
 }
 ```
 
-### 8.4 Data-Hosted: Often No Generation Step
+### 8.5 Data-Hosted: Often No Generation Step
 
 In a data-hosted binding the model is data your program reads at startup, so the typical pipeline has **no build-time code generation** — there is nothing to add to the build:
 
@@ -1017,7 +1050,7 @@ In a data-hosted binding the model is data your program reads at startup, so the
 
 The only case that touches the build is **macro**-based derivation (§5.3.4): macros expand at compile time, which the normal Clojure compiler already handles — still no extra plugin or generate-sources phase.
 
-### 8.5 Incremental Generation
+### 8.6 Incremental Generation
 
 **Problem**: Regenerating everything on every build is slow.
 
@@ -1214,18 +1247,19 @@ public class Order extends GeneratedEntityBase<OrderState> { ... }
 
 ### 11.2 From model to artifacts (grammar-hosted)
 
-The full reference implementation — ANTLR grammar (`KernelDSL.g4`), semantic model
+The full reference implementations — ANTLR grammar (`*.g4`), semantic model
 (records), extractor (parse tree → semantic model), generators (semantic model →
-JavaPoet source), and the generated executor classes — lives in
-[`examples/java-antlr-minimal`](../examples/java-antlr-minimal). Rather than reproduce
-~300 lines of Java here, the pipeline is five stages:
+JavaPoet or Roslyn source), and the generated domain classes — live in
+[`examples/java-antlr-minimal`](../examples/java-antlr-minimal) and
+[`examples/csharp-antlr-minimal`](../examples/csharp-antlr-minimal). Rather than reproduce
+~300 lines of host code here, the pipeline is five stages:
 
 1. **Grammar** (`*.g4`) defines the concrete syntax; ANTLR produces the parser.
 2. **Semantic model** — immutable records mirroring the metamodel (`DomainModel`,
    `ModelDef`, `TransitionDef`, …).
 3. **Extractor** — an ANTLR visitor that walks the parse tree and builds the semantic model.
 4. **Generators** — one per artifact category (model class, state enum, event record,
-   transition method, test); each takes the semantic model and emits source via JavaPoet.
+   transition method, test); each takes the semantic model and emits source via JavaPoet, Roslyn, or equivalent.
 5. **Orchestrator** (`DslCodeGenerator.main`) runs every grammar and generator in one build step.
 
 > This is the **grammar-hosted** binding of DSL-First. In a data/homoiconic host
@@ -1329,7 +1363,7 @@ jcrew/
 | Python | text DSL · ANTLR 4, Lark | Jinja2, `ast` |
 | Go | text DSL · ANTLR 4, Participle | jennifer, text/template |
 | Rust | text DSL · pest, nom | `quote`, proc-macros |
-| C# | text DSL · ANTLR 4, Parlot | Roslyn, T4 |
+| C# / .NET | text DSL · ANTLR 4 (`Antlr4BuildTasks`), Parlot | Roslyn (`SyntaxFactory`, Source Generators), T4 |
 | **Clojure / Lisp** | **EDN data · malli, clojure.spec (no parser)** | **interpretation, or macros** |
 
 ### 12.3 Common Patterns Summary
@@ -1373,6 +1407,7 @@ jcrew/
 **Tools:**
 - [ANTLR 4](https://www.antlr.org/) - Parser generator
 - [JavaPoet](https://github.com/square/javapoet) - Java code generation
+- [Roslyn (.NET Compiler Platform)](https://github.com/dotnet/roslyn) - C# syntax tree construction and source generation
 - [ts-morph](https://ts-morph.com/) - TypeScript AST manipulation
 
 **Specifications:**
@@ -1405,7 +1440,7 @@ my-project/
 ├── core/
 │   ├── generated/           # Generated code goes here
 │   └── runtime/             # Manual runtime code
-└── build.gradle / pom.xml
+└── build.gradle / pom.xml / *.csproj
 ```
 
 **Data-hosted** (EDN model → schema → interpret at startup — no codegen tree):

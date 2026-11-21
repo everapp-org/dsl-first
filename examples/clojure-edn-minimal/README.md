@@ -1,6 +1,6 @@
 # Minimal DSL-First in Clojure (data-hosted)
 
-A complete, runnable data-hosted pipeline in ~40 lines of Clojure. It models the **same Agent state machine** as [`../java-antlr-minimal`](../java-antlr-minimal) — so you can compare the two bindings side by side. There, a grammar and a code generator turn text into a `.java` file. Here, the DSL **is data**: you read it, validate it with a schema, and derive behaviour by interpreting it. No grammar, no parser, no generated files.
+A complete, runnable data-hosted pipeline in ~40 lines of Clojure. It models the **same Agent state machine** as [`../java-antlr-minimal`](../java-antlr-minimal) and [`../csharp-antlr-minimal`](../csharp-antlr-minimal) — so you can compare the two bindings side by side. There, a grammar and a code generator turn text into `.java` or `.cs` files. Here, the DSL **is data**: you read it, validate it with a schema, and derive behaviour by interpreting it. No grammar, no parser, no generated files.
 
 This README is for an implementer building the pipeline by hand.
 

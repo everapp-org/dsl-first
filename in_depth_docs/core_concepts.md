@@ -7,7 +7,7 @@
 
 With DSL-First, the work shifts from writing boilerplate by hand to deriving it from a model that captures the domain (a model written in one of the methodology's languages). The typical process looks like this:
 
-> **Two derivation styles** (see the guide's *[Two Bindings](../dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md#25-two-bindings-grammar-hosted-and-data-hosted)*): in some host languages (such as Java) the model is a small text file with its own syntax — a parser reads it and a **generator** writes the code; the guide calls this **grammar-hosted**. In others (such as Clojure) the model is plain structured data — it is checked against a **schema** and executed directly, often with no generated code at all; the guide calls this **data-hosted**. The walkthrough below shows the first style, in Java; the concepts are identical either way.
+> **Two derivation styles** (see the guide's *[Two Bindings](../dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md#25-two-bindings-grammar-hosted-and-data-hosted)*): in some host languages (such as Java or C#) the model is a small text file with its own syntax — a parser reads it and a **generator** writes the code; the guide calls this **grammar-hosted**. In others (such as Clojure) the model is plain structured data — it is checked against a **schema** and executed directly, often with no generated code at all; the guide calls this **data-hosted**. The walkthrough below shows the first style, in Java; the concepts are identical either way.
 
 ### 1. Capture the Domain in a Model
 

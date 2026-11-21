@@ -1,6 +1,6 @@
 # Minimal DSL-First in Java (grammar-hosted)
 
-A complete, runnable grammar-hosted pipeline: a text DSL is parsed by an ANTLR grammar, and a generator emits a Java source file from it. It models an **Agent state machine** (the same domain as [`../clojure-edn-minimal`](../clojure-edn-minimal), so you can compare the two bindings).
+A complete, runnable grammar-hosted pipeline: a text DSL is parsed by an ANTLR grammar, and a generator emits a Java source file from it. It models an **Agent state machine** (the same domain as [`../csharp-antlr-minimal`](../csharp-antlr-minimal) and [`../clojure-edn-minimal`](../clojure-edn-minimal), so you can compare the implementations side by side).
 
 This README is for an implementer building the pipeline by hand.
 

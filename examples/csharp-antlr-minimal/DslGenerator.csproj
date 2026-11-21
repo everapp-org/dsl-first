@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Everapp</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ANTLR 4 Runtime for Parsing -->
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+    <!-- ANTLR 4 MSBuild Task to Generate C# Parser Code from Grammar directly -->
+    <PackageReference Include="Antlr4BuildTasks" Version="12.14.0" PrivateAssets="all" />
+    <!-- Roslyn for C# Syntax Tree Construction and Code Generation -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Antlr4 Include="Grammar/MyDSL.g4">
+      <Package>Everapp</Package>
+      <Visitor>false</Visitor>
+      <Listener>false</Listener>
+    </Antlr4>
+    <Compile Remove="generated-preview/**/*.cs" />
+  </ItemGroup>
+
+</Project>

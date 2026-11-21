@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
-[![Examples](https://img.shields.io/badge/Runnable_Examples-Java%20%26%20Clojure-orange.svg)](examples/)
+[![Examples](https://img.shields.io/badge/Runnable_Examples-Java%2C%20C%23%20%26%20Clojure-orange.svg)](examples/)
 
 **Welcome to the home of DSL-First Development.**
 
@@ -162,8 +162,9 @@ dsl-first/
 │   ├── BEHAVIOR_DSL.md             #   the language for what your app does, step by step
 │   └── DSL_FIRST_METHODOLOGY_GUIDE.md  #   the instructions your assistant follows
 ├── in_depth_docs/                  # for the curious: why it works, when not to use it
-└── examples/                       # the same small app built two ways — both runnable
+└── examples/                       # the same small app built three ways — all runnable
     ├── java-antlr-minimal/         # Java: the model is a text file; the code is generated from it
+    ├── csharp-antlr-minimal/       # C# / .NET: the model is a text file; C# is generated via Roslyn
     └── clojure-edn-minimal/        # Clojure: the model is plain data; nothing is generated
 ```
 
@@ -174,10 +175,11 @@ dsl-first/
 * [Behavior DSL Specification v1.0](dsl_first_methodology/BEHAVIOR_DSL.md) — The language for describing what an application **does**: its procedures, step by step, including which steps may run side by side and what happens when a step fails. It is a separate language because describing a process needs different building blocks than describing things and their states.
 * [DSL-First Methodology Guide](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The instructions the assistant follows from start to finish: checking your input, interviewing you when needed, writing the model, and producing the code, tests, and docs from it.
 
-### Examples (`examples/`) — the same small app, built two ways
+### Examples (`examples/`) — the same small app, built three ways
 
-Both are runnable, and both implement the same example — a small agent that can be activated and assigned tasks — for developers who want to see exactly what the assistant builds under the hood:
+All three are runnable, and all implement the same example — a small agent that can be activated and assigned tasks — for developers who want to see exactly what the assistant builds under the hood:
 * [`java-antlr-minimal`](examples/java-antlr-minimal/README.md) — **Java**: the model is a small text file with its own syntax; a parser reads it and the Java code is generated from it. The generated code is committed, so you can read it without building anything.
+* [`csharp-antlr-minimal`](examples/csharp-antlr-minimal/README.md) — **C# / .NET**: the same text DSL parsed by ANTLR 4 on modern .NET, with C# code derived via Roslyn (`SyntaxFactory`). The generated `.cs` files are committed, so you can read them without building anything.
 * [`clojure-edn-minimal`](examples/clojure-edn-minimal/README.md) — **Clojure**: the model is plain structured data; the program checks it against a schema and runs it directly. Nothing is generated.
 
 ### In-Depth Docs (`in_depth_docs/`) — for those peeking into internals
@@ -193,7 +195,6 @@ We are looking for implementers to contribute guides and examples for:
 - Python (`astor`)
 - TypeScript (`ts-morph`)
 - Go (`jennifer`)
-- C# (`Roslyn`)
 
 See an issue or want to contribute? Open a PR!
 
