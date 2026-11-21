@@ -1,0 +1,141 @@
+# Every gate of this project, declared.
+#
+# A gate is a rule that a program checks. tools/validate.py implements each
+# gate named here, and the gate `gates-declared` fails the build when the two
+# lists differ. docs/generated/gates.md is derived from this file, so a person
+# can read what the build refuses with no read of the validator.
+#
+#   refuses         one sentence: what the gate refuses
+#   kind            hard | ratchet | report
+#   baseline        ratchet only: the file of frozen debt. It only shrinks
+#   ceiling         report only: the count must not go above it
+#   reads_at_least  the population the gate must read. Less is a failure
+#   planted         a defect to put back. tools/verify_gates.py applies each
+#                   one to a copy of the project and requires a failure that
+#                   holds the text of `expect`
+
+[gates.handler-resolves]
+refuses = "An operation that is built and whose handler is not a real function."
+kind = "hard"
+reads_at_least = 6
+[[gates.handler-resolves.planted]]
+file = "model/contexts/tasks.toml"
+find = "taskapp.tasks.handlers:complete"
+replace = "taskapp.tasks.handlers:compleet"
+expect = "tasks.complete: handled_by 'taskapp.tasks.handlers:compleet' is not a function"
+
+[gates.single-registration-site]
+refuses = "A call that registers a handler, a subscriber or a middleware outside the interpreter."
+kind = "hard"
+reads_at_least = 9
+[[gates.single-registration-site.planted]]
+file = "src/taskapp/tasks/queries.py"
+find = "def list_all(state, payload, emit):"
+replace = "def sneak(bus):\n    bus.register_handler('tasks.sneak', list_all)\n\n\ndef list_all(state, payload, emit):"
+expect = "src/taskapp/tasks/queries.py:5 calls register_handler"
+
+[gates.event-declared]
+refuses = "An event that an operation emits or hears and that no context declares."
+kind = "hard"
+reads_at_least = 3
+[[gates.event-declared.planted]]
+file = "model/contexts/tasks.toml"
+find = 'emits = ["task.completed"]'
+replace = 'emits = ["task.done"]'
+expect = "tasks.complete names the event 'task.done'"
+
+[gates.wiring-typed]
+refuses = "A wiring whose two ends are not both declared, or do not agree on the type."
+kind = "hard"
+reads_at_least = 1
+# The defect this gate exists for: one side changes its type and the other does not.
+[[gates.wiring-typed.planted]]
+file = "model/contexts/tasks.toml"
+find = 'result_item = { task_id = "int", title = "str", done = "bool" }'
+replace = 'result_item = { task_id = "str", title = "str", done = "bool" }'
+expect = "tasks.list.task_id is str, and tasks.complete.task_id is int"
+# The gate must not go green because its population went away.
+[[gates.wiring-typed.planted]]
+file = "model/app.toml"
+find = "[[wirings]]"
+replace = "[[removed]]"
+expect = "read 0, and it must read at least 1"
+
+[gates.not-built-stated]
+refuses = "A status outside the closed set, or a not-built operation with no reason."
+kind = "hard"
+reads_at_least = 7
+[[gates.not-built-stated.planted]]
+file = "model/contexts/tasks.toml"
+find = 'reason = "No decision yet on how long an archived task is kept."'
+replace = ""
+expect = "tasks.archive: a not-built operation gives a reason"
+
+[gates.vocabulary]
+refuses = "A refused word used as an identifier in a model. The message names the approved word."
+kind = "hard"
+reads_at_least = 20
+[[gates.vocabulary.planted]]
+file = "model/app.toml"
+find = 'name = "complete-from-list"'
+replace = 'name = "finish-from-list"'
+expect = "the word 'finish' is refused. Write 'complete'"
+
+[gates.described]
+refuses = "An operation or an event with no description."
+kind = "ratchet"
+baseline = "model/baselines/described.txt"
+reads_at_least = 9
+# New debt is refused.
+[[gates.described.planted]]
+file = "model/contexts/tasks.toml"
+find = 'description = "Mark one task as done."'
+replace = ""
+expect = "tasks.complete has no description. This is new"
+# Paid debt must leave the baseline.
+[[gates.described.planted]]
+file = "model/contexts/audit.toml"
+find = "[middleware.record]"
+replace = "[middleware.record]\ndescription = \"Record the command.\""
+expect = "'audit.record' is in model/baselines/described.txt and no longer fails"
+
+[gates.not-built-count]
+refuses = "More operations that are declared and not built than the ceiling allows."
+kind = "report"
+ceiling = 1
+reads_at_least = 7
+[[gates.not-built-count.planted]]
+file = "model/contexts/tasks.toml"
+find = "[queries.list]"
+replace = "[commands.snooze]\ndescription = \"Stop a task for a time.\"\nstatus = \"not-built\"\nreason = \"Not decided.\"\npayload = { task_id = \"int\" }\n\n[queries.list]"
+expect = "count 2 is above the ceiling 1"
+
+[gates.docs-fresh]
+refuses = "A derived document that differs from what the model gives now."
+kind = "hard"
+reads_at_least = 3
+[[gates.docs-fresh.planted]]
+file = "model/contexts/tasks.toml"
+find = 'description = "List every task."'
+replace = 'description = "List each task."'
+expect = "docs/generated/reference.md differs from the model"
+
+[gates.gates-declared]
+refuses = "A gate that is implemented and not declared, declared and not implemented, or declared in part."
+kind = "hard"
+reads_at_least = 10
+[[gates.gates-declared.planted]]
+file = "model/gates.toml"
+find = "[gates.event-declared]"
+replace = "[gates.event-declard]"
+expect = "gate 'event-declard' is declared in model/gates.toml and no function implements it"
+[[gates.gates-declared.planted]]
+file = "tools/validate.py"
+find = '@gate("vocabulary")'
+replace = '@gate("vocabulary-two")'
+expect = "gate 'vocabulary-two' is implemented and model/gates.toml does not declare it"
+[[gates.gates-declared.planted]]
+file = "model/gates.toml"
+find = "ceiling = 1\n"
+replace = ""
+expect = "a report with no ceiling can grow with no failure"

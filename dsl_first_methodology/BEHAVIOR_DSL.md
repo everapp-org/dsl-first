@@ -4,8 +4,20 @@
 > **License**: Apache 2.0 — see [LICENSE](../LICENSE)
 
 **Version:** 1.0  
-**Companion:** [Kernel DSL Specification v1.1](KERNEL_DSL.md)  
+**Companion:** [Kernel DSL Specification v1.2](KERNEL_DSL.md)  
 **Purpose:** This document defines the **Behavior DSL** — a language an AI coding assistant uses to write a **model** of a procedure: which steps the application performs, in what order, which steps may run side by side, and what to do when a step fails. Each step calls one of a fixed set of operations the host application provides; from the model, executable code is derived.
+
+## TL;DR — this file can be used alone
+
+**What it gives you.** One small language to write down a procedure: which steps run, in what order, which run side by side, and what happens when a step fails. Executable code is derived from it.
+
+**Prerequisites: none.** The Behavior DSL has its own metamodel and its own grammar, both in this file. You do not need the Kernel DSL to write a behavior. You need only the list of operations that your application offers, because each step calls one of them.
+
+| you want to | say to the assistant |
+|---|---|
+| model one procedure | *"Read BEHAVIOR_DSL.md. Write a Behavior DSL model of this procedure. First list the host operations that its steps call."* |
+| read a procedure out of existing code | *"Read BEHAVIOR_DSL.md. Write the behavior model that this function implements. Show the error policy for each step that can fail."* |
+| see a complete example first | read §7, which is one page |
 
 ---
 
@@ -80,6 +92,7 @@ The heart of the DSL: an embedded orchestration script inside an `execution { ..
 |-----------|--------|---------|
 | Function call | `validate(documents)` | Invoke a runtime API function |
 | Assignment | `parsed = parseAll(documents)` | Bind a result to a local variable |
+| Conditional *(v0.2-draft proposal)* | `when videoEnabled { ... }` | Steps run only when the named guard holds — real teardown/setup is full of config-flag branches (`if VIDEO_RECORDING_ENABLED`, `if keepBrowserOpen`). Guards are named runtime predicates, like `guard` in the Kernel DSL. |
 | Foreach | `foreach doc in parsed { ... }` | Sequential iteration |
 | Parallel foreach | `parallelForEach doc in parsed { ... }` | Concurrent iteration (governed by `concurrency`) |
 
@@ -155,8 +168,11 @@ multiplicity        = INTEGER ".." ("*" | INTEGER)
 execution_block     = "execution" "{" statement+ "}"
 statement           = call_stmt
                     | assign_stmt
+                    | when_stmt
                     | foreach_stmt
                     | parallel_foreach_stmt
+
+when_stmt           = "when" NAME "{" statement+ "}"
 
 call_stmt           = NAME "(" arg_list? ")"
 assign_stmt         = NAME "=" expr
@@ -344,7 +360,8 @@ Notice that `onManagerError` and `PROMOTE_WORKER_TO_MANAGER` are project-defined
 
 - This document defines **Behavior DSL v1.0**.
 - v1.0 includes: named behaviors, optional participants, execution scripts (`call` / `assign` / `foreach` / `parallelForEach`), error handling, concurrency policy.
-- Planned v1.x additions: `timeout { ... }`, `retryPolicy { ... }`, conditional (`when`) statements, `compensationStep { ... }`.
+- v0.2-draft proposal (this branch): conditional `when NAME { ... }` statements — needed by real teardown/setup code which is full of config-flag branches (`if VIDEO_RECORDING_ENABLED`, `if keepBrowserOpen`).
+- Planned v1.x additions: `timeout { ... }`, `retryPolicy { ... }`, `compensationStep { ... }`.
 - Breaking grammar changes require v2.0.
 
 **Guidelines for extending:**

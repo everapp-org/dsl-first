@@ -1,0 +1,6 @@
+{:application :task-app
+ :description "A minimal task management application."
+
+ :composes
+ {:leases [:tasks :audit]
+  :binds {}}}

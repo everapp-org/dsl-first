@@ -1,0 +1,17 @@
+# The application is a composition: it names the contexts it uses.
+# The same interpreter starts any application. It names none of them.
+
+application = "task-app"
+description = "A minimal task application."
+contexts = ["tasks", "audit"]
+
+# A wiring is an EDGE of the model: a value that one operation returns
+# and another operation receives. Both ends are declared, so a gate can
+# compare them. An edge that is not declared is found by a user.
+[[wirings]]
+name = "complete-from-list"
+description = "The list row gives the id of the task to complete."
+from = "tasks.list"
+field = "task_id"
+to = "tasks.complete"
+payload_field = "task_id"

@@ -1,0 +1,15 @@
+# The audit context: a record of every command, written before the command runs.
+
+context = "audit"
+description = "Keep a record of every command the application receives."
+
+[middleware.record]
+status = "ready"
+handled_by = "taskapp.audit.middleware:record"
+
+[queries.entries]
+description = "List the recorded commands, oldest first."
+status = "ready"
+handled_by = "taskapp.audit.middleware:entries"
+payload = {}
+result_item = { operation = "str" }

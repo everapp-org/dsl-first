@@ -1,0 +1,23 @@
+# The words of this application. One thing has one name.
+# The vocabulary gate refuses a refused word used as an identifier in a model,
+# and names the approved word. The glossary is derived from this file.
+
+[terms.task]
+kind = "noun"
+definition = "One piece of work that a person must do."
+refuses = ["todo", "ticket", "item"]
+
+[terms.complete]
+kind = "verb"
+definition = "To mark a task as done."
+refuses = ["finish", "close", "resolve"]
+
+[terms.archive]
+kind = "verb"
+definition = "To move a done task out of the list. It is not deleted."
+refuses = ["hide", "remove"]
+
+[terms.audit]
+kind = "noun"
+definition = "The record of the commands that the application received."
+refuses = ["log", "history"]

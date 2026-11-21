@@ -2,13 +2,41 @@
 
 > **A methodology for building maintainable software: the domain is captured in a model, written using the small, domain-specific languages this methodology provides, and the code, tests, and documentation are all derived from that model.**
 
-**Version**: 1.0  
+**Version**: 1.2  
 **Who reads this document**: the **AI coding assistant** — this guide is the specification it follows to apply DSL-First. You can read it too, but you don't have to.  
 **Who the methodology is for**: developers at every level, from interns to architects.  
-**Prerequisites to use it**: **none.** You don't need to know how it works to get a working app out. Everything below is the internals — read it if you're curious, or just hand the three methodology files to your assistant and ask.
+**Prerequisites to use it**: **none.** You don't need to know how it works to get a working app out. Everything below is the internals — read it if you're curious, or just hand the methodology files to your assistant and ask.
 
 > **Origin**: Part of the [DSL-First Methodology](https://github.com/everapp-org/dsl-first) open-source project.  
-> **License**: Apache 2.0 — see [LICENSE](LICENSE)
+> **License**: Apache 2.0 — see [LICENSE](../LICENSE)
+
+---
+
+## TL;DR — pick one use case and apply it
+
+**Prerequisites: none.** Each row can be done alone, with the files it names. You do not need to read this guide: your AI coding assistant does. Copy the files of the row into your project and say the sentence.
+
+| you want to | files the assistant needs | say to the assistant |
+|---|---|---|
+| build a new application from an idea | this guide + `KERNEL_DSL.md` | *"Apply the DSL-First methodology. Interview me first (Phase 0), write the model, then derive the code, the tests and the docs."* (§3.1, §3.1.1) |
+| get a readable model of existing code | `KERNEL_DSL.md` | *"Read this codebase and write the Kernel DSL model that it implements. List what you could not decide."* |
+| add one feature with no drift | this guide + `KERNEL_DSL.md` | *"Change the model first. Then derive again. Do not edit derived code."* (§3.2, §3.3) |
+| model a step-by-step procedure | `BEHAVIOR_DSL.md` | *"Write a Behavior DSL model of this procedure."* |
+| get documentation with PASS/FAIL verdicts | `VERIFICATION_DSL.md` | *"Write the checks for these criteria, and a page that links each claim to its check."* |
+| generate a test suite from a model | `DSL_FIRST_QA_GUIDE.md` | pick a row of the TL;DR of that guide |
+| keep the model and hand-written code in agreement | `DSL_FIRST_GATES_GUIDE.md` | pick a row of the TL;DR of that guide |
+| decide what to model and what to write by hand | this guide | read §3.4, which is two pages |
+| choose between a text DSL and a data model | this guide | read §2.5, which is one page |
+
+**The method in five lines.**
+
+1. The **model** is the one place where the application is defined. The assistant writes it. You review it.
+2. Code, tests and documentation are **derived** from the model by an ordinary program, the same way each time.
+3. What a model cannot express (the user interface, the body of a step, a connection to another system) is written **by hand**, and plugs into the derived part.
+4. Where hand-written code must agree with the model, a **gate** compares the two and stops the build.
+5. To change behavior, change the model, never the derived output.
+
+Each of the six methodology files has a TL;DR of its own, and each can be used alone.
 
 ---
 
@@ -21,6 +49,8 @@
 3. [The Methodology](#3-the-methodology)
    - 3.1.1 [Phase 0 — The intake gate (auto-interview / question list)](#311-phase-0--the-intake-gate-the-assistants-job)
    - 3.1.2 [Closing the loop — derive, run the tests, fix at the source](#312-closing-the-loop--derive-run-the-tests-fix-at-the-source)
+   - 3.5 [Two Modes of Governance: Derivation and Conformance](#35-two-modes-of-governance-derivation-and-conformance)
+   - 3.6 [Gate Discipline: Keeping Conformance Honest](#36-gate-discipline-keeping-conformance-honest)
 4. [DSL Design Patterns](#4-dsl-design-patterns)
 5. [Deriving Artifacts](#5-deriving-artifacts)
 6. [Implementation Workflow](#6-implementation-workflow)
@@ -37,7 +67,7 @@
 
 ### 1.1 What is DSL-First Development?
 
-**DSL-First Development** has one core move: the domain is captured in a **model**, expressed using one or more of the small, domain-specific languages this methodology provides (the Kernel DSL and the Behavior DSL). Everything else — the code, the tests, the documentation — is then *derived* from that model.
+**DSL-First Development** has one core move: the domain is captured in a **model**, expressed using one or more of the small, domain-specific languages this methodology provides (the Kernel DSL, the Behavior DSL, and the Verification DSL). Everything else — the code, the tests, the documentation — is then *derived* from that model.
 
 - **The language** is a *domain-specific language (DSL)* — a small notation tailored to one domain (a state machine, a provider catalog, a workflow), not a general-purpose programming language.
 - **The model** is what's written in that language: the actual files (e.g. `domain.dsl` or `domain.edn`). The model is the **single source of truth** — the one artifact authored directly (by the assistant; see below).
@@ -188,6 +218,9 @@ Each DSL is a modeling language for *one concern*. Both share the same toolchain
 |---------|----------|-------------|-----|
 | **Domain structure & lifecycle** | [KERNEL_DSL.md](KERNEL_DSL.md) | Yes — core grammar | The foundational metamodel: `Domain / Model / State / Transition` |
 | **Behavior / procedure shape** | [BEHAVIOR_DSL.md](BEHAVIOR_DSL.md) | **Yes — distinct grammar** | Its `execution { }` block is a mini imperative language — assignment, `foreach`, `parallelForEach` — with no analog in the Kernel DSL's declarative world |
+| **Checkable claims & living documentation** | [VERIFICATION_DSL.md](VERIFICATION_DSL.md) | **Yes — distinct grammar** | Its `check { given / when / expect }` block reuses the Behavior DSL's call-and-bind shape but adds an *expectation* matched against a result, yielding a four-way verdict — asserting on output has no analog in either sibling |
+| **Declaration tables** | [CATALOG_DSL.md](CATALOG_DSL.md) *(v0.1 proposal)* | **Yes — distinct grammar** | Typed rows of named things that are data, not lifecycles — element catalogs, config keys, device matrices, suite manifests. `fields { name: TYPE }` cannot hold quoted locator values or dotted keys, and a sparse `(version × language)` matrix isn't a fields shape. Plus `bind` selection rules and `format` name-grammars. See the [qa-tafBase case study](../in_depth_docs/case-study-qa-tafbase.md) |
+| **Target profile / platform binding** | [TARGET_DSL.md](TARGET_DSL.md) *(v0.1)* | **Yes — platform binding** | Binds the platform-independent model to a concrete host language version, runner, driver, compile-time tooling, complexity budget, and Tier 1 → Tier 2 concept mappings (`realize`, `prefer`, `avoid`) |
 | **Provider integration** | [case study](../in_depth_docs/case-study-provider-integration.md) | **No — Kernel DSL domain** | `provider`, `protocolBinding`, `selectionPolicy` are all entities with fields; they map directly onto `model / fields`. Value is the three-layer discipline, not new syntax |
 
 The Behavior DSL earns a separate metamodel because the *shape of a procedure* —
@@ -218,7 +251,7 @@ A DSL family shares one toolchain. In a **grammar-hosted** binding that is:
 - **Build orchestration** — a single entry point (e.g., `DslCodeGenerator.main`) that runs all grammars and all generators
 - **Output directory conventions** — all generated artifacts share one `generated/` root
 
-In a **data-hosted** binding the shared toolchain is one **schema registry + loader**: a single malli/spec registry validating every model file, and one `load!` that reads, validates, and assembles them all — same idea, no parsers. (This is how ikc3's `gi` runtime carries eight EDN DSLs on one schema + loader.)
+In a **data-hosted** binding the shared toolchain is one **schema registry + loader**: a single malli/spec registry validating every model file, and one `load!` that reads, validates, and assembles them all — same idea, no parsers. (In practice this scales well: one production agent runtime carries eight EDN model files on a single schema registry and one loader.)
 
 ### 2.5 Two Bindings: Grammar-Hosted and Data-Hosted
 
@@ -235,7 +268,7 @@ DSL-First is paradigm-agnostic. The metamodel — `Domain / Level / Model / Stat
 | Parse step | lexer + parser → AST | none (`read-string`) |
 | Derivation | generator → source text | interpret, or macro-expand |
 
-The choice is dictated by your host language, not by taste. **The model, the single-source-of-truth discipline, and the whole methodology apply to both** — only "how derivation works" differs. The rest of this guide is written for both bindings: where a section is necessarily concrete it shows the grammar-hosted form *and* its data-hosted counterpart (e.g. §2.2 pipelines, §5.3.4, §8.5), so neither is the default.
+The choice is mostly dictated by your host language, not by taste. One correction to a common reading of the table: **data-hosted is not only for Lisps.** Any language that can read a data file and resolve a name to a callable at run time can host a data-hosted model — Python with TOML or JSON and `importlib`, Java with YAML or JSON and reflection. What a Lisp adds is that the model and the code share one syntax, which is a convenience and not a requirement. → Worked examples: [Python (TOML, standard library only)](../examples/python-toml-gates/README.md) and [Java (YAML and reflection)](../examples/java-yaml-gates/README.md). **The model, the single-source-of-truth discipline, and the whole methodology apply to both** — only "how derivation works" differs. The rest of this guide is written for both bindings: where a section is necessarily concrete it shows the grammar-hosted form *and* its data-hosted counterpart (e.g. §2.2 pipelines, §5.3.4, §8.5), so neither is the default.
 
 ---
 
@@ -436,6 +469,110 @@ Hand-written files:
 2. It's a one-time integration, not a repeating pattern
 3. The model defines *what* tools exist; the adapter defines *how* to expose them
 
+### 3.5 Two Modes of Governance: Derivation and Conformance
+
+The methodology's central promise is **the model governs the code**. It is worth being
+precise about the word *governs*, because there are **two** ways a model can govern, and
+most of this guide describes only the first.
+
+| Mode | How the model governs | Drift is caught by | Typical use |
+|------|-----------------------|--------------------|-------------|
+| **Derivation** | The artifact is *produced from* the model — generated (grammar-hosted) or interpreted (data-hosted). There is no independent hand-written version. | Re-derivation: the code *is* the model's output, so it cannot disagree with it. | The default for everything derivable (§3.4 "Generate These"). |
+| **Conformance** | The artifact is *written by hand*, independently of the model, but a **conformance test** asserts that the hand-written thing equals what the model declares. | A test that fails the build the moment code and model disagree. | The few primitives that cannot be derived (below). |
+
+Both keep the model as the single source of truth. The difference is only the
+*enforcement mechanism*: derivation makes drift **impossible**; conformance makes it
+**loud**.
+
+#### Why conformance has to exist: the substrate cannot derive itself
+
+Derivation is not free-standing — it runs on something. A generator runs in a build; an
+interpreter runs on a runtime (a registry, a dispatcher, an evaluation loop). That
+**substrate is the one component the model cannot derive**, because deriving it would
+require the substrate to already exist in order to do the deriving. This is the ordinary
+bootstrap problem: you cannot interpret the manifest that produces your interpreter
+*using* that same interpreter; you cannot compile a compiler purely from itself. At
+exactly one point the relationship has to invert.
+
+So the foundational runtime primitive is **modelled like everything else** — it still
+gets a manifest, declared in the same idiom as every other concern, so it is documented,
+reviewable, and authoritative — but it is **not derived from that manifest**. Instead the
+hand-written primitive is pinned to its model by a conformance test (e.g. "the operations
+this manifest declares *equal* the real protocol's methods"). The manifest governs the
+code; it just governs by conformance rather than by derivation.
+
+Two consequences worth internalising:
+
+- **"Governed, not generated" is not an escape hatch.** It does *not* mean the primitive
+  has no model, and it does *not* mean the DSL was too weak to describe it (its surface —
+  operations, events, invariants — usually *is* expressible). It means the primitive sits
+  *under* the derivation pipeline, so its manifest is conformed-to instead of run.
+- **This is a discipline, not an excuse.** Conformance is justified only for the genuine
+  metacircular core (the substrate derivation depends on). Reaching for "I'll just
+  hand-write it and add a conformance test" to dodge modelling a derivable concern is the
+  drift anti-pattern (§10.3) wearing a disguise. If it *can* be derived, derive it.
+
+#### What makes a conformance test trustworthy
+
+Conformance *relocates* trust rather than removing it: with derivation you trust the
+deriver; with conformance you trust the test. So a conformance test is only worth its
+name if it cannot quietly stop testing anything. Two properties are load-bearing, and
+both are visible by *reading the test* — they are not enforced by yet another test:
+
+- **Independent provenance (non-vacuity).** The two sides being compared must come from
+  *different* origins — e.g. one read from the model file, the other obtained by
+  reflecting the live code at runtime. If both sides are derived from the model, the test
+  is a tautology that can never fail. This is the single property a reviewer must always
+  check, and the reason conformance terminates the "who tests the test?" regress at a
+  small, readable artifact instead of an infinite tower.
+- **Bidirectional check.** Assert *equality* of the two surfaces, not that one is a subset
+  of the other. A subset check is blind to drift on one side (a renamed or stray element
+  slips through); equality catches both directions.
+
+#### Conformance carries a coverage obligation that derivation does not
+
+Under derivation, a model element with *no* test still cannot drift — the code is the
+model's output, so the two agree by construction; an untested element is merely untested,
+not unsafe. Under conformance the code is hand-written, so a model element that *no* test
+pins drifts **invisibly**: nothing produces it and nothing checks it. "Governed by
+conformance" silently degrades into "governed by whichever parts someone remembered to
+test."
+
+So conformance mode needs a **second gate beyond the conformance tests themselves**: a
+*coverage check* that fails the build when a model element declared as conformed (an
+operation, a contract surface) has no test pinning it. The cheap, robust form is to tag
+each conformance test with the model coordinate it pins, then assert — statically, so the
+gate does not depend on load order — that every conformed coordinate in the model appears
+in some test's tag. The coverage gate and the two properties above compose: coverage
+ensures a test *exists* for each element; independent provenance and bidirectionality
+ensure each such test actually *bites*.
+
+### 3.6 Gate Discipline: Keeping Conformance Honest
+
+§3.5 says why conformance exists and what makes one conformance test trustworthy. A
+project that applies it for months collects dozens of such checks — call each one a
+**gate** — and a second-order problem appears: gates that are green because they read
+an empty list, counts that are printed and never limited, rules that live in a checklist
+nobody runs. None of these is caught by the gates themselves.
+
+The full treatment is its own document, the **[Gates Guide](DSL_FIRST_GATES_GUIDE.md)**.
+The rules it adds, in one line each:
+
+| # | rule | the defect it answers |
+|---|------|-----------------------|
+| 1 | **A rule is a program, not a paragraph.** A convention arrives with its gate in the same change. | a checklist that was never run |
+| 2 | **Declare the edges, not only the nodes.** A provider declares what it returns; a wiring between two operations is a model element with a type check. | both ends were correct and the join was broken |
+| 3 | **A gate is a declaration**: what it refuses, its kind, its limit, the population it must read, a planted failure. A meta-gate compares declared gates with implemented gates, in both directions. | nobody can say what the build refuses |
+| 4 | **Three kinds: hard, ratchet, report.** A new rule in an old project arrives as a ratchet and is never red on arrival. A ratchet is two-sided, so its baseline only shrinks. A report has a ceiling. | a red gate that was disabled; a count that grew |
+| 5 | **A gate must be able to fail.** Each gate has a planted failure that a harness puts back, and a floor on how much it reads. | a check that reads nothing |
+| 6 | **Declare what is not built.** `not-built` is a status with a reason; the system answers with it, and a query lists it. | controls that do nothing over a green build |
+| 7 | **Statements, not prose.** A claim that carries weight is a checkable statement or a typed field; the description only explains. | a description that was false |
+| 8 | **The vocabulary is a model.** One thing, one name; the build refuses a refused synonym used as an identifier, and the glossary is derived. | two names for one thing |
+
+Every rule is implemented in two runnable examples:
+[`python-toml-gates`](../examples/python-toml-gates/README.md) and
+[`java-yaml-gates`](../examples/java-yaml-gates/README.md).
+
 ---
 
 ## 4. DSL Design Patterns
@@ -592,6 +729,61 @@ model Order {
 
 The generator creates a stub; developers implement the `@custom` actions.
 
+### 4.4 Validation & Environment Patterns
+
+#### 4.4.1 The Environment Reference
+
+Secrets do not belong in a model — but the model still has to say *where*
+a secret goes. Spell the reference, never the value:
+
+```dsl
+# Bad: the secret is in the model — on disk, in review, in every clone
+steps {
+    fill secret with "hunter2"
+}
+
+# Good: the model names the need; the environment supplies the value
+steps {
+    fill secret with env:SUT_SECRET
+}
+```
+
+Rules that make this honest:
+
+- The model **names the need** (`env:NAME`); the run reads the variable.
+  The generated code carries `os.environ["SUT_SECRET"]`, not the secret.
+- Needs **derive from declared use** — a `model.env_needs()` that walks
+  every `env:`/`env-pool:` reference — so preflight can gate on what's
+  missing *before* anything executes.
+- The indirection never leaks back into artifacts: captions, journals,
+  and error output name the variable (`fill secret`), never its value.
+- `env-pool:` is the same pattern for single-use values (one-time
+  codes): the environment is a pool consumed one-per-call, exhaustion
+  is a named runtime error.
+
+#### 4.4.2 The Named Refusal Table
+
+A validator that throws on the first problem forces the author to fix
+one error at a time. Instead, collect *refusals* — and give every
+refusal a **name**:
+
+```json
+{"clause": "journey.board-to-tot.steps[2]",
+ "reason": "unknown-element",
+ "message": "click names no element: \"open-tot\""}
+```
+
+Rules:
+
+- Validation **collects**, it does not throw — the author gets the
+  whole list in one pass.
+- The refusal's `reason` is part of the language's contract: an
+  enumerable, stable name (`unknown-step`, `bad-env`, `bad-auth`…)
+  that the spec lists and consumers may switch on — CLI exit codes,
+  CI annotations, IDE diagnostics.
+- Refusal names grow **only with the grammar** — a new language
+  construct earns its refusal name in the same change.
+
 ---
 
 ## 5. Deriving Artifacts
@@ -745,6 +937,21 @@ Data-hosted, the interpreter is just a function, so the test is just a function 
     (is (= :published (step :draft :publish)))
     (is (= :draft     (step :draft :unknown)))))   ; no transition => unchanged
 ```
+
+### 5.5 Target Profiles and the Two-Tier Concept Ontology
+
+When an emitter translates a DSL model (M2) into host code (Java, Python, TypeScript, JavaScript), it is performing an ontological mapping from **platform-independent domain concepts** to **target-language constructs**. Left implicit, that mapping drifts across generators or relies on whatever legacy idiom an AI assistant happens to recall.
+
+The **[Target Profile Specification](TARGET_DSL.md)** makes this platform binding explicit through a two-tier concept ontology (maintained as shared catalogs when paired with GAKS):
+
+1. **Tier 1 — Abstract Programming Archetypes (`CONCEPT-prog-v1-*`):** Language-neutral constructs required by DSL-First generators — *Immutable Data Carrier* (`001`), *Closed Type Union* (`002`), *Exhaustive Pattern Branching* (`003`), *Null-Safe Optionality* (`004`), *Scoped Resource Cleanup* (`005`), *Scoped Test Fixture* (`006`), *Parallel Fan-Out* (`007`), *Immutable Collection Literal* (`008`), *Higher-Order Function* (`009`), and *External Environment Binding* (`010`).
+2. **Tier 2 — Host-Language Realizations (`CONCEPT-{java,python,ts,js}-v1-*`):** Concrete language constructs linked via `realizes:` to their Tier 1 archetype and `contrasts-with:` to sibling languages:
+   - **Java 21++ (`java`):** `record` (`002`), `sealed interface` (`004`), pattern-matching `switch` (`006`), JSpecify `@NullMarked` + Error Prone/NullAway (`019`), `try-with-resources` (`012`), `List.of`/`Map.of` (`011`), Virtual Threads (`009`), `var` (`003`), text blocks (`008`).
+   - **Python 3.12 (`python`):** `@dataclass(frozen=True, slots=True)` (`001`), `X | Y` unions (`002`), `match`/`case` + `assert_never` (`003`), `T | None` strict typing (`004`), `with` context managers (`005`), `yield` fixtures (`006`).
+   - **TypeScript (`ts`):** `readonly` interfaces & `as const` (`001`), discriminated unions (`002`), exhaustive `never` narrowing (`003`), `strictNullChecks` (`004`), `using` / `Disposable` (`005`), `test.extend<T>()` (`006`).
+   - **JavaScript ESM (`js`):** `Object.freeze({...})` (`001`), tagged discriminants (`002`), `?.` and `??` (`004`), `try/finally` (`005`), JSDoc `@ts-check`.
+
+A project's `target` block selects which Tier 2 construct realizes each Tier 1 archetype (`realize ... with ...`), which idioms are preferred (`prefer ...`), and which legacy anti-patterns are refused (`avoid ...`). When generating source files, the emitter stamps `# @concept <ID>` / `// @concept <ID>` headers so every generated file is traceable to the exact concepts it embodies. See [TARGET_DSL.md](TARGET_DSL.md) for the complete grammar and mapping tables.
 
 ---
 
@@ -1150,6 +1357,34 @@ public class OrderMigration_v1_to_v2 {
 }
 ```
 
+### 9.4 How New Concepts Arrive: The Three-Channel Funnel
+
+Host languages and libraries evolve even when the domain model does not. New target-language concepts enter a DSL-First project through three channels:
+
+1. **Channel 1 — Human-Curated Source (Presentations, Books, Post-Mortems):** A developer or architect encounters a better construct (for example, a conference talk on modern Java 21–25 *"Java++"* covering `record`, `sealed interface`, JSpecify `@NullMarked`, and NullAway) and proposes it to improve readability or compile-time safety.
+2. **Channel 2 — AI Coding Assistant Proposal:** While generating or refactoring an emitter or adapter, the assistant identifies a construct that reduces boilerplate or eliminates a bug class under the project's declared language version.
+3. **Channel 3 — Toolchain / Language Upgrade:** Bumping the compiler or test runner baseline (e.g., Java 17 → 21, Python 3.10 → 3.12, TypeScript 4 → 5) unlocks constructs that were previously unavailable.
+
+To prevent style drift (where half the codebase uses an old idiom and half uses a new one), **neither a human nor an AI assistant edits generated files or emitter templates ad hoc**. Every candidate construct follows the same three-step governance funnel:
+
+```
+  Candidate concept arrives (Talk / AI proposal / Toolchain bump)
+        │
+        ▼
+  1. Catalog entry (CONCEPT-<lang>-v1-NNN-01-<slug>.md)
+     Defines the construct, minimum version (since:), and Tier 1 archetype (realizes:)
+        │
+        ▼
+  2. Decision gate ([!decision] state: open)
+     Weighs readability, tooling compatibility, and migration impact
+        │
+        ▼  Human approves (state: decided)
+  3. Update Target Profile (realize / prefer / avoid) + Emitter
+     Regenerate all affected files atomically; gates verify 0 violations
+```
+
+If a candidate construct is rejected (for example, a non-standard compiler plugin like Manifold that breaks IDE portability), its concept page stays in the catalog with `standing: discouraged` and is added to the Target Profile's `avoid` list — preserving the institutional memory of *why* the project does not use it.
+
 ---
 
 ## 10. Anti-Patterns
@@ -1202,6 +1437,10 @@ transitions {
 - Generated code is the ONLY implementation (no parallel hand-written version)
 - CI validates the model parses and generates successfully
 - Runtime uses generated classes directly
+- The one principled exception is the bootstrap substrate that derivation itself runs on
+  (§3.5): it is hand-written, but not a *parallel* version — it is pinned to its model by
+  a **conformance test** that fails the build on drift. Governance by conformance, not a
+  licence to fork the implementation.
 
 ### 10.4 Over-Generation
 
@@ -1227,6 +1466,46 @@ public class Order extends GeneratedEntityBase<OrderState> { ... }
 ```
 
 **Solution**: Generate standalone code with no special dependencies.
+
+### 10.6 The Gate That Cannot Fail
+
+**Problem**: A check is green because it looks at nothing. It iterates over a list that
+became empty after a refactor, or it compares two values that both come from the model,
+or its scan covers one file extension of two. It prints "0 violations" on every build.
+
+**Solution**: Give every gate a **planted failure** — put the defect back in a copy of the
+project and require a red build with a named message — and a **floor** on how many things
+it must read. See the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) §6.
+
+### 10.7 The Undeclared Seam
+
+**Problem**: Both ends of a join are modelled and tested, and the join is not. A query
+returns an `id` as a string; a command takes it as a UUID; a screen passes one to the
+other. Every test is green, because each test exercises one end.
+
+**Solution**: Declare what each provider returns, and declare the wiring between
+operations as a model element. A gate then compares the two types.
+See the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) §3.
+
+### 10.8 Prose as Substance
+
+**Problem**: The model's weight sits in `description` strings. A gate checks that each
+one exists; nothing can check that it is true. Rules live in a checklist, and promises
+that are not built live in comments.
+
+**Solution**: A claim that carries weight becomes a statement or a typed field. A rule
+becomes a program. Something promised and not built becomes a declared `not-built`
+status with a reason. See the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) §2, §7, §8.
+
+### 10.9 Red on Arrival
+
+**Problem**: A new rule is switched on in an existing project and finds 400 violations.
+The build is red on the first day, so the gate is disabled, or every commit skips all
+the gates to get past this one.
+
+**Solution**: Introduce the rule as a **two-sided ratchet**: freeze today's violations in
+a baseline file that only shrinks, and refuse new ones. Never skip the gates wholesale.
+See the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) §5.
 
 ---
 
@@ -1267,7 +1546,7 @@ JavaPoet or Roslyn source), and the generated domain classes — live in
 > "generator" is interpretation or a macro — same metamodel, no parser. See §2.5 and the
 > [Clojure example](../examples/clojure-edn-minimal/README.md).
 
-### 11.7 Project Structure
+### 11.3 Project Structure
 
 ```
 jcrew/
@@ -1346,21 +1625,28 @@ jcrew/
 - [ ] Test the deriver
 - [ ] Wire into the build (grammar-hosted) or load at startup (data-hosted)
 - [ ] Document the model
+- [ ] Declare what each provider returns, and each wiring between operations
+- [ ] Declare what is promised and not built, with a reason
 
 **Ongoing:**
 - [ ] The model is the single source of truth
 - [ ] Derived artifacts are never manually edited
 - [ ] All changes flow through the model
 - [ ] Version the DSL for breaking changes
+- [ ] Every rule is a declared gate; a new rule in old code arrives as a ratchet
+- [ ] Every gate has a planted failure, and the harness that runs them is green
+- [ ] One thing has one name: the vocabulary is declared and the build reads it
+
+The last three items are the [Gates Guide](DSL_FIRST_GATES_GUIDE.md) checklist in brief.
 
 ### 12.2 Technology Options
 
 | Language | Carrier + validation | Derivation |
 |----------|----------------------|------------|
-| Java | text DSL · ANTLR 4, JavaCC | JavaPoet, Roaster |
+| Java | text DSL · ANTLR 4, JavaCC — or YAML/JSON data · Jackson, records | JavaPoet, Roaster — or interpretation via reflection |
 | Kotlin | text DSL · ANTLR 4 | KotlinPoet |
 | TypeScript | text DSL · PEG.js, Chevrotain — or typed object literals · Zod | ts-morph, TS AST |
-| Python | text DSL · ANTLR 4, Lark | Jinja2, `ast` |
+| Python | text DSL · ANTLR 4, Lark — or TOML/JSON data · `tomllib`, dataclasses, pydantic | Jinja2, `ast` — or interpretation via `importlib` |
 | Go | text DSL · ANTLR 4, Participle | jennifer, text/template |
 | Rust | text DSL · pest, nom | `quote`, proc-macros |
 | C# / .NET | text DSL · ANTLR 4 (`Antlr4BuildTasks`), Parlot | Roslyn (`SyntaxFactory`, Source Generators), T4 |
@@ -1394,6 +1680,12 @@ jcrew/
 | **Semantic Model** | In-memory representation of the DSL's domain concepts | both |
 | **Meta-program** | A program that operates on other programs | both |
 | **Single Source of Truth** | One authoritative definition from which all artifacts are derived | both |
+| **Gate** | A program that reads the model, the code, or both, and stops the build when a rule is broken | both |
+| **Ratchet** | A gate over a rule the project does not meet yet: a baseline file freezes today's violations, new ones fail, and the baseline only shrinks | both |
+| **Planted failure** | A named defect put back into a copy of the project to prove that a gate fires | both |
+| **Wiring** | A declared edge of the model: a value one operation returns and another receives | both |
+| **Target Profile** | Declarative platform binding (`TARGET_DSL.md`) specifying host language version, runner, driver, tooling, complexity budget, and Tier 1 → Tier 2 concept mappings | both |
+| **Concept Ontology** | Hierarchy of abstract programming/QA archetypes (`Tier 1`) and concrete host-language/tool realizations (`Tier 2`) stamped as `@concept` tags by emitters | both |
 
 ---
 
@@ -1462,5 +1754,5 @@ my-project/
 ---
 
 **Document Version**: 1.0  
-**Last Updated**: 2026-01-29  
+**Last Updated**: 2026-06-11  
 **License**: Apache 2.0 — https://github.com/everapp-org/dsl-first/blob/main/LICENSE

@@ -1,0 +1,17 @@
+# The audit context: a record of every command, written before the command runs.
+
+context: audit
+description: Keep a record of every command the application receives.
+
+middleware:
+  record:
+    status: ready
+    handled_by: org.everapp.taskapp.audit.Middleware#record
+
+queries:
+  entries:
+    description: List the recorded commands, oldest first.
+    status: ready
+    handled_by: org.everapp.taskapp.audit.Middleware#entries
+    payload: {}
+    result_item: {operation: str}

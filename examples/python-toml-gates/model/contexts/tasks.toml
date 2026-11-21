@@ -1,0 +1,51 @@
+# The tasks context: what the application offers for tasks.
+# This file is the model. The interpreter wires it, the gates check it,
+# and the reference documentation is derived from it.
+
+context = "tasks"
+description = "Create a task, complete it, and list the tasks."
+
+[commands.create]
+description = "Create a task with a title."
+status = "ready"
+handled_by = "taskapp.tasks.handlers:create"
+payload = { title = "str" }
+result = { task_id = "int" }
+emits = ["task.created"]
+
+[commands.complete]
+description = "Mark one task as done."
+status = "ready"
+handled_by = "taskapp.tasks.handlers:complete"
+payload = { task_id = "int" }
+result = { task_id = "int", done = "bool" }
+emits = ["task.completed"]
+
+# Declared, and not built. The application refuses it with the reason below.
+# The absence is a fact that a query can list, not a missing line.
+[commands.archive]
+description = "Move a done task out of the list."
+status = "not-built"
+reason = "No decision yet on how long an archived task is kept."
+payload = { task_id = "int" }
+
+[queries.list]
+description = "List every task."
+status = "ready"
+handled_by = "taskapp.tasks.queries:list_all"
+payload = {}
+result_item = { task_id = "int", title = "str", done = "bool" }
+
+[events."task.created"]
+description = "A task now exists."
+payload = { task_id = "int", title = "str" }
+
+[events."task.completed"]
+description = "A task is done."
+payload = { task_id = "int" }
+
+[subscribers.count_completed]
+description = "Count the tasks that were completed."
+status = "ready"
+handled_by = "taskapp.tasks.handlers:count_completed"
+pattern = "task.completed"

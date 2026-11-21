@@ -1,0 +1,35 @@
+{:domain :tasks
+ :description "Task management context — create, complete, and query tasks."
+
+ :levels
+ {:commands
+  {:models
+   {:create
+    {:description "Create a new task with a title."
+     :status :ready
+     :payload [:map [:title :string]]
+     :handled-by :tasks.handlers/create
+     :emits [:task/created]}
+    :complete
+    {:description "Mark a task as completed."
+     :status :ready
+     :payload [:map [:task-id :int]]
+     :handled-by :tasks.handlers/complete
+     :emits [:task/completed]}}}
+
+  :queries
+  {:models
+   {:list
+    {:description "List all tasks."
+     :status :ready
+     :read-only true
+     :payload [:map]
+     :handled-by :tasks.queries/list-all}}}
+
+  :subscribers
+  {:models
+   {:log-events
+    {:description "Log every event for debugging."
+     :status :in-progress
+     :pattern :task/created
+     :handled-by :tasks.subscribers/log-event}}}}}
