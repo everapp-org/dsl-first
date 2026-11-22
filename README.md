@@ -30,7 +30,7 @@ The same model also drives **test automation and QA**: the state machine yields 
 
 ## Who Is This For?
 
-This methodology is designed for **developers using AI coding assistants** (Cursor, GitHub Copilot, Windsurf, Claude Code, etc.).
+This methodology is designed for **developers using AI coding assistants** (Cursor, GitHub Copilot, Devin (Windsurf), Claude Code, etc.).
 
 The core insight: AI assistants are dramatically more effective when they work from a **structured model** than from natural-language requirements alone. In the DSL-First methodology, the AI coding assistant turns your specification — or your existing codebase — into a small, readable model, written in the languages this methodology provides. That model becomes the single source of truth: the one place where the heart of the application is defined. The assistant then generates the application's backbone from it — code, tests, and documentation that agree with each other.
 
@@ -84,88 +84,40 @@ The boundary between the two moves in one direction: when a hand-written pattern
 
 ## Getting Started
 
-No long reading list. Six files are all you need to drop into your project; your AI coding assistant does the rest.
+No long reading list, and no methodology jargon to memorize. Copy **one folder** into your project; its [`SKILL.md`](dsl_first_methodology/SKILL.md) teaches your AI coding assistant when to interview you, which DSL specifications to load on demand, and when to pause with visual architecture diagrams and technical telemetry reports.
 
-### Step 1 — Copy these six files into your project
+### Step 1 — Copy the `dsl_first_methodology` folder into your project
 
-These files are not for you to study — they are the instructions your AI coding assistant works from. Copy all six into your project; the assistant applies whichever it needs.
+Drop the [`dsl_first_methodology/`](dsl_first_methodology/) folder into your project — either as an agent skill (so your assistant discovers [`SKILL.md`](dsl_first_methodology/SKILL.md) automatically) or at the project root:
 
-[`dsl_first_methodology/KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md) teaches your assistant the language for describing what your application **manages**: the things it keeps track of (orders, customers, payments), the states each thing can be in (an order can be *placed*, *paid*, *shipped*, or *refunded*), and which state changes are allowed (a refunded order cannot be shipped again).
+```bash
+# Option A: Install as an auto-discovered skill (Claude Code, Codex, Antigravity, Cursor)
+mkdir -p .agents/skills
+cp -r path/to/dsl-first/dsl_first_methodology .agents/skills/dsl-first
 
-[`dsl_first_methodology/BEHAVIOR_DSL.md`](dsl_first_methodology/BEHAVIOR_DSL.md) teaches your assistant the language for describing what your application **does**: its step-by-step procedures — for example, "when an order is placed: check the stock, charge the customer, then ship; if charging fails, cancel the order."
-
-[`dsl_first_methodology/VERIFICATION_DSL.md`](dsl_first_methodology/VERIFICATION_DSL.md) teaches your assistant the language for describing what must **hold**: the checkable claims your application makes — "a placed order can be paid; a declined card cancels it." From these it produces **living documentation**: prose a newcomer can read, where each claim is shown passing or failing against the running system, so a page that drifts from the code does not read poorly — it *fails*.
-
-[`dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md`](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) gives your assistant its working instructions: when to interview you about your project, how to write the model from what you provide, and how to produce the code, the tests, and the docs from that model.
-
-[`dsl_first_methodology/DSL_FIRST_QA_GUIDE.md`](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) teaches your assistant how to apply the three DSL languages to **test automation**: extracting testable specifications from existing codebases, generating test suites (Gherkin, step definitions, test data factories), and producing living documentation with live PASS/FAIL verdicts. It covers both grammar-hosted (Java) and data-hosted (Clojure) bindings.
-
-[`dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md`](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) teaches your assistant how to keep the model and the hand-written code **honest over time**: every rule is a small program (a *gate*) that stops the build, a new rule is brought into an existing project without turning the build red, and every gate is proven able to fail. Without it, a project collects checks that are green because they look at nothing.
-
-*(Draft proposal on this branch)* [`dsl_first_methodology/CATALOG_DSL.md`](dsl_first_methodology/CATALOG_DSL.md) teaches the language for **declaration tables** — typed rows of named things that are data, not lifecycles: element catalogs, config keys, device matrices, suite manifests. Motivated by a real test-framework extraction (see the case study in `in_depth_docs/`).
-
-[`dsl_first_methodology/TARGET_DSL.md`](dsl_first_methodology/TARGET_DSL.md) teaches your assistant how to bind a platform-independent model to one or more **target language profiles** (Java 21++, Python 3.12, TypeScript, JavaScript ESM), mapping abstract programming and QA archetypes (`CONCEPT-prog-v1-*`, `CONCEPT-istqb-v1-*`, `CONCEPT-qa-v1-*`) to idiomatic target constructs with `@concept` traceability.
-
-### Step 2 — (Optional) Brainstorm: from a vague idea to a requirements document
-
-This step is for when you don't yet have a written specification — it runs **before any model exists**. You can start here deliberately, but you don't have to remember to: the methodology makes **the assistant check your input and start interviewing on its own when what you gave it is too thin to work from** — that's Phase 0, the [intake gate](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md#311-phase-0--the-intake-gate-the-assistants-job), and it's the assistant's job, not yours.
-
-The assistant interviews you one question at a time (each with its recommended answer), turns vague or double-duty words into one agreed name per thing, probes edge cases with concrete scenarios, and checks your answers against any existing code. It then writes the result up as a **PRD** — a Product Requirements Document: a short, structured statement of what to build, covering the agreed vocabulary, the things your application manages and the states they pass through, the rules, and the questions still open. You review and approve it, and that approved PRD is what Step 3 works from.
-
-The prompt to start it deliberately:
-
-```
-Before writing any model, interview me about this domain to produce a PRD. Ask one
-question at a time, each with your recommended answer. Sharpen my terminology into
-one agreed name per concept, probe edge cases with concrete scenarios ("what if a
-customer cancels an order that has already shipped?"), and challenge anything in my
-answers that the existing code contradicts. When the domain is clear, write it up
-as a PRD — vocabulary, the things managed and their states, rules, open questions —
-and wait for my approval.
+# Option B: Copy the folder directly into your project root
+cp -r path/to/dsl-first/dsl_first_methodology ./dsl_first_methodology
 ```
 
-**If you're only a messenger** — relaying for a stakeholder and unable to answer on the spot — ask for a **question list** instead of a live interview, and bring the answers back:
+You do not need to read the files inside the folder — [`SKILL.md`](dsl_first_methodology/SKILL.md) routes your assistant to the right specification only when needed:
+* [`SKILL.md`](dsl_first_methodology/SKILL.md) — **The entry point.** Teaches the assistant how to run the methodology, enforce product-vs-example boundaries, and pause at the four checkpoints without requiring you to write technical prompts.
+* [`DSL_FIRST_CHECKPOINTS_GUIDE.md`](dsl_first_methodology/DSL_FIRST_CHECKPOINTS_GUIDE.md) — Defines the **four review checkpoints**: the evolving **visual architecture floorplan** (saying what each part *actually does today*), the **measured technical telemetry report** (tools, languages, and LoC breakdown), and the LLM self-reflection check.
+* [`DSL_FIRST_METHODOLOGY_GUIDE.md`](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The complete workflow reference (grammar-hosted and data-hosted bindings, derivation vs. conformance).
+* [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md), [`BEHAVIOR_DSL.md`](dsl_first_methodology/BEHAVIOR_DSL.md), [`VERIFICATION_DSL.md`](dsl_first_methodology/VERIFICATION_DSL.md), [`CATALOG_DSL.md`](dsl_first_methodology/CATALOG_DSL.md), [`TARGET_DSL.md`](dsl_first_methodology/TARGET_DSL.md) — The five modeling languages (what your app **manages**, what it **does** step by step, what claims must **hold**, **declaration tables**, and **target language profiles**).
+* [`DSL_FIRST_QA_GUIDE.md`](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) & [`DSL_FIRST_GATES_GUIDE.md`](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) — How to apply the models to test automation, living documentation, and build gates (ratchets, baselines, planted failures).
 
-```
-I can't answer domain questions myself — I'm relaying to the stakeholders.
-Instead of interviewing me, give me a grouped list of the open questions, each
-with why it matters and your provisional assumption, so I can collect answers.
-```
+### Step 2 — Talk to your assistant in plain language
 
-> The PRD states *intent* — what you asked for. Once Step 3 authors the model, **the model is the source of truth for what the app actually does**; the PRD is your record of original intent, not a second place to edit behavior. To change behavior, prompt the assistant: it updates the model and regenerates the code. When the intent itself changes, refresh the PRD — or have it regenerated from the model as a derived document — so the two never silently disagree.
+Because [`SKILL.md`](dsl_first_methodology/SKILL.md) carries the methodology rules, you can talk about **your software and its specification** in everyday terms:
 
-### Step 3 — Let the assistant author the model and generate the rest
-
-Now point the assistant at the methodology. It writes the model — the single source of truth — produces the code, the tests, and the docs from it, runs the tests, and fixes whatever fails:
-
-```
-I want to apply the DSL-First methodology to this project. You have all six
-methodology files in context — the Kernel DSL, Behavior DSL, and Verification DSL
-specifications, the methodology guide, the QA guide, and the gates guide. Author the model from the
-approved PRD (or, if I skipped the brainstorm, from the specification or existing
-code I point you at), using whichever language the domain needs. Then generate the
-code, tests, and docs, run the tests, and trace any failure to its real cause —
-fixing it at its source (the model if a rule is wrong, the generator if the
-expansion is wrong), never by editing generated code.
-```
-
-One knob: **how much of its work you check**, from most oversight to least. Append one to the prompt above.
-
-**Step-by-step** — review each model file before any code is generated.
-
-```
-Show me each model file and wait for my approval before generating any code,
-tests, or docs.
-```
-
-**YOLO** — the assistant goes all the way to a finished result in one pass; you review at the end.
-
-```
-Go all the way in one pass, without stopping for review. I'll check the
-finished result.
-```
-
-(If you did the Step 2 brainstorm, its approved PRD feeds straight into either mode.)
+| What you want to do | What to say to your assistant |
+|---|---|
+| **Start from an idea (Clarify specification & visual blueprint first)** | *"Use the `dsl-first` skill. Interview me one question at a time about the software I want to build so we can write a clear specification and a visual blueprint diagram before any code is written."* |
+| **Build the software with review checkpoints (Recommended)** | *"Build this software using the `dsl-first` skill. Pause at the 4 checkpoints to show me the visual architecture diagram, the technical report (tools, languages, lines of code), and your self-reflection check."* |
+| **Build in one pass (YOLO, with full report at the end)** | *"Build this software using the `dsl-first` skill in one pass without stopping, and finish with the visual architecture diagram, the technical report of tools/languages/LoC, and the self-reflection check."* |
+| **Extend, add a programming language, or change an existing project** | *"Using the `dsl-first` skill, run the Stop 4 pre-flight check before writing code: show me on the architecture diagram what part of the product this changes, the current technical report, and any issues in existing code before copying it."* |
+| **Audit an existing codebase or AI session** | *"Using the `dsl-first` skill, audit this repository and give me the visual architecture floorplan (what each part actually does today), the measured technical report (tools, languages, LoC), and any red flags."* |
+| **Relay questions to stakeholders (when you can't answer on the spot)** | *"I'm relaying to stakeholders — instead of interviewing me live, give me a grouped list of the open product questions, each with why it matters and your recommended default."* |
 
 ## Pick One Use Case
 
@@ -182,7 +134,8 @@ You do not need all six files, and you do not need to read any of them. **Each f
 | add a rule to an old project, and not break the build | [`DSL_FIRST_GATES_GUIDE.md`](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
 | stop defects in the joins between operations | [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md), §3.8 | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
 | make visible what is promised and not built | [`KERNEL_DSL.md`](dsl_first_methodology/KERNEL_DSL.md), §3.7 | [`python-toml-gates`](examples/python-toml-gates/README.md), [`java-yaml-gates`](examples/java-yaml-gates/README.md) |
-| apply all of it | all six files, as in [Getting started](#getting-started) | — |
+| review AI progress with a visual architecture floorplan, LoC telemetry, and LLM red-flag checks | [`DSL_FIRST_CHECKPOINTS_GUIDE.md`](dsl_first_methodology/DSL_FIRST_CHECKPOINTS_GUIDE.md) | — |
+| apply all of it | all methodology files, as in [Getting started](#getting-started) | — |
 
 A dash means that this repository has no runnable example for that case yet.
 
@@ -191,13 +144,17 @@ A dash means that this repository has no runnable example for that case yet.
 ```
 dsl-first/
 ├── README.md
-├── dsl_first_methodology/          # THE METHODOLOGY — copy these six files into your project
+├── dsl_first_methodology/          # THE METHODOLOGY — copy this one folder into your project
+│   ├── SKILL.md                    #   the entry-point skill: teaches your assistant the workflow & checkpoints
 │   ├── KERNEL_DSL.md               #   the language for what your app manages
 │   ├── BEHAVIOR_DSL.md             #   the language for what your app does, step by step
 │   ├── VERIFICATION_DSL.md         #   the language for what must hold — and living documentation
+│   ├── CATALOG_DSL.md              #   the language for declaration tables, bind rules, and formats
+│   ├── TARGET_DSL.md               #   the language for target language profiles and @concept mappings
 │   ├── DSL_FIRST_METHODOLOGY_GUIDE.md  #   the instructions your assistant follows
 │   ├── DSL_FIRST_QA_GUIDE.md       #   how to apply the DSLs to test automation and QA
-│   └── DSL_FIRST_GATES_GUIDE.md    #   how to keep model and code honest: declared gates, ratchets, planted failures
+│   ├── DSL_FIRST_GATES_GUIDE.md    #   how to keep model and code honest: declared gates, ratchets, planted failures
+│   └── DSL_FIRST_CHECKPOINTS_GUIDE.md  #   4 review stops: visual architecture floorplan, LoC telemetry, LLM red flags
 ├── in_depth_docs/                  # for the curious: why it works, when not to use it
 ├── tools/                          # for contributors only: a check of the grammar in KERNEL_DSL.md
 └── examples/                       # runnable examples — from minimal to advanced
@@ -212,6 +169,7 @@ dsl-first/
 ## Documentation Navigation
 
 ### The Methodology (`dsl_first_methodology/`)
+* [DSL-First Skill (`SKILL.md`)](dsl_first_methodology/SKILL.md) — The agent skill entry point: teaches your AI coding assistant when to interview you, how to separate product from specimen/transport strata, which DSL specification to load on demand, and how to report at the four visual floorplan checkpoints.
 * [Kernel DSL Specification v1.2](dsl_first_methodology/KERNEL_DSL.md) — The language for describing what an application **manages**: the things it keeps track of, the states each can be in, and which state changes are allowed. Since v1.2 also: what each operation receives and returns, what is declared and not built yet, and the joins between operations.
 * [Behavior DSL Specification v1.0](dsl_first_methodology/BEHAVIOR_DSL.md) — The language for describing what an application **does**: its procedures, step by step, including which steps may run side by side and what happens when a step fails. It is a separate language because describing a process needs different building blocks than describing things and their states.
 * [Verification DSL Specification v1.0](dsl_first_methodology/VERIFICATION_DSL.md) — The language for describing what must **hold**: the checkable claims an application makes about itself, and the **living documentation** derived from them — prose that renders each claim with its current pass/fail verdict. It is a separate language because asserting on a result is foreign to describing things or procedures.
@@ -221,6 +179,7 @@ dsl-first/
 * [DSL-First Methodology Guide](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The instructions the assistant follows from start to finish: checking your input, interviewing you when needed, writing the model, and producing the code, tests, and docs from it.
 * [DSL-First QA & Test Automation Guide](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) — How to apply the three DSL languages to QA work: extracting testable specifications from existing code, generating test suites (Gherkin, step definitions, data factories), and producing living documentation with live verdicts. Covers both grammar-hosted (Java) and data-hosted (Clojure) bindings.
 * [DSL-First Gates Guide](dsl_first_methodology/DSL_FIRST_GATES_GUIDE.md) — How the rules that hold a model and its code together are themselves declared, introduced without breaking the build (ratchets), and proven able to fail (planted failures). Also: declaring the joins between operations, declaring what is not built, and a vocabulary that the build enforces. Language-neutral, with Python and Java bindings, each with a runnable example.
+* [DSL-First Checkpoints & Architecture Floorplan Guide](dsl_first_methodology/DSL_FIRST_CHECKPOINTS_GUIDE.md) — Four concise review stops across Phases 0–6 where the assistant outputs a visual architecture floorplan (grouped by stratum, with plain-English *"what it does today"* labels), measured technical telemetry (tools, languages, LoC, and AST-driven vs. literal-string generator ratios), and a self-reflection card to catch subpar LLM shortcuts early.
 
 ### Examples (`examples/`) — from minimal to advanced, all runnable
 

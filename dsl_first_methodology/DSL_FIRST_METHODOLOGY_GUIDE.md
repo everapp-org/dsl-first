@@ -18,13 +18,14 @@
 
 | you want to | files the assistant needs | say to the assistant |
 |---|---|---|
-| build a new application from an idea | this guide + `KERNEL_DSL.md` | *"Apply the DSL-First methodology. Interview me first (Phase 0), write the model, then derive the code, the tests and the docs."* (§3.1, §3.1.1) |
-| get a readable model of existing code | `KERNEL_DSL.md` | *"Read this codebase and write the Kernel DSL model that it implements. List what you could not decide."* |
-| add one feature with no drift | this guide + `KERNEL_DSL.md` | *"Change the model first. Then derive again. Do not edit derived code."* (§3.2, §3.3) |
+| build a new application from an idea | this guide + `KERNEL_DSL.md` + [`DSL_FIRST_CHECKPOINTS_GUIDE.md`](DSL_FIRST_CHECKPOINTS_GUIDE.md) | *"Interview me about the software I want to build to produce a specification and visual blueprint first, then build it using the DSL-First methodology, pausing at the 4 checkpoints in DSL_FIRST_CHECKPOINTS_GUIDE.md."* (§3.1) |
+| get a readable model of existing code | `KERNEL_DSL.md` | *"Inspect this codebase, explain what it manages and the rules it enforces, and write the Kernel DSL model that it implements. List what you could not decide."* |
+| add one feature or language with no drift | this guide + `KERNEL_DSL.md` + [`DSL_FIRST_CHECKPOINTS_GUIDE.md`](DSL_FIRST_CHECKPOINTS_GUIDE.md) | *"Before writing code, run Stop 4 of DSL_FIRST_CHECKPOINTS_GUIDE.md to show what part of the product this changes on the architecture diagram, then update the model and regenerate."* (§3.1.3, §3.2) |
 | model a step-by-step procedure | `BEHAVIOR_DSL.md` | *"Write a Behavior DSL model of this procedure."* |
 | get documentation with PASS/FAIL verdicts | `VERIFICATION_DSL.md` | *"Write the checks for these criteria, and a page that links each claim to its check."* |
 | generate a test suite from a model | `DSL_FIRST_QA_GUIDE.md` | pick a row of the TL;DR of that guide |
 | keep the model and hand-written code in agreement | `DSL_FIRST_GATES_GUIDE.md` | pick a row of the TL;DR of that guide |
+| review AI progress at each phase with a visual floorplan & LoC telemetry | [`DSL_FIRST_CHECKPOINTS_GUIDE.md`](DSL_FIRST_CHECKPOINTS_GUIDE.md) | *"Pause at the 4 stops in DSL_FIRST_CHECKPOINTS_GUIDE.md with the Visual Floorplan, Telemetry Table, and Self-Reflection Card."* (§3.1.3) |
 | decide what to model and what to write by hand | this guide | read §3.4, which is two pages |
 | choose between a text DSL and a data model | this guide | read §2.5, which is one page |
 
@@ -379,6 +380,16 @@ Deriving the artifacts is not the end of a pass — *running* them is. After gen
 - the failure is in hand-written glue → fix the glue.
 
 Editing generated code to make a test pass is the cardinal anti-pattern ([§10.2](#102-generate-and-modify)): the next re-derivation erases the edit, and meanwhile the model — the single source of truth — still lies about the system. Under **YOLO** the assistant drives this loop to green on its own; under **step-by-step** it surfaces the test results at each checkpoint for you.
+
+### 3.1.3 Four Self-Reflect & Visual Floorplan Checkpoints (Catching LLM Shortcuts Early)
+
+An AI coding assistant can cut corners at any phase: modeling an easy test specimen instead of the product, writing a shallow vocabulary-only `.dsl` file while pasting thousands of lines of hardcoded target-language strings into generator scripts, confusing a derived transport file (`EDN → JSON`) with the source-of-truth model, or cloning a flawed layout across multiple language lanes because parity tests pass.
+
+The concise companion **[Checkpoints & Architecture Floorplan Guide](DSL_FIRST_CHECKPOINTS_GUIDE.md)** defines **four review stops** across Phases 0–6:
+- **Stop 1 (After Phase 0/1 — Scope & Blueprint):** Separates the four strata (**S3 Methodology Language**, **S2 Product Model**, **S1 User/Specimen Model**, **S0 Transport Artifact**) and draws the initial Blueprint Floorplan before any DSL is written.
+- **Stop 2 (After Phase 2/3 — Model Substance):** Verifies behavioral depth (states, transitions, procedures, and explicit `status not-built` declarations) vs. vocabulary-only fakes.
+- **Stop 3 (After Phase 4/5 on Lane 1 — Derivation Honesty & Output Surface):** Prints measured technical telemetry (tools, languages, LoC by stratum, and **AST-driven LoC vs. literal template-string LoC**) plus the top-level product output tree *before* any second language lane is started.
+- **Stop 4 (Phase 6 — Extension & Multi-Lane Delta):** Requires a pre-flight stratum and deliverable-surface check before executing `"extend / add language / generate"` requests.
 
 ### 3.2 The "Generate, Don't Write" Principle
 
