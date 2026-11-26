@@ -179,7 +179,7 @@ Both additions are optional. An operation with no types and no `returns` is vali
 
 The order is fixed: the parameters, then `returns`, then `status` (§3.7). `operation a status ready returns (x: Int)` is not valid.
 
-A type in a parameter list is one word with no space and no comma (`NoteId`, `List<Note>`, `String[]`). Give a longer type a name, and use the name.
+A type in a parameter list is one word with no space and no comma (`NoteId`, `NoteId?`, `List<Note>`, `String[]`). An optional `?` suffix (e.g., `NoteId?`) is accepted as shorthand alongside `Optional<NoteId>`. Give a longer type a name, and use the name.
 
 ### 3.6 Constraints
 Constraints allow declaring simple architecture governance rules. Interpretation and enforcement are performed by external validators.
@@ -267,7 +267,7 @@ model_body      = (description | fields | states | transitions | invariants)+
 fields          = "fields" "{" field+ "}"
 field           = NAME ":" TYPE
 
-TYPE            = /[A-Za-z0-9_<>,.\[\] ]+/
+TYPE            = /[A-Za-z0-9_<>,.\[\]? ]+/
 
 states          = "states" "{" NAME ([","] NAME)* "}"
 transitions     = "transitions" "{" transition+ "}"
@@ -296,7 +296,7 @@ operation       = "operation" NAME ("(" typed_param_list? ")")?
 typed_param_list = typed_param ("," typed_param)*
 typed_param     = NAME [":" PARAM_TYPE]
 
-PARAM_TYPE      = /[A-Za-z0-9_.<>\[\]]+/
+PARAM_TYPE      = /[A-Za-z0-9_.<>\[\]?]+/
 STATUS          = "ready" | "in-progress" | "not-built"
 
 wiring          = "wiring" NAME "{" [description] "from" endpoint "to" endpoint "}"
@@ -313,9 +313,11 @@ STRING          = ESCAPED_STRING
 %import common.ESCAPED_STRING
 %import common.WS
 %ignore WS
+COMMENT         : "//" /[^\n]*/
+%ignore COMMENT
 ```
 
-*Notes: `TYPE` and `condition_expr` are intentionally permissive and domain-agnostic. You decide how to interpret types and conditions in your generators. `PARAM_TYPE` (v1.2) is narrower than `TYPE`: it has no space and no comma, because a comma separates parameters. The words `returns`, `many`, `status`, `reason`, `wiring`, `from` and `to` are keywords in the positions the grammar gives them.*
+*Notes: `TYPE` and `condition_expr` are intentionally permissive and domain-agnostic. You decide how to interpret types and conditions in your generators. Both `TYPE` and `PARAM_TYPE` accept an optional `?` suffix shorthand (e.g., `TaskId?` alongside `Optional<TaskId>`). `PARAM_TYPE` (v1.2) is narrower than `TYPE`: it has no space and no comma, because a comma separates parameters. Single-line `//` comments are ignored, matching the other specifications in the DSL-First family. The words `returns`, `many`, `status`, `reason`, `wiring`, `from` and `to` are keywords in the positions the grammar gives them.*
 
 ### 4.1 The data-hosted concrete syntax
 
