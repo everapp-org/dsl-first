@@ -5,7 +5,7 @@
 
 **Version:** 0.1  
 **Companions:** [Kernel DSL v1.2](KERNEL_DSL.md) · [Behavior DSL v1.0](BEHAVIOR_DSL.md) · [Verification DSL v1.0](VERIFICATION_DSL.md) · [Catalog DSL v0.1](CATALOG_DSL.md) · [Gates Guide](DSL_FIRST_GATES_GUIDE.md)  
-**Purpose:** The Kernel, Behavior, Verification, and Catalog DSLs define a **Platform-Independent Model (PIM)** — what the domain manages, what procedures it runs, what claims must hold, and what declaration tables exist. When a generator or emitter translates that PIM into executable host code (Java, Python, TypeScript, JavaScript, Clojure), it requires a **Target Profile (Platform Binding)**: an explicit declaration of the target language version, runner, driver, compile-time tooling, complexity budgets, and the mapping from abstract programming/QA archetypes to concrete target-language constructs.
+**Purpose:** The Kernel, Behavior, Verification, and Catalog DSLs define a **Platform-Independent Model (PIM)** — what the domain manages, what procedures it runs, what claims must hold, and what declaration tables exist. When a generator or emitter translates that PIM into executable host code (Rust, Java, Python, TypeScript, JavaScript, Clojure), it requires a **Target Profile (Platform Binding)**: an explicit declaration of the target language version, runner, driver, compile-time tooling, complexity budgets, and the mapping from abstract programming/QA archetypes to concrete target-language constructs.
 
 ---
 
@@ -20,7 +20,7 @@
 | you want to | say to the assistant |
 |---|---|
 | define a target lane for code generation | *"Read TARGET_DSL.md. Write a `target` profile for our project (language version, test runner, driver, compile-time checks, preferred constructs, and refused anti-patterns). Show me the profile before generating code."* |
-| emit multiple language lanes from one model | *"Read TARGET_DSL.md. Using our single DSL model, generate deterministic implementations for the declared `target` profiles (`python-312`, `java-21pp`, `ts-pwtest`, `js-esm-pwtest`) and stamp `@concept` tags for every realized construct."* |
+| emit multiple language lanes from one model | *"Read TARGET_DSL.md. Using our single DSL model, generate deterministic implementations for the declared `target` profiles (`rust-196`, `python-312`, `java-21pp`, `ts-pwtest`, `js-esm-pwtest`) and stamp `@concept` tags for every realized construct."* |
 | upgrade a target language baseline (e.g. Java 11 → Java 21++) | *"Read TARGET_DSL.md §4 and §6. Update our Java target profile to Java 21++ (`record`, `sealed interface`, pattern-matching `switch`, JSpecify `@NullMarked` + NullAway), regenerate the code, and run the build gates."* |
 | propose a new language construct | *"Read TARGET_DSL.md §7. Open a `[!decision]` proposal comparing the candidate construct against our current Target Profile before changing the emitter."* |
 
@@ -79,7 +79,7 @@ Without an explicit Target Profile, an AI coding assistant or code generator mak
 
 Separating the **Domain Model (PIM)** from the **Target Profile (Platform Binding)** gives three guarantees:
 1. **One domain model, many target lanes.** The domain files (`kernel.dsl`, `behaviors.dsl`, `verification.dsl`, `catalog.dsl`) stay 100% free of host-language syntax. Switching from Java 11 to Java 21++, or adding Python, TypeScript, and JavaScript lanes, touches only the Target Profile and the emitter bound to it.
-2. **Ontological traceability (`@concept`).** Every construct the emitter writes is chosen by mapping an abstract **Tier 1 Archetype** (`CONCEPT-prog-v1-*` or `CONCEPT-qa-v1-*`) to the Target Profile's **Tier 2 Realization** (`CONCEPT-java-v1-*`, `CONCEPT-python-v1-*`, `CONCEPT-ts-v1-*`, `CONCEPT-js-v1-*`, `CONCEPT-playwright-v1-*`, `CONCEPT-selenium-v1-*`). When paired with GAKS, the emitter stamps `# @concept <ID>` or `// @concept <ID>` into the generated code so a checker (`gaks_check.py --code`) verifies every link and learners can read the concept pages side by side.
+2. **Ontological traceability (`@concept`).** Every construct the emitter writes is chosen by mapping an abstract **Tier 1 Archetype** (`CONCEPT-prog-v1-*` or `CONCEPT-qa-v1-*`) to the Target Profile's **Tier 2 Realization** (`CONCEPT-rust-v1-*`, `CONCEPT-java-v1-*`, `CONCEPT-python-v1-*`, `CONCEPT-ts-v1-*`, `CONCEPT-js-v1-*`, `CONCEPT-playwright-v1-*`, `CONCEPT-selenium-v1-*`). When paired with GAKS, the emitter stamps `# @concept <ID>` or `// @concept <ID>` into the generated code so a checker (`gaks_check.py --code`) verifies every link and learners can read the concept pages side by side.
 3. **Governed evolution.** New language features (e.g., from a conference presentation like *"Java++"* or a new JDK/Python/TypeScript release) do not sneak into half the codebase by accident; they enter through a reviewable Target Profile update.
 
 ---
@@ -90,15 +90,15 @@ Separating the **Domain Model (PIM)** from the **Target Profile (Platform Bindin
 A named platform binding configuration. A project with a single implementation language declares one `target`; a multi-lane reference project (such as `tafbase`) declares one `target` per lane (`python_312`, `java_21pp`, `ts_pwtest`, `js_esm_pwtest`).
 
 ### 2.2 `language`, `runner`, and `driver`
-- `language <id> "<version>"` — the host compiler or runtime baseline (`java "21"`, `python "3.12"`, `typescript "5.6"`, `javascript "ES2024"`).
-- `runner <id> "<version>"` — the test or execution harness (`junit "5.11"`, `pytest "8.3"`, `pwtest "1.49"`).
-- `driver <id> "<version>"` — the automation or protocol engine (`playwright "1.49"`, `selenium "4.27"`, `http "std"`).
+- `language <id> "<version>"` — the host compiler or runtime baseline (`rust "1.96"`, `java "21"`, `python "3.12"`, `typescript "5.6"`, `javascript "ES2024"`).
+- `runner <id> "<version>"` — the test or execution harness (`cargo_test "1.96"`, `junit "5.11"`, `pytest "8.3"`, `pwtest "1.49"`).
+- `driver <id> "<version>"` — the automation or protocol engine (`axum "0.8"`, `playwright "1.49"`, `selenium "4.27"`, `http "std"`).
 
 ### 2.3 `catalogs`
-The list of shared GAKS concept catalogs imported by this target lane (e.g., `prog, java, istqb, qa, playwright, junit`). In a GAKS-enabled repository, these map directly to the `"catalogs"` array in `gaks.project.json`.
+The list of shared GAKS concept catalogs imported by this target lane (e.g., `prog, rust, qa` or `prog, java, istqb, qa, playwright, junit`). In a GAKS-enabled repository, these map directly to the `"catalogs"` array in `gaks.project.json`.
 
 ### 2.4 `tooling`
-Compile-time and static-analysis gates enforced on all generated and hand-written code in this lane (e.g., JSpecify `@NullMarked` + Error Prone + NullAway for Java; `mypy --strict` / `ruff` for Python; `tsc --noEmit --strict` for TypeScript; `tsc --allowJs --checkJs` for JavaScript ESM).
+Compile-time and static-analysis gates enforced on all generated and hand-written code in this lane (e.g., `clippy "-D warnings"` / `rustfmt "--check"` for Rust; JSpecify `@NullMarked` + Error Prone + NullAway for Java; `mypy --strict` / `ruff` for Python; `tsc --noEmit --strict` for TypeScript; `tsc --allowJs --checkJs` for JavaScript ESM).
 
 ### 2.5 `constructs` (`realize`, `prefer`, `avoid`)
 - `realize <Archetype-ID> with <Realization-ID>` — binds a language-neutral Tier 1 archetype (`CONCEPT-prog-v1-*` or `CONCEPT-qa-v1-*`) to the exact Tier 2 language/tool concept (`CONCEPT-<lang>-v1-*`) the emitter must produce.
@@ -160,18 +160,18 @@ When an emitter translates a DSL model across multiple target lanes, every M2 co
 
 ### 4.1 Programming Archetypes (`CONCEPT-prog-v1-*`)
 
-| DSL Construct (M2) | Tier 1 Archetype (`prog`) | Java 21++ (`java`) | Python 3.12 (`python`) | TypeScript (`ts`) | JavaScript ESM (`js`) |
-|---|---|---|---|---|---|
-| `model` / `entry` value carrier | `CONCEPT-prog-v1-001-01-immutable-data-carrier` | `CONCEPT-java-v1-002-01-records` (`record`) | `CONCEPT-python-v1-001-01-frozen-dataclass` (`@dataclass(frozen=True, slots=True)`) | `CONCEPT-ts-v1-001-01-readonly-interface-and-type` (`readonly` interface / `as const`) | `CONCEPT-js-v1-001-01-object-freeze-and-destructuring` (`Object.freeze({...})`) |
-| `states` / outcome variants | `CONCEPT-prog-v1-002-01-closed-type-union` | `CONCEPT-java-v1-004-01-sealed-classes` (`sealed interface ... permits`) | `CONCEPT-python-v1-002-01-union-type` (`X \| Y` union) | `CONCEPT-ts-v1-002-01-discriminated-union` (`type U = A \| B`) | `CONCEPT-js-v1-002-01-tagged-object-discriminant` (`{ kind: '...' }`) |
-| `transitions` / `bind` dispatch | `CONCEPT-prog-v1-003-01-exhaustive-branching` | `CONCEPT-java-v1-006-01-pattern-matching-instanceof-and-switch` + `005-01-switch-expressions` | `CONCEPT-python-v1-003-01-structural-pattern-matching` (`match`/`case` + `assert_never`) | `CONCEPT-ts-v1-003-01-exhaustive-switch-never` (`switch` + `never`) | `CONCEPT-js-v1-003-01-switch-with-default-throw` (`switch` + default `throw`) |
-| `optional` field / nullable return | `CONCEPT-prog-v1-004-01-null-safe-optionality` | `CONCEPT-java-v1-019-01-jspecify-and-nullaway` (`@NullMarked`, `@Nullable`) + `013-01-optional-discipline` | `CONCEPT-python-v1-004-01-none-aware-typing` (`T \| None`, strict mypy) | `CONCEPT-ts-v1-004-01-strict-null-checks` (`strictNullChecks`) | `CONCEPT-js-v1-004-01-nullish-coalescing-and-optional-chaining` (`?.`, `??`) |
-| Scoped session / client handle | `CONCEPT-prog-v1-005-01-scoped-resource-cleanup` | `CONCEPT-java-v1-012-01-try-with-resources-and-cleaner` (`try (...)`) | `CONCEPT-python-v1-005-01-context-manager` (`with ...:`) | `CONCEPT-ts-v1-005-01-using-disposable` (`using` / `try-finally`) | `CONCEPT-js-v1-005-01-try-finally-and-explicit-resource-management` |
-| Scoped test fixture | `CONCEPT-prog-v1-006-01-scoped-test-fixture` | `CONCEPT-java-v1-001-01-junit-lifecycle-annotations` (`@BeforeEach`/`@AfterEach`) | `CONCEPT-python-v1-006-01-pytest-yield-fixture` (`@pytest.fixture` + `yield`) | `CONCEPT-ts-v1-006-01-typed-test-fixture-extension` (`test.extend<T>()`) | `CONCEPT-js-v1-006-01-async-fixture-callback` (`async ({ page }, use) =>`) |
-| `parallelForEach` / fan-out | `CONCEPT-prog-v1-007-01-parallel-fan-out` | `CONCEPT-java-v1-009-01-virtual-threads` (`newVirtualThreadPerTaskExecutor`) | `CONCEPT-python-v1-007-01-taskgroup-and-executor` (`TaskGroup` / `Executor`) | `CONCEPT-ts-v1-007-01-typed-promise-concurrency` (`Promise.all`) | `CONCEPT-js-v1-007-01-promise-all-and-allsettled` (`Promise.all`) |
-| Static catalog tables / lists | `CONCEPT-prog-v1-008-01-immutable-collection-literal` | `CONCEPT-java-v1-011-01-immutable-collection-factories` (`List.of`, `Map.of`, `Stream.toList()`) | `CONCEPT-python-v1-008-01-tuple-and-frozenset` (`tuple`, `frozenset`, `MappingProxyType`) | `CONCEPT-ts-v1-008-01-readonly-array-and-const-tuple` (`ReadonlyArray<T>`, `as const`) | `CONCEPT-js-v1-008-01-frozen-array-and-map-set` (`Object.freeze([...])`) |
-| Guard / predicate / transform | `CONCEPT-prog-v1-009-01-higher-order-function` | `CONCEPT-java-v1-014-01-lambdas-and-method-references` (`Predicate<T>`, `::`) | `CONCEPT-python-v1-009-01-callable-and-protocol` (`Callable`, `Protocol`) | `CONCEPT-ts-v1-009-01-generic-function-signature` (`(x: T) => boolean`) | `CONCEPT-js-v1-009-01-arrow-functions-and-closures` (`(x) => ...`) |
-| `env:NAME` / `env-pool:NAME` | `CONCEPT-prog-v1-010-01-external-environment-binding` | `CONCEPT-java-v1-031-01-system-getenv-binding` (`System.getenv`) | `CONCEPT-python-v1-010-01-os-environ-get` (`os.environ.get`) | `CONCEPT-ts-v1-010-01-typed-env-config` (`process.env`) | `CONCEPT-js-v1-010-01-process-env-binding` (`process.env.KEY ?? ...`) |
+| DSL Construct (M2) | Tier 1 Archetype (`prog`) | Rust (`rust`) | Java 21++ (`java`) | Python 3.12 (`python`) | TypeScript (`ts`) | JavaScript ESM (`js`) |
+|---|---|---|---|---|---|---|
+| `model` / `entry` value carrier | `CONCEPT-prog-v1-001-01-immutable-data-carrier` | `CONCEPT-rust-v1-001-01-derive-structs` (`#[derive(Debug, Clone, PartialEq)] struct`) | `CONCEPT-java-v1-002-01-records` (`record`) | `CONCEPT-python-v1-001-01-frozen-dataclass` (`@dataclass(frozen=True, slots=True)`) | `CONCEPT-ts-v1-001-01-readonly-interface-and-type` (`readonly` interface / `as const`) | `CONCEPT-js-v1-001-01-object-freeze-and-destructuring` (`Object.freeze({...})`) |
+| `states` / outcome variants | `CONCEPT-prog-v1-002-01-closed-type-union` | `CONCEPT-rust-v1-002-01-tagged-enums` (`enum State { ... }`) | `CONCEPT-java-v1-004-01-sealed-classes` (`sealed interface ... permits`) | `CONCEPT-python-v1-002-01-union-type` (`X \| Y` union) | `CONCEPT-ts-v1-002-01-discriminated-union` (`type U = A \| B`) | `CONCEPT-js-v1-002-01-tagged-object-discriminant` (`{ kind: '...' }`) |
+| `transitions` / `bind` dispatch | `CONCEPT-prog-v1-003-01-exhaustive-branching` | `CONCEPT-rust-v1-003-01-exhaustive-match` (`match (state, trigger) { ... }`) | `CONCEPT-java-v1-006-01-pattern-matching-instanceof-and-switch` + `005-01-switch-expressions` | `CONCEPT-python-v1-003-01-structural-pattern-matching` (`match`/`case` + `assert_never`) | `CONCEPT-ts-v1-003-01-exhaustive-switch-never` (`switch` + `never`) | `CONCEPT-js-v1-003-01-switch-with-default-throw` (`switch` + default `throw`) |
+| `optional` field / nullable return | `CONCEPT-prog-v1-004-01-null-safe-optionality` | `CONCEPT-rust-v1-004-01-option-and-result` (`Option<T>`, `Result<T, E>`) | `CONCEPT-java-v1-019-01-jspecify-and-nullaway` (`@NullMarked`, `@Nullable`) + `013-01-optional-discipline` | `CONCEPT-python-v1-004-01-none-aware-typing` (`T \| None`, strict mypy) | `CONCEPT-ts-v1-004-01-strict-null-checks` (`strictNullChecks`) | `CONCEPT-js-v1-004-01-nullish-coalescing-and-optional-chaining` (`?.`, `??`) |
+| Scoped session / client handle | `CONCEPT-prog-v1-005-01-scoped-resource-cleanup` | `CONCEPT-rust-v1-005-01-raii-drop-guards` (RAII `Drop` guards) | `CONCEPT-java-v1-012-01-try-with-resources-and-cleaner` (`try (...)`) | `CONCEPT-python-v1-005-01-context-manager` (`with ...:`) | `CONCEPT-ts-v1-005-01-using-disposable` (`using` / `try-finally`) | `CONCEPT-js-v1-005-01-try-finally-and-explicit-resource-management` |
+| Scoped test fixture | `CONCEPT-prog-v1-006-01-scoped-test-fixture` | `CONCEPT-rust-v1-006-01-tempfile-isolated-world` (`tempfile::TempDir` isolated world) | `CONCEPT-java-v1-001-01-junit-lifecycle-annotations` (`@BeforeEach`/`@AfterEach`) | `CONCEPT-python-v1-006-01-pytest-yield-fixture` (`@pytest.fixture` + `yield`) | `CONCEPT-ts-v1-006-01-typed-test-fixture-extension` (`test.extend<T>()`) | `CONCEPT-js-v1-006-01-async-fixture-callback` (`async ({ page }, use) =>`) |
+| `parallelForEach` / fan-out | `CONCEPT-prog-v1-007-01-parallel-fan-out` | `CONCEPT-rust-v1-012-01-tokio-joinset-and-rayon` (`tokio::task::JoinSet` / `rayon`) | `CONCEPT-java-v1-009-01-virtual-threads` (`newVirtualThreadPerTaskExecutor`) | `CONCEPT-python-v1-007-01-taskgroup-and-executor` (`TaskGroup` / `Executor`) | `CONCEPT-ts-v1-007-01-typed-promise-concurrency` (`Promise.all`) | `CONCEPT-js-v1-007-01-promise-all-and-allsettled` (`Promise.all`) |
+| Static catalog tables / lists | `CONCEPT-prog-v1-008-01-immutable-collection-literal` | `CONCEPT-rust-v1-007-01-const-slices-and-vecs` (`const &[T]` / `LazyLock`) | `CONCEPT-java-v1-011-01-immutable-collection-factories` (`List.of`, `Map.of`, `Stream.toList()`) | `CONCEPT-python-v1-008-01-tuple-and-frozenset` (`tuple`, `frozenset`, `MappingProxyType`) | `CONCEPT-ts-v1-008-01-readonly-array-and-const-tuple` (`ReadonlyArray<T>`, `as const`) | `CONCEPT-js-v1-008-01-frozen-array-and-map-set` (`Object.freeze([...])`) |
+| Guard / predicate / transform | `CONCEPT-prog-v1-009-01-higher-order-function` | `CONCEPT-rust-v1-013-01-fn-traits-and-closures` (`impl Fn(&T) -> bool`) | `CONCEPT-java-v1-014-01-lambdas-and-method-references` (`Predicate<T>`, `::`) | `CONCEPT-python-v1-009-01-callable-and-protocol` (`Callable`, `Protocol`) | `CONCEPT-ts-v1-009-01-generic-function-signature` (`(x: T) => boolean`) | `CONCEPT-js-v1-009-01-arrow-functions-and-closures` (`(x) => ...`) |
+| `env:NAME` / `env-pool:NAME` | `CONCEPT-prog-v1-010-01-external-environment-binding` | `CONCEPT-rust-v1-008-01-std-env-typed-config` (`std::env::var` typed config) | `CONCEPT-java-v1-031-01-system-getenv-binding` (`System.getenv`) | `CONCEPT-python-v1-010-01-os-environ-get` (`os.environ.get`) | `CONCEPT-ts-v1-010-01-typed-env-config` (`process.env`) | `CONCEPT-js-v1-010-01-process-env-binding` (`process.env.KEY ?? ...`) |
 
 ### 4.2 QA & Test Automation Archetypes (`CONCEPT-istqb-v1-*` → `CONCEPT-qa-v1-*` → Tool/Runner)
 
@@ -190,7 +190,7 @@ When an emitter translates a DSL model across multiple target lanes, every M2 co
 
 ## 5. Reference Target Profiles for Multi-Lane Projects
 
-Below are the four standard Target Profiles used in multi-lane QA and application codebases:
+Below are five standard Target Profiles used in multi-lane QA and application codebases:
 
 ### 5.1 Lane 1: Python 3.12 + pytest + Playwright (`python_312`)
 - **Language & Tooling:** Python 3.12+, `pytest` 8.x, `playwright` Python sync API, `ruff` / `mypy --strict`.
@@ -208,6 +208,54 @@ Below are the four standard Target Profiles used in multi-lane QA and applicatio
 ### 5.4 Lane 4: JavaScript ESM + `@playwright/test` (`js_esm_pwtest`)
 - **Language & Tooling:** Node 22+ ES Modules (`"type": "module"`), `@playwright/test` 1.49+, JSDoc `@ts-check` for zero-build static verification.
 - **Key Realizations:** `Object.freeze({...})` and frozen arrays (`CONCEPT-js-v1-001-01-object-freeze-and-destructuring`, `008-01-frozen-array-and-map-set`); optional chaining `?.` and nullish coalescing `??` (`CONCEPT-js-v1-004-01-nullish-coalescing-and-optional-chaining`); `test.extend({...})` async fixture callbacks (`CONCEPT-js-v1-006-01-async-fixture-callback`).
+
+### 5.5 Lane 5: Rust + Tokio + Axum + Cargo Test (`rust_196`)
+- **Language & Tooling:** Rust 1.96+ (edition 2024), `cargo test`, `clippy -D warnings`, `rustfmt --check`, `--all-targets --all-features`.
+- **Key Realizations:** `#[derive(Debug, Clone, PartialEq)]` structs (`CONCEPT-rust-v1-001-01-derive-structs`); closed tagged `enum` lifecycles (`CONCEPT-rust-v1-002-01-tagged-enums`) paired with exhaustive `match` dispatch (`CONCEPT-rust-v1-003-01-exhaustive-match`); `Option<T>` / `Result<T, E>` (`CONCEPT-rust-v1-004-01-option-and-result`); RAII `Drop` guards (`CONCEPT-rust-v1-005-01-raii-drop-guards`); `tempfile`-isolated test worlds (`CONCEPT-rust-v1-006-01-tempfile-isolated-world`); `thiserror` domain errors (`CONCEPT-rust-v1-009-01-thiserror-domain-errors`) and `serde` / `schemars` contract serialization (`CONCEPT-rust-v1-010-01-serde-and-schemars-contracts`).
+- **Refused Anti-Patterns:** `.unwrap()` in library code (`CONCEPT-rust-v1-030-01-unwrap-in-library-code`), unnecessary `unsafe` blocks (`CONCEPT-rust-v1-031-01-unnecessary-unsafe-blocks`), and blocking I/O on an async runtime (`CONCEPT-rust-v1-032-01-blocking-io-on-async-runtime`).
+
+```dsl
+// Reference Target Profile: Rust 1.96 + Tokio + Axum + Serde/Schemars + Cargo Test
+target rust_196 {
+    description "Idiomatic Rust 1.96 + Tokio + Axum 0.8 + Serde/Schemars + Cargo Test"
+    language    rust "1.96"
+    runner      cargo_test "1.96"
+    driver      axum "0.8"
+
+    catalogs    prog, rust, qa
+
+    tooling {
+        linter        clippy "-D warnings"
+        formatter     rustfmt "--check"
+        compiler_args "--all-targets", "--all-features"
+    }
+
+    constructs {
+        realize CONCEPT-prog-v1-001-01-immutable-data-carrier       with CONCEPT-rust-v1-001-01-derive-structs
+        realize CONCEPT-prog-v1-002-01-closed-type-union            with CONCEPT-rust-v1-002-01-tagged-enums
+        realize CONCEPT-prog-v1-003-01-exhaustive-branching         with CONCEPT-rust-v1-003-01-exhaustive-match
+        realize CONCEPT-prog-v1-004-01-null-safe-optionality        with CONCEPT-rust-v1-004-01-option-and-result
+        realize CONCEPT-prog-v1-005-01-scoped-resource-cleanup      with CONCEPT-rust-v1-005-01-raii-drop-guards
+        realize CONCEPT-prog-v1-006-01-scoped-test-fixture          with CONCEPT-rust-v1-006-01-tempfile-isolated-world
+        realize CONCEPT-prog-v1-008-01-immutable-collection-literal with CONCEPT-rust-v1-007-01-const-slices-and-vecs
+        realize CONCEPT-prog-v1-010-01-external-environment-binding with CONCEPT-rust-v1-008-01-std-env-typed-config
+
+        prefer  CONCEPT-rust-v1-009-01-thiserror-domain-errors
+        prefer  CONCEPT-rust-v1-010-01-serde-and-schemars-contracts
+        prefer  CONCEPT-rust-v1-011-01-workspace-crate-boundaries
+
+        avoid   CONCEPT-rust-v1-030-01-unwrap-in-library-code
+        avoid   CONCEPT-rust-v1-031-01-unnecessary-unsafe-blocks
+        avoid   CONCEPT-rust-v1-032-01-blocking-io-on-async-runtime
+    }
+
+    budget {
+        max_method_lines        50
+        max_nesting_depth       3
+        max_parameters          5
+    }
+}
+```
 
 ---
 

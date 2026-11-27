@@ -47,6 +47,16 @@ The check layer is intentionally minimal — **not Turing-complete**. There is n
 
 > **Not a test framework.** Unit and integration tests live in the host project's test suite and may assert anything in any language. The Verification DSL models only the claims a *document* makes — the subset of behavior a newcomer reads about — so that documentation can prove itself. Its deliberate weakness (no control flow) is what keeps a claim legible as a sentence.
 
+### Anti-Pattern: The "Dry FSM Echo"
+
+**Never echo single-transition Kernel FSM edges into `verification.dsl`.** When an AI assistant drafts a verification model right after `kernel.dsl`, its default instinct is to transcribe individual entity transitions (`OFF -> IDLE`, `DRAFT -> SUBMITTED`, `IDLE -> PAUSED`) as mechanical one-line checks. That produces a dry, redundant verification file that merely repeats what Layer 1 generated FSM transition tests already prove — without documenting anything a user or stakeholder actually cares about.
+
+- **Put exhaustive single-entity FSM and catalog matrices in Layer 1 generated tests** (derived directly from `kernel.dsl` transitions and `catalog` tables).
+- **Reserve `verification.dsl` for high-value product promises:**
+  1. **Mined production bugs and regressions** (e.g., timeout retry-then-fallback, rejecting silent false-success responses, schema/alias quirks).
+  2. **Cross-component user journeys** spanning multiple models or services (e.g., end-to-end order checkout, multi-step context chaining, isolated workspace execution).
+  3. **Safety contracts and business policies** users rely on (e.g., never auto-dispatching unconfirmed destructive actions, budget halts, honest `status not-built` refusals).
+
 ---
 
 ## 2. Levels (M0–M3)
@@ -130,6 +140,8 @@ expect paid.status == "paid"
 
 Nested paths (`result.items[0].sku`) and equality against bound names (`== order.total`) are the only operators. There is no negation, comparison, or boolean logic — a claim that needs them is decomposed or is not a documentation claim.
 
+Literal values in expectations and call arguments include strings, booleans, integers, and decimals (`12.5`, `0.95` — useful for latency, ratio, and score claims). For monetary amounts and currency totals, prefer integer minor units (e.g., cents) to avoid floating-point rounding ambiguity.
+
 ### 3.5 Verdict — the runtime contract
 
 Running a check yields exactly one verdict. The four-way taxonomy is the language's central contribution: it separates *the system is wrong* from *the claim's instrumentation is wrong* from *the claim is not yet backed*. Collapsing these is how living documentation loses trust.
@@ -185,11 +197,12 @@ arg_list           = expr ("," expr)*
 
 assertion          = path "==" value
 path               = NAME ( "." NAME | "[" INTEGER "]" )*
-value              = STRING | INTEGER | BOOLEAN | path
-expr               = STRING | INTEGER | BOOLEAN | path
+value              = STRING | DECIMAL | INTEGER | BOOLEAN | path
+expr               = STRING | DECIMAL | INTEGER | BOOLEAN | call | path
 
 NAME               = /[A-Za-z_][A-Za-z0-9_]*/
 STRING             = ESCAPED_STRING
+DECIMAL            = /[0-9]+\.[0-9]+/
 INTEGER            = /[0-9]+/
 BOOLEAN            = "true" | "false"
 
@@ -251,7 +264,7 @@ Before any check executes, each is linted against the host-operation contract: e
 
 ## 7. Example: A Verification Model (Kernel-domain claims)
 
-Claims about the order lifecycle modeled in the Kernel DSL — that a placed order can be paid, and that a declined payment cancels it.
+Claims about the order lifecycle modeled in the Kernel DSL — focused on user-visible payment guarantees and verbatim refund recording rather than mechanically echoing every single-edge FSM transition (which Layer 1 generated Kernel transition tests already cover).
 
 ```dsl
 verification OrderLifecycle {
@@ -335,8 +348,8 @@ When `readHistory` is later changed or removed, `PromptAppendsToHistory` turns r
 
 ## 9. Versioning and Evolution
 
-- This document defines **Verification DSL v1.0**.
-- v1.0 includes: named verifications, checks (`given` / `when` / `expect`), partial-match expectations, the four-way verdict taxonomy, prose instrumentation by link, check reuse, and phrase parameterization.
+- This document defines **Verification DSL v1.0** (with backward-compatible grammar refinements for decimal literals `DECIMAL` and nested call arguments in `expr`).
+- v1.0 includes: named verifications, checks (`given` / `when` / `expect`), partial-match expectations, string/boolean/integer/decimal literals (integer minor units remain recommended for currency), the four-way verdict taxonomy, prose instrumentation by link, check reuse, and phrase parameterization.
 - Planned v1.x additions: declared **ambient bindings** in the model; declared **result coercions** so a phrase can supply a typed (not only string) argument; a `setup { }` block shared across a verification's checks.
 - Breaking grammar changes require v2.0.
 

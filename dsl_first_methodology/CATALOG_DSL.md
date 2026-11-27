@@ -5,7 +5,7 @@
 > **Status**: Proposal — motivated by the [qa-tafBase case study](../in_depth_docs/case-study-qa-tafbase.md). Feedback welcome on the tracker.
 
 **Version:** 0.1-draft
-**Companions:** [Kernel DSL v1.1](KERNEL_DSL.md) · [Behavior DSL v1.0](BEHAVIOR_DSL.md) · [Verification DSL v1.0](VERIFICATION_DSL.md)
+**Companions:** [Kernel DSL v1.2](KERNEL_DSL.md) · [Behavior DSL v1.0](BEHAVIOR_DSL.md) · [Verification DSL v1.0](VERIFICATION_DSL.md)
 **Purpose:** This document proposes the **Catalog DSL** — a language for **declaration tables**: typed rows of named things that are *data, not lifecycles*. Element catalogs, configuration keys, device/target matrices, suite manifests, lookup maps. It fills the largest gap found when applying the stock DSL trio to a real test-automation framework: the framework's most mechanical mass was neither entities-with-states nor procedures — it was *tables of declarations*.
 
 ---
@@ -86,12 +86,12 @@ property         = NAME ":"? value+
 value            = STRING | INTEGER | BOOLEAN | NAME
 
 bind             = "bind" NAME "on" NAME "{" bind_row+ "}"
-bind_row         = STRING "->" NAME ("," NAME NAME?)*
+bind_row         = STRING "->" NAME NAME? ("," NAME NAME?)*
 
 format           = "format" NAME "{" format_pattern+ "}"
-format_pattern   = "pattern" NAME? STRING
+format_pattern   = "pattern" ("-" NAME | NAME)? STRING
 
-resolve_rule     = "resolve" NAME ("," NAME)*   // e.g. resolve exact, below, fallback en
+resolve_rule     = "resolve" NAME NAME? ("," NAME NAME?)*   // e.g. resolve exact, below, fallback en
 
 KIND             = NAME                         // entry kinds are open — declared per project
 NAME             = /[A-Za-z_][A-Za-z0-9_.]*/    // dotted names allowed (config keys)
@@ -107,6 +107,85 @@ COMMENT          : "//" /[^\n]*/
 ```
 
 *Notes: `KIND` is deliberately open — `page`, `element`, `locator`, `target`, `suite`, `key`, `env`, `source` are project vocabulary, like the Behavior DSL's runtime-API names. The grammar fixes only the *shape* of a declaration table.*
+
+### 3.1 The data-hosted concrete syntax (YAML / JSON + JSON Schema)
+
+Just like [Kernel DSL §4.1](KERNEL_DSL.md#41-the-data-hosted-concrete-syntax) and [Target Profile §3](TARGET_DSL.md#3-formal-grammar-ebnf), the Catalog DSL metamodel is independent of its concrete syntax. For wide or rapidly evolving tabular catalogs — such as LLM/service provider capability matrices, tool/adapter registries, device grids, or closed multilingual command phrase tables — a **data-hosted YAML (or JSON/TOML) file validated by a JSON Schema** is often cleaner to diff, review, and load than a custom brace grammar, while preserving the exact same M2 concepts (`catalog`, `entry`, `bind`, `format`, `resolve`).
+
+| Catalog DSL construct (§3) | Data-hosted YAML key | Validation & gate |
+|---|---|---|
+| `catalog Name` | top-level `catalog: Name`, `version`, `description` | JSON Schema required metadata |
+| `entry_block` / properties | named map or typed sequence (`providers:`, `adapters:`, `phrases:`) | JSON Schema structural types + enum sets |
+| `bind X on Y { ... }` | `bindings:` / `selection_policies:` ordered rows mapping discriminant keys to targets | Deterministic lookup gate (every target resolves to a declared entry or Kernel operation; no silent fallback) |
+| `format Name { ... }` | `formats:` map of named pattern templates | Round-trip Verification DSL check (`parse(render(x)) == x`) |
+| `resolve exact, below, fallback en` | `resolution: { order: [exact, below], fallback: en }` | Matrix arity & fallback-column gate |
+
+**Example 1 — Provider capability & routing matrix (YAML + `bind` selection policy):**
+
+```yaml
+catalog: Providers
+version: "1.0"
+description: "Capability matrix and deterministic routing policies for model/API providers."
+
+protocol_bindings:
+  openai_compat:
+    transport: HTTP_REST
+    auth: BEARER_ENV
+    chat_endpoint: "/v1/chat/completions"
+
+models:
+  - id: fast-14b
+    binding: openai_compat
+    tier: FAST
+    supports_tools: true
+    context_tokens: 32768
+  - id: reasoning-32b
+    binding: openai_compat
+    tier: FLAGSHIP
+    supports_tools: true
+    context_tokens: 131072
+
+# Preserves Catalog DSL `bind` selection semantics as declarative rows:
+bindings:
+  select_model_on_tier:
+    discriminant: tier
+    rows:
+      - match: FAST
+        target: fast-14b
+        fallback: reasoning-32b
+      - match: FLAGSHIP
+        target: reasoning-32b
+        fallback: fast-14b
+```
+
+**Example 2 — Closed multilingual phrase table (exact `bind` to declared Kernel operations):**
+
+```yaml
+catalog: VoicePhrases
+version: "1.0"
+description: "Closed, deterministic command phrase table — exact match only, no LLM guessing."
+
+rules:
+  match_mode: exact_lowercase
+  unmatched_action: report_and_ignore
+
+phrases:
+  - language: en
+    phrase: "stop reading"
+    also: ["cancel speech", "quiet"]
+    command: "SpeechService.stopSpeech"
+    confirm: false
+  - language: bg
+    phrase: "спри четенето"
+    command: "SpeechService.stopSpeech"
+    confirm: false
+  - language: en
+    phrase: "cancel active job"
+    command: "JobService.cancelJob"
+    confirm: true
+```
+
+In a data-hosted binding, a companion `*.schema.json` enforces column types and closed enumerations at build time, while a cross-reference gate verifies that every `bind` target or `command` names an existing catalog entry or Kernel DSL operation.
 
 ---
 

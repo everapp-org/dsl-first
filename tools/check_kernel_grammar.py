@@ -89,6 +89,58 @@ VALID = {
             }
             wiring second { from A.b.c to D.e.f }
         }''',
+    "single-line // comments throughout a model": '''
+        // Leading file comment
+        domain Notes {
+            description "Commented model."
+            level domain {
+                // Entity comment
+                model Note {
+                    fields {
+                        id: NoteId // inline field comment
+                        title: String
+                    }
+                    states { Draft, Published }
+                    transitions {
+                        // Publish transition
+                        Draft -> Published on publish
+                            emits NotePublished
+                    }
+                }
+            }
+            level application {
+                service NoteService {
+                    // Operation comment
+                    operation listNotes returns many (note_id: NoteId, title: String)
+                    operation publishNote(note_id: NoteId)
+                }
+            }
+            // Wiring comment
+            wiring publishFromList {
+                from NoteService.listNotes.note_id
+                to   NoteService.publishNote.note_id
+            }
+        }''',
+    "optional ? suffix type shorthand alongside Optional<T>": '''
+        domain Tasks {
+            level domain {
+                model Task {
+                    fields {
+                        id: TaskId
+                        parentId: TaskId?
+                        assignee: Optional<UserId>
+                        labels: List<String?>
+                    }
+                    states { Open, Done }
+                }
+            }
+            level application {
+                service TaskService {
+                    operation assignTask(task_id: TaskId, parent_id: TaskId?, assignee: Optional<UserId>)
+                        returns (task_id: TaskId, parent_id: TaskId?)
+                }
+            }
+        }''',
 }
 
 INVALID = {

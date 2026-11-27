@@ -156,7 +156,7 @@ dsl-first/
 │   ├── DSL_FIRST_GATES_GUIDE.md    #   how to keep model and code honest: declared gates, ratchets, planted failures
 │   └── DSL_FIRST_CHECKPOINTS_GUIDE.md  #   4 review stops: visual architecture floorplan, LoC telemetry, LLM red flags
 ├── in_depth_docs/                  # for the curious: why it works, when not to use it
-├── tools/                          # for contributors only: a check of the grammar in KERNEL_DSL.md
+├── tools/                          # for contributors only: EBNF grammar gates for all five DSL specs
 └── examples/                       # runnable examples — from minimal to advanced
     ├── java-antlr-minimal/         # Java: the model is a text file; the code is generated from it
     ├── csharp-antlr-minimal/       # C# / .NET: the model is a text file; C# is generated via Roslyn
@@ -174,7 +174,7 @@ dsl-first/
 * [Behavior DSL Specification v1.0](dsl_first_methodology/BEHAVIOR_DSL.md) — The language for describing what an application **does**: its procedures, step by step, including which steps may run side by side and what happens when a step fails. It is a separate language because describing a process needs different building blocks than describing things and their states.
 * [Verification DSL Specification v1.0](dsl_first_methodology/VERIFICATION_DSL.md) — The language for describing what must **hold**: the checkable claims an application makes about itself, and the **living documentation** derived from them — prose that renders each claim with its current pass/fail verdict. It is a separate language because asserting on a result is foreign to describing things or procedures.
 * [Catalog DSL Specification v0.1 (proposal)](dsl_first_methodology/CATALOG_DSL.md) — *proposal on this branch*: the language for **declaration tables** — typed rows of named things (element catalogs, config keys, device matrices, suite manifests), plus `bind` selection rules and `format` name-grammars that generate renderer+parser pairs.
-* [Target Profile Specification v0.1](dsl_first_methodology/TARGET_DSL.md) — *on this branch*: the platform-binding specification that maps a platform-independent DSL model to concrete host languages (Java 21++, Python 3.12, TypeScript, JavaScript ESM), runners (`JUnit 5`, `pytest`, `@playwright/test`), drivers (`Playwright`, `Selenium`), compile-time tooling (JSpecify, Error Prone, NullAway, `tsc`, `mypy`), and GAKS `@concept` ontologies.
+* [Target Profile Specification v0.1](dsl_first_methodology/TARGET_DSL.md) — *on this branch*: the platform-binding specification that maps a platform-independent DSL model to concrete host languages (Rust, Java 21++, Python 3.12, TypeScript, JavaScript ESM), runners (`cargo test`, `JUnit 5`, `pytest`, `@playwright/test`), drivers (`Axum`, `Playwright`, `Selenium`), compile-time tooling (`clippy`, `rustfmt`, JSpecify, Error Prone, NullAway, `tsc`, `mypy`), and GAKS `@concept` ontologies.
 * [Case study: qa-tafBase](in_depth_docs/case-study-qa-tafbase.md) — *on this branch*: the field report motivating the proposal — a 91.5k-line test framework where declaration tables were the largest modeling surface the stock trio didn't cover.
 * [DSL-First Methodology Guide](dsl_first_methodology/DSL_FIRST_METHODOLOGY_GUIDE.md) — The instructions the assistant follows from start to finish: checking your input, interviewing you when needed, writing the model, and producing the code, tests, and docs from it.
 * [DSL-First QA & Test Automation Guide](dsl_first_methodology/DSL_FIRST_QA_GUIDE.md) — How to apply the three DSL languages to QA work: extracting testable specifications from existing code, generating test suites (Gherkin, step definitions, data factories), and producing living documentation with live verdicts. Covers both grammar-hosted (Java) and data-hosted (Clojure) bindings.
@@ -207,7 +207,7 @@ We are looking for implementers to contribute guides and examples for:
 - TypeScript (`ts-morph`)
 - Go (`jennifer`)
 
-If you change `KERNEL_DSL.md`, run `python3 tools/check_kernel_grammar.py` (it needs `pip install lark`). It builds a parser from the grammar in the specification and reads every example of the specification. The workflow `.github/workflows/check.yml` runs it on each pull request. Nobody needs this tool to *use* the methodology.
+If you change any of the five DSL specifications (`KERNEL_DSL.md`, `BEHAVIOR_DSL.md`, `VERIFICATION_DSL.md`, `CATALOG_DSL.md`, `TARGET_DSL.md`), run `python3 tools/check_kernel_grammar.py` and `python3 tools/check_all_grammars.py` (they need `pip install lark`). They build parsers directly from the EBNF blocks in the specifications and validate every example plus planted failures. The workflow `.github/workflows/check.yml` runs both checks on each pull request. Nobody needs these tools to *use* the methodology.
 
 See an issue or want to contribute? Open a PR!
 

@@ -415,6 +415,18 @@ verification OrderLifecycle {
 
 Running the model produces living documentation — prose where each claim shows its current PASS/FAIL verdict. See the [Verification DSL specification](VERIFICATION_DSL.md) for the full language.
 
+#### Anti-Pattern: The "Dry FSM Echo"
+
+**Never echo single-transition Kernel FSM edges one-for-one into `verification.dsl`.** When an AI assistant drafts `verification.dsl` immediately after writing `kernel.dsl`, it often transcribes individual state transitions (`OFF -> IDLE`, `DRAFT -> SUBMITTED`, `IDLE -> PAUSED`) as mechanical one-line checks. Those checks duplicate what **Layer 1 generated tests** (derived directly from the Kernel FSM transition matrix and Catalog tables in §6.1–§6.2) already verify exhaustively.
+
+| Don't ("Dry FSM Echo") | Do (High-Value `verification.dsl` Claims) |
+|---|---|
+| Echoing `OFF -> IDLE on activate` as a standalone check | **Mined bugs & regressions** (e.g., timeout retry-then-fallback, rejecting silent false-success responses) |
+| Repeating every single-entity valid/invalid transition edge | **Cross-component user journeys** spanning multiple models/services (e.g., multi-step context chaining, end-to-end checkout, isolated worker runs) |
+| Transcribing every row of a static lookup catalog | **Safety contracts & business policies** (e.g., never auto-dispatching unconfirmed destructive commands, budget halts, honest `status not-built` refusals — see §4.4) |
+
+Keep exhaustive single-entity FSM and catalog coverage in Layer 1 generated tests, and keep `verification.dsl` focused on promises a human stakeholder actually wants to read as living documentation.
+
 ### 4.3 QA-Specific Extensions: Test Data and Coverage Annotations
 
 The DSL family models behavior. QA adds **test-data annotations** — not a new grammar, but conventions layered on the model for test generation:
